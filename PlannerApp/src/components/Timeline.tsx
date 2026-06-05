@@ -51,6 +51,7 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
   // Stable data for event handlers — avoids stale closures
   const dragDataRef = useRef<{
     taskId: string
+    blockType: 'flexible' | 'fixed'
     duration: number
     blockOriginalTop: number
     pointerStartY: number
@@ -96,11 +97,45 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
     setDraggingId(null)
     setGhostTop(null)
     if (!d?.started || currentGhostTop === null) return
+
     const newStartMin = currentGhostTop + DAY_START_MIN
     const newStart = fromMinutes(newStartMin)
     const newEnd = fromMinutes(newStartMin + d.duration)
-    onSnapshot()
-    await updateTask(userId, d.taskId, { earliest_start: newStart, latest_end: newEnd })
+
+    if (d.blockType === 'fixed') {
+      const event = plan.fixed_events.find(e => e.id === d.taskId)
+      if (!event) return
+      if (event.template_id) {
+        // Recurring: suppress today's occurrence, save a standalone with new times
+        const suppressionId = `${event.template_id}-${plan.day}`
+        onSnapshot({ id: suppressionId, type: 'event' })
+        await suppressEventOccurrence(userId, event.template_id, plan.day)
+        await saveEvent(userId, {
+          id: crypto.randomUUID(),
+          title: event.title,
+          start_datetime: newStart,
+          end_datetime: newEnd,
+          day: plan.day,
+          ...(event.notes ? { notes: event.notes } : {}),
+          ...(event.tentative ? { tentative: true } : {}),
+        })
+      } else {
+        // One-time: overwrite the existing doc in place
+        onSnapshot()
+        await saveEvent(userId, {
+          id: event.id,
+          title: event.title,
+          start_datetime: newStart,
+          end_datetime: newEnd,
+          day: event.day,
+          ...(event.notes ? { notes: event.notes } : {}),
+          ...(event.tentative ? { tentative: true } : {}),
+        })
+      }
+    } else {
+      onSnapshot()
+      await updateTask(userId, d.taskId, { earliest_start: newStart, latest_end: newEnd })
+    }
   }
 
   function handleDragHandlePointerCancel(_e: React.PointerEvent<HTMLDivElement>) {
@@ -439,7 +474,9 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
           const event = block.type === 'fixed' ? plan.fixed_events.find(e => e.id === block.task_id) : undefined
           const isRecurringTask = block.type === 'flexible' && !!task?.template_id
           const isRecurringEvent = block.type === 'fixed' && !!event?.template_id
-          const isDraggable = block.type === 'flexible' && block.status === 'scheduled'
+          const isDraggable =
+            (block.type === 'flexible' && block.status === 'scheduled') ||
+            (block.type === 'fixed' && !event?.all_day)
           const blockTop = toMinutes(block.start) - DAY_START_MIN
           const blockDuration = toMinutes(block.end) - toMinutes(block.start)
           return (
@@ -475,6 +512,7 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
                 e.currentTarget.setPointerCapture(e.pointerId)
                 dragDataRef.current = {
                   taskId: block.task_id,
+                  blockType: block.type,
                   duration: blockDuration,
                   blockOriginalTop: blockTop,
                   pointerStartY: e.clientY - gridRect.top,
