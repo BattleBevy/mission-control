@@ -6,16 +6,24 @@ import { useTemplates } from './hooks/useTemplates'
 import { useEventTemplates } from './hooks/useEventTemplates'
 import { signIn, signOut } from './store/auth'
 import { saveTask, moveTask } from './store/tasks'
+import { updateTask } from './store/tasks'
 import { parseRecurrence, shouldFireOnDay, createInstance } from './engine/recurrence'
+import { toMinutes } from './engine/time'
 import { Timeline } from './components/Timeline'
 import { TaskBankPanel } from './components/TaskBankPanel'
 import { AnytimePanel } from './components/AnytimePanel'
 import { UnscheduledList } from './components/UnscheduledList'
 import { ConflictDialog } from './components/ConflictDialog'
+import { OverduePrompt } from './components/OverduePrompt'
 import { FixedEventForm } from './components/FixedEventForm'
 import { QuickAddTaskForm } from './components/QuickAddTaskForm'
 import { WeekView } from './components/WeekView'
 import './App.css'
+
+function nowString(): string {
+  const d = new Date()
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
 
 function offsetDay(from: string, delta: number): string {
   const date = new Date(from + 'T00:00:00')
@@ -50,6 +58,22 @@ function SchedulerView({ user }: { user: User }) {
   const [showEventForm, setShowEventForm] = useState(false)
   const [showTaskForm, setShowTaskForm] = useState(false)
   const generatedDayRef = useRef<string | null>(null)
+  const [now, setNow] = useState(nowString)
+
+  // Tick every minute so the overdue check re-runs even without a plan change.
+  useEffect(() => {
+    const interval = setInterval(() => setNow(nowString()), 60_000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // First scheduled task whose end time has passed and hasn't been actioned yet.
+  const overdueTask = isToday && plan
+    ? (plan.flexible_tasks.find(t =>
+        t.status === 'scheduled' &&
+        !!t.scheduled_end &&
+        toMinutes(t.scheduled_end) <= toMinutes(now)
+      ) ?? null)
+    : null
 
   function switchToDay(day: string) {
     setSelectedDay(day)
@@ -153,7 +177,15 @@ function SchedulerView({ user }: { user: User }) {
         <main className="app-layout">
           <TaskBankPanel userId={user.uid} />
 
-          {showConflictDialog && (
+          {overdueTask && (
+            <OverduePrompt
+              task={overdueTask}
+              userId={user.uid}
+              onSnapshot={snapshot}
+            />
+          )}
+
+          {!overdueTask && showConflictDialog && (
             <ConflictDialog
               tasks={scheduled!.unscheduled}
               conflicts={conflicts}

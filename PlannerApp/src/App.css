@@ -1013,6 +1013,60 @@
   margin-top: var(--space-1);
 }
 
+/* ── Overdue prompt ──────────────────────────────────────────────────────────── */
+
+.overdue-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(42, 26, 8, 0.35);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.overdue-dialog {
+  background: var(--surface);
+  border: 1px solid var(--warn);
+  border-top: 3px solid var(--warn);
+  border-radius: 8px;
+  padding: var(--space-6);
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 8px 24px rgba(42, 26, 8, 0.2);
+}
+
+.overdue-header {
+  margin-bottom: var(--space-2);
+}
+
+.overdue-title {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.overdue-task-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--space-1);
+}
+
+.overdue-subtitle {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  margin-bottom: var(--space-4);
+}
+
+.overdue-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
 /* ── Conflict dialog ─────────────────────────────────────────────────────────── */
 
 .conflict-overlay {
