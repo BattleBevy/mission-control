@@ -1660,12 +1660,12 @@
   background-image: url('./assets/botanical-vine-tile.svg');
   background-size: 52px 120px;
   background-repeat: repeat-y;
-  opacity: 0.30;
+  opacity: 0.38;
   pointer-events: none;
   z-index: 0;
 }
 
-/* Three-leaf spray above the empty-day message */
+/* Swamp twig above the empty-day message */
 .empty-day-prompt::before {
   content: '';
   display: block;
@@ -1676,7 +1676,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  opacity: 0.55;
+  opacity: 0.50;
 }
 
 /* ── Corner botanical compositions ───────────────────────────────────────────
@@ -1696,7 +1696,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: bottom left;
-  opacity: 0.42;
+  opacity: 0.50;
   pointer-events: none;
   z-index: 2;
 }
@@ -1713,7 +1713,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: top right;
-  opacity: 0.35;
+  opacity: 0.42;
   pointer-events: none;
   z-index: 2;
 }
