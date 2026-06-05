@@ -1,5 +1,6 @@
 import type { SchedulerInput, SchedulerOutput, ScheduledBlock, GapBlock } from '../types'
 import { computeFreeIntervals, subtractInterval } from './intervals'
+import type { Interval } from './intervals'
 import { sortFlexibleTasks } from './sort'
 import { placeTask } from './place'
 import { toMinutes, fromMinutes } from './time'
