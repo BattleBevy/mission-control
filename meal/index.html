@@ -168,6 +168,7 @@ details.more-nutr summary:hover { color: var(--accent); }
 
 <header class="site-header">
   <h1>Meal &amp; Nutrition Hub</h1>
+  <button id="export-btn" class="hub-link" style="cursor:pointer;border:1px solid var(--border);background:var(--surface)">Export</button>
   <a href="../index.html" class="hub-link">&#8592; Hub</a>
 </header>
 
@@ -1279,6 +1280,16 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.add('active');
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
   });
+});
+
+// ── Export ───────────────────────────────────────────────────────────────────
+
+document.getElementById('export-btn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(D, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), { href: url, download: 'meal-backup.json' });
+  a.click();
+  URL.revokeObjectURL(url);
 });
 
 // ── Init ─────────────────────────────────────────────────────────────────────
