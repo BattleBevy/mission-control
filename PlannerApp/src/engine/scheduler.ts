@@ -35,12 +35,31 @@ export function runScheduler(input: SchedulerInput): SchedulerOutput {
   // Free intervals are computed from hard events only — tentative events compete for gaps.
   let freeIntervals = computeFreeIntervals(hardEvents, working_hours)
 
+  // The scheduling window start (may be advanced to current time by recalculate).
+  const windowStart = toMinutes(working_hours.start)
+
   // Place tentative events: preferred slot first, then next available slot forward.
-  // Silently omitted if no slot fits (no conflict generated — these are best-effort).
+  // If the preferred start is already past the scheduling window, pin at preferred time —
+  // displacement only applies to future events where a conflict can still be avoided.
+  // Silently omitted if no future slot fits (no conflict generated — these are best-effort).
   for (const event of tentativeEvents) {
     const preferredStart = toMinutes(event.start_datetime)
     const preferredEnd = toMinutes(event.end_datetime)
     const duration = preferredEnd - preferredStart
+
+    if (preferredStart < windowStart) {
+      // Already started or passed — show at preferred time, no displacement.
+      scheduled.push({
+        task_id: event.id,
+        title: event.title,
+        type: 'fixed',
+        start: event.start_datetime,
+        end: event.end_datetime,
+        status: 'scheduled',
+        tentative: true,
+      })
+      continue
+    }
 
     let placed: Interval | null = null
 
