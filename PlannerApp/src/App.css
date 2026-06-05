@@ -292,6 +292,39 @@
   box-shadow: 0 0 0 2px var(--warn);
 }
 
+.scheduled-block.dragging {
+  opacity: 0.35;
+}
+
+.drag-ghost {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border: 2px dashed var(--accent-finance);
+  border-radius: 4px;
+  background: rgba(194, 124, 40, 0.12);
+  pointer-events: none;
+  z-index: 15;
+  box-sizing: border-box;
+}
+
+.drag-handle {
+  flex-shrink: 0;
+  padding: 0 2px 0 4px;
+  cursor: grab;
+  touch-action: none;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1;
+  user-select: none;
+  opacity: 0.55;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  opacity: 0.9;
+}
+
 .block-header {
   display: flex;
   align-items: center;

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { DayPlan, SchedulerOutput, TaskTemplate, EventTemplate } from '../types'
 import { updateTask, saveTask, deleteTask, moveTask } from '../store/tasks'
 import { saveTemplate, updateTemplate, deleteTemplate } from '../store/templates'
@@ -6,7 +6,7 @@ import { saveEvent, deleteEvent } from '../store/events'
 import { saveEventTemplate, updateEventTemplate, deleteEventTemplate } from '../store/eventTemplates'
 import { suppressEventOccurrence, suppressTaskOccurrence } from '../store/suppressions'
 import { createInstance } from '../engine/recurrence'
-import { toMinutes } from '../engine/time'
+import { toMinutes, fromMinutes } from '../engine/time'
 import type { TaskInstance } from '../types'
 import type { TaskEditFields, EventEditFields } from './ScheduledBlock'
 import type { SuppressionRef } from '../hooks/useDayPlan'
@@ -17,6 +17,7 @@ import { todayString } from '../hooks/useDayPlan'
 
 const HOURS = Array.from({ length: 17 }, (_, i) => i + 7)
 const HALF_HOURS = Array.from({ length: 17 }, (_, i) => i * 60 + 30)
+const DAY_START_MIN = 420 // 07:00
 
 const WORK_BAND_TOP = 180
 const WORK_BAND_HEIGHT = 480
@@ -44,6 +45,70 @@ interface Props {
 export function Timeline({ plan, scheduled, userId, onSnapshot, templates, eventTemplates }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [selectedAllDayId, setSelectedAllDayId] = useState<string | null>(null)
+
+  // ── Drag-and-drop state ────────────────────────────────────────────────────
+  const gridRef = useRef<HTMLDivElement>(null)
+  // Stable data for event handlers — avoids stale closures
+  const dragDataRef = useRef<{
+    taskId: string
+    duration: number
+    blockOriginalTop: number
+    pointerStartY: number
+    started: boolean
+  } | null>(null)
+  // Ref for reading in pointerUp (always current, no closure staleness)
+  const ghostTopRef = useRef<number | null>(null)
+  // State for rendering the ghost block
+  const [ghostTopState, setGhostTopState] = useState<number | null>(null)
+  // Which block ID is currently being dragged (for .dragging class)
+  const [draggingId, setDraggingId] = useState<string | null>(null)
+
+  function snap15(minutes: number): number {
+    return Math.round(minutes / 15) * 15
+  }
+
+  function setGhostTop(top: number | null) {
+    ghostTopRef.current = top
+    setGhostTopState(top)
+  }
+
+  function handleDragHandlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    const d = dragDataRef.current
+    if (!d) return
+    e.preventDefault()
+    const gridRect = gridRef.current?.getBoundingClientRect()
+    if (!gridRect) return
+    const delta = (e.clientY - gridRect.top) - d.pointerStartY
+    if (!d.started) {
+      if (Math.abs(delta) < 5) return
+      d.started = true
+    }
+    const rawMin = d.blockOriginalTop + delta + DAY_START_MIN
+    const snapped = snap15(rawMin)
+    const clamped = Math.max(DAY_START_MIN, Math.min(snapped, 1440 - d.duration))
+    setGhostTop(clamped - DAY_START_MIN)
+  }
+
+  async function handleDragHandlePointerUp(_e: React.PointerEvent<HTMLDivElement>) {
+    const d = dragDataRef.current
+    const currentGhostTop = ghostTopRef.current
+    dragDataRef.current = null
+    setDraggingId(null)
+    setGhostTop(null)
+    if (!d?.started || currentGhostTop === null) return
+    const newStartMin = currentGhostTop + DAY_START_MIN
+    const newStart = fromMinutes(newStartMin)
+    const newEnd = fromMinutes(newStartMin + d.duration)
+    onSnapshot()
+    await updateTask(userId, d.taskId, { earliest_start: newStart, latest_end: newEnd })
+  }
+
+  function handleDragHandlePointerCancel(_e: React.PointerEvent<HTMLDivElement>) {
+    dragDataRef.current = null
+    setDraggingId(null)
+    setGhostTop(null)
+  }
+  // ── End drag-and-drop ──────────────────────────────────────────────────────
 
   const allDayEvents = plan.fixed_events.filter(e => e.all_day)
   const taskMap = new Map(plan.flexible_tasks.map(t => [t.id, t]))
@@ -319,7 +384,7 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
           })}
         </div>
       )}
-      <div className="timeline-grid">
+      <div className="timeline-grid" ref={gridRef}>
         {HOURS.map(h => (
           <div key={h} className="timeline-hour" style={{ top: (h - 7) * 60 }}>
             <span className="timeline-hour-label">{String(h).padStart(2, '0')}:00</span>
@@ -340,6 +405,13 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
         )}
 
         {plan.day === todayString() && <CurrentTimeLine />}
+
+        {ghostTopState !== null && dragDataRef.current && (
+          <div
+            className="drag-ghost"
+            style={{ top: ghostTopState, height: dragDataRef.current.duration }}
+          />
+        )}
 
         {scheduled.gaps.map((gap, i) => (
           <GapBlock key={i} gap={gap} />
@@ -367,6 +439,9 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
           const event = block.type === 'fixed' ? plan.fixed_events.find(e => e.id === block.task_id) : undefined
           const isRecurringTask = block.type === 'flexible' && !!task?.template_id
           const isRecurringEvent = block.type === 'fixed' && !!event?.template_id
+          const isDraggable = block.type === 'flexible' && block.status === 'scheduled'
+          const blockTop = toMinutes(block.start) - DAY_START_MIN
+          const blockDuration = toMinutes(block.end) - toMinutes(block.start)
           return (
             <ScheduledBlock
               key={block.task_id}
@@ -391,6 +466,25 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
               onDeleteEventToday={isRecurringEvent ? () => handleDeleteEventToday(block.task_id) : undefined}
               onDeleteEventAll={isRecurringEvent ? () => handleDeleteEventAll(block.task_id) : undefined}
               onReschedule={isRecurringEvent ? (newDay) => handleReschedule(block.task_id, newDay) : undefined}
+              isDragging={draggingId === block.task_id}
+              onDragHandlePointerDown={isDraggable ? (e: React.PointerEvent<HTMLDivElement>) => {
+                e.stopPropagation()
+                e.preventDefault()
+                const gridRect = gridRef.current?.getBoundingClientRect()
+                if (!gridRect) return
+                e.currentTarget.setPointerCapture(e.pointerId)
+                dragDataRef.current = {
+                  taskId: block.task_id,
+                  duration: blockDuration,
+                  blockOriginalTop: blockTop,
+                  pointerStartY: e.clientY - gridRect.top,
+                  started: false,
+                }
+                setDraggingId(block.task_id)
+              } : undefined}
+              onDragHandlePointerMove={isDraggable ? handleDragHandlePointerMove : undefined}
+              onDragHandlePointerUp={isDraggable ? handleDragHandlePointerUp : undefined}
+              onDragHandlePointerCancel={isDraggable ? handleDragHandlePointerCancel : undefined}
             />
           )
         })}

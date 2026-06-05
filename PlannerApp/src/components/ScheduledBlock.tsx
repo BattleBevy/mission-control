@@ -48,6 +48,12 @@ interface Props {
   onDeleteEventToday?: () => void
   onDeleteEventAll?: () => void
   onReschedule?: (newDay: string) => void
+  // Drag-and-drop
+  isDragging?: boolean
+  onDragHandlePointerDown?: (e: React.PointerEvent<HTMLDivElement>) => void
+  onDragHandlePointerMove?: (e: React.PointerEvent<HTMLDivElement>) => void
+  onDragHandlePointerUp?: (e: React.PointerEvent<HTMLDivElement>) => void
+  onDragHandlePointerCancel?: (e: React.PointerEvent<HTMLDivElement>) => void
 }
 
 export function ScheduledBlock({
@@ -59,6 +65,11 @@ export function ScheduledBlock({
   onMoveToTomorrow,
   onDeleteEvent, onDeleteEventToday, onDeleteEventAll,
   onReschedule,
+  isDragging = false,
+  onDragHandlePointerDown,
+  onDragHandlePointerMove,
+  onDragHandlePointerUp,
+  onDragHandlePointerCancel,
 }: Props) {
   const [rescheduleMode, setRescheduleMode] = useState(false)
   const [rescheduleDate, setRescheduleDate] = useState('')
@@ -83,6 +94,7 @@ export function ScheduledBlock({
     block.status === 'in_progress' ? 'in-progress' : '',
     selected ? 'selected' : '',
     (block.tentative || event?.tentative) ? 'tentative' : '',
+    isDragging ? 'dragging' : '',
   ].filter(Boolean).join(' ')
 
   function handleClick(e: React.MouseEvent) {
@@ -163,6 +175,16 @@ export function ScheduledBlock({
       <div className="block-header">
         <span className="block-title">{block.title}</span>
         {height >= 24 && <span className="block-time">{block.start}–{block.end}</span>}
+        {onDragHandlePointerDown && (
+          <div
+            className="drag-handle"
+            onClick={e => e.stopPropagation()}
+            onPointerDown={onDragHandlePointerDown}
+            onPointerMove={onDragHandlePointerMove}
+            onPointerUp={onDragHandlePointerUp}
+            onPointerCancel={onDragHandlePointerCancel}
+          >⠿</div>
+        )}
       </div>
 
       {selected && isActive && (
