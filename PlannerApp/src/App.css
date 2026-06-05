@@ -1635,3 +1635,46 @@
   font-size: 0.875rem;
   font-style: italic;
 }
+
+/* ── Botanical whimsy ─────────────────────────────────────────────────────── */
+
+/* ❧ is a classic herbalist/printer's floral ornament — subtle Hearth Witch touch */
+.app-title::after {
+  content: '❧';
+  color: var(--success);
+  font-size: 0.75em;
+  margin-left: 0.35em;
+  opacity: 0.6;
+  font-style: normal;
+}
+
+/* Botanical sprig watermark — faint, bottom-right of timeline, sits behind all blocks */
+.timeline-grid::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 180px;
+  height: 240px;
+  background-image: url('./assets/botanical-sprig.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: bottom right;
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Single leaf above the empty-state "no tasks yet" text */
+.empty-day-prompt::before {
+  content: '';
+  display: block;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto var(--space-3);
+  background-image: url('./assets/botanical-leaf.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.4;
+}
