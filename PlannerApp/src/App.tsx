@@ -6,7 +6,6 @@ import { useTemplates } from './hooks/useTemplates'
 import { useEventTemplates } from './hooks/useEventTemplates'
 import { signIn, signOut } from './store/auth'
 import { saveTask, moveTask } from './store/tasks'
-import { updateTask } from './store/tasks'
 import { parseRecurrence, shouldFireOnDay, createInstance } from './engine/recurrence'
 import { toMinutes } from './engine/time'
 import { Timeline } from './components/Timeline'
@@ -59,6 +58,7 @@ function SchedulerView({ user }: { user: User }) {
   const [showTaskForm, setShowTaskForm] = useState(false)
   const generatedDayRef = useRef<string | null>(null)
   const [now, setNow] = useState(nowString)
+  const isToday = selectedDay === todayString()
 
   // Tick every minute so the overdue check re-runs even without a plan change.
   useEffect(() => {
@@ -88,7 +88,6 @@ function SchedulerView({ user }: { user: User }) {
     setWeekStart(d => offsetDay(d, 7))
   }
 
-  const isToday = selectedDay === todayString()
   const showConflictDialog = !conflictDismissed && !!scheduled && scheduled.unscheduled.length > 0
 
   // Tasks eligible for carry-forward: unscheduled OR scheduled-but-untouched flexible blocks
