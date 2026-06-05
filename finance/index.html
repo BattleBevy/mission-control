@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finance Command Center</title>
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="../firebase-init.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #ede5d8;
+      --surface: #faf5eb;
+      --border:  #d4b896;
+      --text:    #2a1a08;
+      --muted:   #7a5c3c;
+      --accent:  #c27c28;
+      --success: #4e6b35;
+      --warn:    #c87820;
+      --danger:  #8b3530;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .header-left h1 {
+      font-family: Georgia, 'Book Antiqua', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .header-left .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+    /* ── Buttons ────────────────────────────────────────────────────────── */
+    .btn {
+      font-size: 0.8125rem;
+      font-family: inherit;
+      padding: 0.4rem 0.875rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      background: var(--surface);
+      color: var(--text);
+      transition: background 0.12s;
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn:hover { background: var(--bg); }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: #a86820; border-color: #a86820; }
+
+    .btn-sm { font-size: 0.75rem; padding: 0.25rem 0.625rem; }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+      font-family: inherit;
+    }
+    .btn-link:hover { color: var(--text); }
+
+    /* ── Card ───────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 2px 10px rgba(80,45,10,0.07);
+      margin-bottom: 1.25rem;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-title { font-size: 1rem; font-weight: 600; }
+    .card-meta  { font-size: 0.8125rem; color: var(--muted); }
+
+    /* ── Bills ──────────────────────────────────────────────────────────── */
+    .bill-item { border-bottom: 1px solid var(--border); }
+    .bill-item:last-child { border-bottom: none; }
+    .bill-item.is-paid .bill-name { color: var(--muted); }
+
+    .bill-row {
+      display: grid;
+      grid-template-columns: 2.5rem 1fr auto 8.5rem auto;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.55rem 0;
+    }
+
+    .bill-day {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .bill-info   { display: flex; flex-direction: column; gap: 0.1rem; }
+    .bill-name   { font-size: 0.9375rem; }
+    .bill-detail { font-size: 0.75rem; color: var(--muted); }
+
+    .bill-amounts { display: flex; flex-direction: column; align-items: flex-end; }
+    .bill-amt  { font-size: 0.9375rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .bill-min  { font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+    .bill-action { display: flex; align-items: center; gap: 0.5rem; }
+
+    /* ── Badges ─────────────────────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .badge-paid     { background: #d8ebc2; color: #3a5c1e; }
+    .badge-autopaid { background: #f5e6c0; color: #7a4a10; }
+    .badge-overdue  { background: #f0d0c0; color: #7a2a20; }
+    .badge-soon     { background: #f5e0a8; color: #7a4a08; }
+    .badge-upcoming { background: #e8dcc8; color: var(--muted); border: 1px solid var(--border); }
+
+    /* ── Inline Pay Form ────────────────────────────────────────────────── */
+    .pay-form {
+      display: none;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.625rem 0 0.625rem 3.25rem;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .pay-form.open { display: flex; }
+
+    .pay-form label {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .pay-form input[type="number"] {
+      width: 7.5rem;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    /* ── Bills Footer ───────────────────────────────────────────────────── */
+    .bills-footer {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 0.875rem;
+      font-size: 0.875rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .bills-footer strong { color: var(--text); }
+
+    /* ── Expense Layout ─────────────────────────────────────────────────── */
+    .expense-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    @media (max-width: 740px) {
+      .expense-grid { grid-template-columns: 1fr; }
+      .bill-row { grid-template-columns: 2rem 1fr auto 7rem auto; gap: 0.5rem; }
+    }
+
+    /* ── Add Expense Form ───────────────────────────────────────────────── */
+    .exp-form-row {
+      display: grid;
+      grid-template-columns: 1fr 6.5rem;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .exp-form-row input,
+    .exp-form-row select,
+    #exp-desc {
+      padding: 0.45rem 0.625rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      width: 100%;
+    }
+
+    #exp-desc { width: 100%; margin-bottom: 0.5rem; }
+
+    /* ── Expense Log ────────────────────────────────────────────────────── */
+    .exp-entry {
+      display: grid;
+      grid-template-columns: 3rem 1fr auto auto;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+    .exp-entry:last-child { border-bottom: none; }
+
+    .exp-date  { color: var(--muted); font-size: 0.75rem; }
+    .exp-label { font-size: 0.75rem; color: var(--muted); }
+    .exp-desc  { font-size: 0.875rem; }
+    .exp-amt   { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    /* ── Category Totals ────────────────────────────────────────────────── */
+    .cat-row { margin-bottom: 0.875rem; }
+    .cat-row:last-child { margin-bottom: 0; }
+
+    .cat-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      margin-bottom: 0.3rem;
+    }
+    .cat-name { font-weight: 500; }
+    .cat-amt  { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+    .bar-track {
+      height: 7px;
+      background: #e8dcc8;
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+    }
+
+    .cat-grand-total {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 0.75rem;
+      margin-top: 0.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    /* ── Editable balance / amount ──────────────────────────────────────── */
+    .bill-balance, .bill-amt-edit {
+      cursor: pointer;
+      border-bottom: 1px dashed var(--muted);
+      transition: color 0.1s, border-color 0.1s;
+    }
+    .bill-balance:hover, .bill-amt-edit:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .bal-input {
+      width: 7rem;
+      padding: 0.1rem 0.35rem;
+      font-size: 0.75rem;
+      font-family: inherit;
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    /* ── Debt overview ──────────────────────────────────────────────────── */
+    .debt-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    @media (max-width: 740px) { .debt-layout { grid-template-columns: 1fr; } }
+
+    .debt-big { font-size: 2.25rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 0.4rem; }
+
+    .debt-goal-line { font-size: 0.875rem; color: var(--muted); margin-bottom: 1rem; }
+    .debt-goal-amt  { cursor: pointer; border-bottom: 1px dashed var(--muted); transition: color 0.1s; }
+    .debt-goal-amt:hover { color: var(--accent); border-bottom-color: var(--accent); }
+    .goal-input {
+      width: 8rem;
+      padding: 0.1rem 0.35rem;
+      font-size: 0.875rem;
+      font-family: inherit;
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .debt-bar-track {
+      height: 10px;
+      background: #e8dcc8;
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-bottom: 0.375rem;
+    }
+    .debt-bar-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.4s ease; }
+    .debt-bar-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); }
+
+    .debt-account-list { display: flex; flex-direction: column; gap: 0.3rem; }
+    .debt-account {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .debt-account:last-child { border-bottom: none; }
+    .debt-acc-name { color: var(--muted); }
+    .debt-acc-bal  { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    .celebrate { color: var(--success); font-weight: 600; }
+
+    /* ── Collapsible ────────────────────────────────────────────────────── */
+    .toggle-btn {
+      background: none; border: none; font-size: 0.75rem;
+      color: var(--muted); cursor: pointer; padding: 0; font-family: inherit;
+    }
+    .toggle-btn:hover { color: var(--text); }
+    .collapsible.collapsed { display: none; }
+
+    /* ── Receipt form ────────────────────────────────────────────────────── */
+    .rec-form-top {
+      display: grid; grid-template-columns: 1fr 8.5rem; gap: 0.5rem; margin-bottom: 0.5rem;
+    }
+    .rec-form-top input {
+      padding: 0.45rem 0.625rem; border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.875rem; font-family: inherit; background: var(--surface); color: var(--text); width: 100%;
+    }
+    .rec-cat-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .rec-cat-item  { display: flex; flex-direction: column; gap: 0.2rem; }
+    .rec-cat-header { display: flex; justify-content: space-between; align-items: baseline; }
+    .rec-cat-header label { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+    .rec-bucket-total { font-size: 0.75rem; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+    .rec-item-list { display: flex; flex-direction: column; gap: 0.05rem; min-height: 0; }
+    .rec-item-entry { display: flex; align-items: center; gap: 0.2rem; font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+    .rec-del-item { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.6rem; padding: 0 0.1rem; line-height: 1; }
+    .rec-del-item:hover { color: var(--danger); }
+    .rec-cat-add { display: flex; gap: 0.3rem; align-items: center; }
+    .rec-cat-add input {
+      flex: 1; padding: 0.4rem 0.5rem; border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.875rem; font-family: inherit; background: var(--surface); color: var(--text);
+    }
+    .rec-item-add { padding: 0.35rem 0.6rem; font-size: 1rem; font-weight: 600; line-height: 1; }
+    .rec-total-row { font-size: 0.875rem; color: var(--muted); margin-bottom: 0.5rem; text-align: right; }
+    .rec-total-row strong { color: var(--text); font-variant-numeric: tabular-nums; }
+
+    /* ── Receipt log entries ─────────────────────────────────────────────── */
+    .rec-entry { padding: 0.4rem 0; border-bottom: 1px solid var(--border); }
+    .rec-entry:last-child { border-bottom: none; }
+    .rec-entry-row {
+      display: grid; grid-template-columns: 3rem 1fr auto auto;
+      gap: 0.5rem; align-items: center; font-size: 0.875rem;
+    }
+    .rec-store     { font-weight: 500; }
+    .rec-total-amt { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .rec-breakdown { font-size: 0.75rem; color: var(--muted); padding-left: 3.5rem; margin-top: 0.15rem; }
+
+    /* ── Empty State ────────────────────────────────────────────────────── */
+    .empty { color: var(--muted); font-style: italic; font-size: 0.875rem; padding: 0.25rem 0; }
+
+    .sub-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 1rem 0 0.625rem;
+      padding-top: 0.875rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .sub-header span { color: var(--muted); font-weight: 400; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+
+<!-- Sign-in overlay — shown until Google auth resolves -->
+<div id="signin-overlay" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000">
+  <div style="background:var(--surface);border:1px solid var(--border);border-top:3px solid #c27c28;border-radius:14px;padding:2rem;text-align:center;max-width:320px;width:90%;box-shadow:0 4px 20px rgba(80,45,10,0.12)">
+    <div style="font-family:Georgia,serif;font-size:1.25rem;margin-bottom:0.5rem">Finance Command Center</div>
+    <div style="font-size:0.875rem;color:var(--muted);margin-bottom:1.5rem">Sign in to access your financial dashboard</div>
+    <button id="google-signin-btn" class="btn btn-primary" style="width:100%">Sign in with Google</button>
+  </div>
+</div>
+
+<header>
+  <div class="header-left">
+    <h1>Finance Command Center</h1>
+    <div class="subtitle" id="subtitle"></div>
+  </div>
+  <div class="header-actions">
+    <a href="../index.html" class="btn">← Hub</a>
+    <button class="btn" id="import-btn">Import</button>
+    <button class="btn" id="export-btn">Export</button>
+    <button class="btn btn-primary" id="new-month-btn">New Month →</button>
+  </div>
+</header>
+
+<!-- Bills -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Bills This Month</span>
+    <span class="card-meta" id="bills-stat"></span>
+  </div>
+  <div id="bills-list"></div>
+  <div class="bills-footer" id="bills-footer"></div>
+</div>
+
+<!-- Debt Overview -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Total Debt</span>
+    <span class="card-meta" id="debt-meta"></span>
+  </div>
+  <div class="debt-layout">
+    <div id="debt-summary"></div>
+    <div id="debt-accounts"></div>
+  </div>
+</div>
+
+<!-- Expenses -->
+<div class="expense-grid">
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Log an Expense</span>
+    </div>
+    <div class="exp-form-row">
+      <select id="exp-cat"></select>
+      <input type="number" id="exp-amt" placeholder="Amount" min="0" step="0.01">
+    </div>
+    <input type="text" id="exp-desc" placeholder="Description (optional) — press Enter to add">
+    <button class="btn btn-primary" id="exp-add" style="width:100%;margin-top:0.5rem;">+ Add Expense</button>
+
+    <div class="sub-header">
+      <span>This Month's Entries <span id="exp-count"></span></span>
+      <button class="toggle-btn" id="exp-log-toggle">▾ Show</button>
+    </div>
+    <div id="expense-log" class="collapsible collapsed"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Spending by Category</span>
+      <span class="card-meta" id="exp-total-label"></span>
+    </div>
+    <div id="category-totals"></div>
+  </div>
+
+</div>
+
+<!-- Receipt Analysis -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Receipt Analysis</span>
+    <span class="card-meta" id="rec-meta"></span>
+  </div>
+  <div class="expense-grid">
+    <div>
+      <div class="rec-form-top">
+        <input type="text" id="rec-store" placeholder="Store name">
+        <input type="date" id="rec-date">
+      </div>
+      <div id="rec-cat-grid" class="rec-cat-grid"></div>
+      <div class="rec-total-row">Total: <strong id="rec-running-total">$0.00</strong></div>
+      <button class="btn btn-primary" id="rec-add" style="width:100%;margin-bottom:0.75rem;">+ Add Receipt</button>
+      <div class="sub-header">
+        <span>Receipt Log <span id="rec-count"></span></span>
+        <button class="toggle-btn" id="rec-log-toggle">▾ Show</button>
+      </div>
+      <div id="receipt-log" class="collapsible collapsed"></div>
+    </div>
+    <div id="receipt-totals"></div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept=".json" style="display:none">
+
+<script>
+// ── Seed data — blank template; real data lives in Firestore ──────────────
+const SEED = {
+  month: new Date().toISOString().slice(0, 7),
+  bills: [],
+  expenses: [],
+  receipts: [],
+  debtGoal: 0,
+  categories: [
+    { id: 'walmart',    label: 'Walmart / Grocery' },
+    { id: 'other-food', label: 'Other Food / Restaurants' },
+    { id: 'amazon',     label: 'Amazon' },
+    { id: 'vet',        label: 'Vet' },
+    { id: 'anet',       label: 'ArenaNet / Guild Wars' },
+    { id: 'gas',        label: 'Gas / EzMart' },
+    { id: 'house',      label: 'House / Home' },
+    { id: 'other',      label: 'Other / Misc' },
+    { id: 'yearly',     label: 'Yearly / Annual' },
+  ]
+};
+
+const RECEIPT_CATS = [
+  { id: 'shared-food', label: 'Shared Food' },
+  { id: 'pet',         label: 'Pet' },
+  { id: 'bev-food',    label: 'Bev Food' },
+  { id: 'rich-food',   label: 'Rich Food' },
+  { id: 'misc',        label: 'Misc' },
+  { id: 'deposit',     label: 'Deposit' },
+  { id: 'tax',         label: 'Tax' },
+];
+
+let expLogCollapsed = true;
+let recLogCollapsed = true;
+
+// ── Persistence ───────────────────────────────────────────────────────────
+const STORAGE_KEY = 'finance-v1';
+
+async function load() {
+  const user = mcAuth.currentUser;
+  if (user) {
+    try {
+      const ref  = mcDb.collection('users').doc(user.uid).collection('data').doc('finance');
+      const snap = await ref.get();
+      if (snap.exists) return snap.data();
+      // Firestore empty — migrate from localStorage if present
+      const local = localStorage.getItem(STORAGE_KEY);
+      if (local) {
+        const parsed = JSON.parse(local);
+        await ref.set(parsed);
+        return parsed;
+      }
+    } catch (e) {
+      console.warn('Firestore load failed, using localStorage fallback:', e);
+    }
+  }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(SEED));
+  } catch {
+    return JSON.parse(JSON.stringify(SEED));
+  }
+}
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const user = mcAuth.currentUser;
+  if (user) {
+    mcDb.collection('users').doc(user.uid).collection('data').doc('finance')
+      .set(state)
+      .catch(e => console.warn('Firestore save failed:', e));
+  }
+}
+
+// ── State ─────────────────────────────────────────────────────────────────
+let state = JSON.parse(JSON.stringify(SEED)); // default until auth + Firestore load
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const fmt    = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const fmtDec = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const uid    = ()  => Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+
+function monthLabel(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  return new Date(y, m - 1, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+}
+
+function nextMonth(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  const d = new Date(y, m, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ── Render: Bills ─────────────────────────────────────────────────────────
+function renderBills() {
+  $('subtitle').textContent = monthLabel(state.month);
+
+  const _now = new Date();
+  const _actualYM = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}`;
+  const todayDay = state.month > _actualYM ? 0 : _now.getDate();
+  const bills = [...state.bills].sort((a, b) => a.dueDay - b.dueDay);
+  const list  = $('bills-list');
+  list.innerHTML = '';
+
+  bills.forEach(b => {
+    const days = b.dueDay - todayDay;
+    let badgeCls, badgeLabel;
+
+    if (b.paid) {
+      badgeCls   = b.autopay ? 'badge-autopaid' : 'badge-paid';
+      badgeLabel = b.autopay ? 'autopaid' : 'paid';
+    } else if (days < 0) {
+      badgeCls   = 'badge-overdue';
+      badgeLabel = `${Math.abs(days)}d overdue`;
+    } else if (days === 0) {
+      badgeCls   = 'badge-soon';
+      badgeLabel = 'due today';
+    } else if (days <= 5) {
+      badgeCls   = 'badge-soon';
+      badgeLabel = `due in ${days}d`;
+    } else {
+      badgeCls   = 'badge-upcoming';
+      badgeLabel = `day ${b.dueDay}`;
+    }
+
+    const displayAmt = b.paid && b.amountPaid != null ? fmtDec(b.amountPaid) : fmt(b.amount);
+    const showMin    = b.minimumDue != null && b.minimumDue < b.amount && !b.paid;
+    const balSpan    = b.balance != null
+      ? `<span class="bill-balance" data-id="${b.id}" title="Click to update balance">${fmt(b.balance)} balance</span>`
+      : '';
+    const noteSpan   = b.notes ? `<span>${b.notes}</span>` : '';
+    const details    = [balSpan, noteSpan].filter(Boolean).join(' · ');
+
+    const urgentColor = !b.paid && days < 0 ? 'var(--danger)' : 'var(--success)';
+
+    const item = document.createElement('div');
+    item.className = `bill-item${b.paid ? ' is-paid' : ''}`;
+    item.dataset.id = b.id;
+    item.innerHTML = `
+      <div class="bill-row">
+        <span class="bill-day">${b.dueDay}</span>
+        <div class="bill-info">
+          <span class="bill-name">${b.name}</span>
+          ${details ? `<div class="bill-detail">${details}</div>` : ''}
+        </div>
+        <div class="bill-amounts">
+          <span class="${b.paid ? 'bill-amt' : 'bill-amt bill-amt-edit'}" data-id="${b.id}" title="${b.paid ? '' : 'Click to update amount'}">${displayAmt}</span>
+          ${showMin ? `<span class="bill-min">min ${fmt(b.minimumDue)}</span>` : ''}
+        </div>
+        <span class="badge ${badgeCls}">${badgeLabel}</span>
+        <div class="bill-action">
+          ${b.paid
+            ? `<button class="btn-link undo-paid" data-id="${b.id}">undo</button>`
+            : `<button class="btn btn-sm mark-paid" data-id="${b.id}"
+                 style="color:${urgentColor};border-color:${urgentColor}">Mark Paid ▾</button>`}
+        </div>
+      </div>
+      <div class="pay-form" id="pf-${b.id}">
+        <label>Amount paid:</label>
+        <input type="number" id="pa-${b.id}" value="${b.amount}" min="0" step="0.01">
+        <button class="btn btn-sm btn-primary confirm-paid" data-id="${b.id}">✓ Confirm</button>
+        <button class="btn btn-sm cancel-paid" data-id="${b.id}">Cancel</button>
+      </div>`;
+
+    list.appendChild(item);
+  });
+
+  const total    = bills.reduce((s, b) => s + b.amount, 0);
+  const paidAmt  = bills.filter(b => b.paid).reduce((s, b) => s + (b.amountPaid ?? b.amount), 0);
+  const paidCt   = bills.filter(b => b.paid).length;
+  const remain   = bills.filter(b => !b.paid).reduce((s, b) => s + b.amount, 0);
+
+  $('bills-stat').textContent = `${paidCt} of ${bills.length} paid`;
+  $('bills-footer').innerHTML = `
+    <span>Paid so far: <strong>${fmtDec(paidAmt)}</strong></span>
+    <span>Still owed: <strong style="color:${remain > 0 ? 'var(--warn)' : 'var(--success)'}">${fmt(remain)}</strong></span>
+    <span>Month total: <strong>${fmt(total)}</strong></span>`;
+}
+
+// ── Render: Expenses ──────────────────────────────────────────────────────
+function renderExpenses() {
+  // Populate category dropdown once
+  const sel = $('exp-cat');
+  if (!sel.options.length) {
+    state.categories.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.id;
+      o.textContent = c.label;
+      sel.appendChild(o);
+    });
+  }
+
+  // Expense log (newest first)
+  const log    = $('expense-log');
+  const sorted = [...state.expenses].sort((a, b) => b.date.localeCompare(a.date));
+
+  if (!sorted.length) {
+    log.innerHTML = '<p class="empty">No expenses logged yet.</p>';
+  } else {
+    log.innerHTML = '';
+    sorted.forEach(e => {
+      const cat  = state.categories.find(c => c.id === e.category);
+      const div  = document.createElement('div');
+      div.className = 'exp-entry';
+      div.innerHTML = `
+        <span class="exp-date">${e.date.slice(5)}</span>
+        <div>
+          <div class="exp-label">${cat ? cat.label : e.category}</div>
+          ${e.description ? `<div class="exp-desc">${e.description}</div>` : ''}
+        </div>
+        <span class="exp-amt">${fmtDec(e.amount)}</span>
+        <button class="btn-link del-exp" data-id="${e.id}" title="Delete">✕</button>`;
+      log.appendChild(div);
+    });
+  }
+
+  $('exp-count').textContent = sorted.length ? `${sorted.length} entries` : '';
+  $('expense-log').classList.toggle('collapsed', expLogCollapsed);
+  $('exp-log-toggle').textContent = expLogCollapsed ? '▾ Show' : '▴ Hide';
+
+  // Category totals
+  const totalsEl   = $('category-totals');
+  const grandTotal = state.expenses.reduce((s, e) => s + e.amount, 0);
+  totalsEl.innerHTML = '';
+
+  if (!grandTotal) {
+    totalsEl.innerHTML = '<p class="empty">No spending recorded yet.</p>';
+    $('exp-total-label').textContent = '';
+    return;
+  }
+
+  $('exp-total-label').textContent = fmtDec(grandTotal) + ' total';
+
+  const catMap = {};
+  state.expenses.forEach(e => { catMap[e.category] = (catMap[e.category] || 0) + e.amount; });
+  const maxAmt = Math.max(...Object.values(catMap));
+
+  state.categories.forEach(c => {
+    const amt = catMap[c.id] || 0;
+    if (!amt) return;
+    const row = document.createElement('div');
+    row.className = 'cat-row';
+    row.innerHTML = `
+      <div class="cat-labels">
+        <span class="cat-name">${c.label}</span>
+        <span class="cat-amt">${fmtDec(amt)}</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${((amt / maxAmt) * 100).toFixed(1)}%"></div>
+      </div>`;
+    totalsEl.appendChild(row);
+  });
+
+  const footer = document.createElement('div');
+  footer.className = 'cat-grand-total';
+  footer.innerHTML = `<span>Total spent</span><span>${fmtDec(grandTotal)}</span>`;
+  totalsEl.appendChild(footer);
+}
+
+// ── Render: Debt tracker ──────────────────────────────────────────────────
+function renderDebtTracker() {
+  const withBal = state.bills.filter(b => b.balance != null);
+  const total   = withBal.reduce((s, b) => s + b.balance, 0);
+  const goal    = state.debtGoal ?? 125000;
+  const start   = state.debtStart || total;
+  const gap     = total - goal;
+  const atGoal  = gap <= 0;
+
+  // Progress: 0% = day one, 100% = goal reached
+  const journey = start - goal;
+  const pct     = journey > 0
+    ? Math.max(0, Math.min(100, ((start - total) / journey) * 100))
+    : (atGoal ? 100 : 0);
+
+  $('debt-meta').innerHTML = atGoal
+    ? `<span class="celebrate">🎉 Goal reached!</span>`
+    : `${fmt(gap)} above goal`;
+
+  // Left panel: summary + bar
+  $('debt-summary').innerHTML = `
+    <div class="debt-big">${fmt(total)}</div>
+    <div class="debt-goal-line">
+      Goal: under <span class="debt-goal-amt" id="debt-goal-val" title="Click to change">${fmt(goal)}</span>
+      ${atGoal
+        ? `<span class="celebrate"> — 🎉 Spa day earned!</span>`
+        : `<span> — ${fmt(gap)} to go</span>`}
+    </div>
+    <div class="debt-bar-track">
+      <div class="debt-bar-fill" style="width:${pct.toFixed(1)}%"></div>
+    </div>
+    <div class="debt-bar-labels">
+      <span>Start: ${fmt(start)}</span>
+      <span>${pct.toFixed(0)}% of the way there</span>
+      <span>Goal: ${fmt(goal)}</span>
+    </div>`;
+
+  // Right panel: individual accounts, highest first
+  const sorted = [...withBal].sort((a, b) => b.balance - a.balance);
+  $('debt-accounts').innerHTML = `<div class="debt-account-list">` +
+    sorted.map(b => `
+      <div class="debt-account">
+        <span class="debt-acc-name">${b.name}</span>
+        <span class="debt-acc-bal">${fmt(b.balance)}</span>
+      </div>`).join('') +
+    `</div>`;
+
+  // Inline edit the goal
+  document.getElementById('debt-goal-val')?.addEventListener('click', () => {
+    const span = document.getElementById('debt-goal-val');
+    const inp  = document.createElement('input');
+    inp.type   = 'number';
+    inp.value  = goal;
+    inp.min    = 0;
+    inp.step   = 1000;
+    inp.className = 'goal-input';
+    const commit = () => {
+      const val = parseFloat(inp.value);
+      if (!isNaN(val) && val > 0) { state.debtGoal = val; save(); }
+      renderDebtTracker();
+    };
+    inp.addEventListener('blur', commit);
+    inp.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter')  inp.blur();
+      if (ev.key === 'Escape') renderDebtTracker();
+    });
+    span.replaceWith(inp);
+    inp.focus();
+    inp.select();
+  });
+}
+
+// ── Render: Receipt Analysis ──────────────────────────────────────────────
+function renderReceiptAnalysis() {
+  const receipts = state.receipts || [];
+  const sorted   = [...receipts].sort((a, b) => b.date.localeCompare(a.date));
+  const log      = $('receipt-log');
+
+  if (!sorted.length) {
+    log.innerHTML = '<p class="empty">No receipts logged yet.</p>';
+  } else {
+    log.innerHTML = '';
+    sorted.forEach(r => {
+      const total  = RECEIPT_CATS.reduce((s, c) => s + (r.breakdown[c.id] || 0), 0);
+      const parts  = RECEIPT_CATS
+        .filter(c => r.breakdown[c.id] > 0)
+        .map(c => `${c.label}: ${fmtDec(r.breakdown[c.id])}`);
+      const div = document.createElement('div');
+      div.className = 'rec-entry';
+      div.innerHTML = `
+        <div class="rec-entry-row">
+          <span class="exp-date">${r.date.slice(5)}</span>
+          <span class="rec-store">${r.store}</span>
+          <span class="rec-total-amt">${fmtDec(total)}</span>
+          <button class="btn-link del-rec" data-id="${r.id}" title="Delete">✕</button>
+        </div>
+        ${parts.length ? `<div class="rec-breakdown">${parts.join(' · ')}</div>` : ''}`;
+      log.appendChild(div);
+    });
+  }
+
+  log.classList.toggle('collapsed', recLogCollapsed);
+  $('rec-log-toggle').textContent = recLogCollapsed ? '▾ Show' : '▴ Hide';
+  $('rec-count').textContent = sorted.length ? `(${sorted.length})` : '';
+
+  // Subcategory totals
+  const totalsEl  = $('receipt-totals');
+  const grandTotal = receipts.reduce((s, r) =>
+    s + RECEIPT_CATS.reduce((t, c) => t + (r.breakdown[c.id] || 0), 0), 0);
+  totalsEl.innerHTML = '';
+
+  if (!grandTotal) {
+    totalsEl.innerHTML = '<p class="empty">No receipts logged yet.</p>';
+    $('rec-meta').textContent = '';
+    return;
+  }
+
+  $('rec-meta').textContent = fmtDec(grandTotal) + ' total';
+
+  const catTotals = {};
+  RECEIPT_CATS.forEach(c => {
+    catTotals[c.id] = receipts.reduce((s, r) => s + (r.breakdown[c.id] || 0), 0);
+  });
+  const maxCat = Math.max(...Object.values(catTotals).filter(v => v > 0));
+
+  RECEIPT_CATS.forEach(c => {
+    const amt = catTotals[c.id];
+    if (!amt) return;
+    const row = document.createElement('div');
+    row.className = 'cat-row';
+    row.innerHTML = `
+      <div class="cat-labels">
+        <span class="cat-name">${c.label}</span>
+        <span class="cat-amt">${fmtDec(amt)}</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${((amt / maxCat) * 100).toFixed(1)}%"></div>
+      </div>`;
+    totalsEl.appendChild(row);
+  });
+
+  const footer = document.createElement('div');
+  footer.className = 'cat-grand-total';
+  footer.innerHTML = `<span>Total receipts</span><span>${fmtDec(grandTotal)}</span>`;
+  totalsEl.appendChild(footer);
+}
+
+function render() {
+  renderBills();
+  renderDebtTracker();
+  renderExpenses();
+  renderReceiptAnalysis();
+  renderRecForm();
+}
+
+// ── Bills: inline balance editing ─────────────────────────────────────────
+$('bills-list').addEventListener('click', e => {
+  if (!e.target.classList.contains('bill-balance')) return;
+  const id   = parseInt(e.target.dataset.id);
+  const bill = state.bills.find(b => b.id === id);
+  const inp  = document.createElement('input');
+  inp.type   = 'number';
+  inp.value  = bill.balance ?? 0;
+  inp.min    = 0;
+  inp.step   = 1;
+  inp.className = 'bal-input';
+  const commit = () => {
+    const val = parseFloat(inp.value);
+    if (!isNaN(val) && val >= 0) { bill.balance = val; save(); }
+    renderBills();
+    renderDebtTracker();
+  };
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', ev => {
+    if (ev.key === 'Enter')  inp.blur();
+    if (ev.key === 'Escape') renderBills();
+  });
+  e.target.replaceWith(inp);
+  inp.focus();
+  inp.select();
+});
+
+$('bills-list').addEventListener('click', e => {
+  if (!e.target.classList.contains('bill-amt-edit')) return;
+  const id   = parseInt(e.target.dataset.id);
+  const bill = state.bills.find(b => b.id === id);
+  const inp  = document.createElement('input');
+  inp.type   = 'number';
+  inp.value  = bill.amount;
+  inp.min    = 0;
+  inp.step   = 0.01;
+  inp.className = 'bal-input';
+  const commit = () => {
+    const val = parseFloat(inp.value);
+    if (!isNaN(val) && val >= 0) { bill.amount = val; save(); }
+    renderBills();
+  };
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', ev => {
+    if (ev.key === 'Enter')  inp.blur();
+    if (ev.key === 'Escape') renderBills();
+  });
+  e.target.replaceWith(inp);
+  inp.focus();
+  inp.select();
+});
+
+// ── Bills: interactions ───────────────────────────────────────────────────
+$('bills-list').addEventListener('click', e => {
+  const id   = parseInt(e.target.dataset.id);
+  if (!id) return;
+  const bill = state.bills.find(b => b.id === id);
+
+  if (e.target.classList.contains('mark-paid')) {
+    const pf     = $(`pf-${id}`);
+    const isOpen = pf.classList.contains('open');
+    document.querySelectorAll('.pay-form.open').forEach(f => f.classList.remove('open'));
+    if (!isOpen) {
+      pf.classList.add('open');
+      $(`pa-${id}`).focus();
+      $(`pa-${id}`).select();
+    }
+    return;
+  }
+
+  if (e.target.classList.contains('confirm-paid')) {
+    const input = $(`pa-${id}`);
+    const amt   = parseFloat(input.value);
+    if (isNaN(amt) || amt < 0) { input.focus(); return; }
+    bill.paid      = true;
+    bill.amountPaid = amt;
+    save();
+    renderBills();
+    return;
+  }
+
+  if (e.target.classList.contains('cancel-paid')) {
+    $(`pf-${id}`).classList.remove('open');
+    return;
+  }
+
+  if (e.target.classList.contains('undo-paid')) {
+    bill.paid       = false;
+    bill.amountPaid = null;
+    save();
+    renderBills();
+  }
+});
+
+// Confirm with Enter in the amount field
+$('bills-list').addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const id = parseInt(e.target.id?.replace('pa-', ''));
+  if (!id) return;
+  $('bills-list').querySelector(`.confirm-paid[data-id="${id}"]`)?.click();
+});
+
+// ── Expenses: add ─────────────────────────────────────────────────────────
+function addExpense() {
+  const cat  = $('exp-cat').value;
+  const amt  = parseFloat($('exp-amt').value);
+  const desc = $('exp-desc').value.trim();
+  if (!cat || isNaN(amt) || amt <= 0) { $('exp-amt').focus(); return; }
+
+  state.expenses.push({ id: uid(), date: todayStr(), category: cat, amount: amt, description: desc });
+  $('exp-amt').value  = '';
+  $('exp-desc').value = '';
+  $('exp-amt').focus();
+  save();
+  renderExpenses();
+}
+
+$('exp-add').addEventListener('click', addExpense);
+$('exp-desc').addEventListener('keydown', e => { if (e.key === 'Enter') addExpense(); });
+$('exp-amt').addEventListener('keydown',  e => { if (e.key === 'Enter') $('exp-desc').focus(); });
+
+// ── Expenses: delete ──────────────────────────────────────────────────────
+$('expense-log').addEventListener('click', e => {
+  if (!e.target.classList.contains('del-exp')) return;
+  state.expenses = state.expenses.filter(x => x.id !== e.target.dataset.id);
+  save();
+  renderExpenses();
+});
+
+// ── New Month ─────────────────────────────────────────────────────────────
+$('new-month-btn').addEventListener('click', () => {
+  const nm = nextMonth(state.month);
+  if (!confirm(`Start ${monthLabel(nm)}?\n\nAll bills will reset to unpaid and this month's expenses will clear.\nExport first if you want to keep a record.`)) return;
+  state.month = nm;
+  state.bills.forEach(b => { b.paid = false; b.amountPaid = null; });
+  state.expenses  = [];
+  state.receipts  = [];
+  save();
+  RECEIPT_CATS.forEach(c => { recItems[c.id] = []; });
+  $('exp-cat').innerHTML = '';
+  render();
+});
+
+// ── Export ────────────────────────────────────────────────────────────────
+$('export-btn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), { href: url, download: `finance-${state.month}.json` });
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ── Import ────────────────────────────────────────────────────────────────
+$('import-btn').addEventListener('click', () => $('file-input').click());
+
+$('file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.bills || !data.month) throw new Error();
+      state = data;
+      save();
+      $('exp-cat').innerHTML = '';
+      render();
+    } catch {
+      alert('Could not read that file — make sure it was exported from this dashboard.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+// ── Expense log: collapse toggle ──────────────────────────────────────────
+$('exp-log-toggle').addEventListener('click', () => {
+  expLogCollapsed = !expLogCollapsed;
+  $('expense-log').classList.toggle('collapsed', expLogCollapsed);
+  $('exp-log-toggle').textContent = expLogCollapsed ? '▾ Show' : '▴ Hide';
+});
+
+// ── Receipts: accumulator ─────────────────────────────────────────────────
+const recItems = Object.fromEntries(RECEIPT_CATS.map(c => [c.id, []]));
+
+function recBucketTotal(catId) {
+  return recItems[catId].reduce((s, v) => s + v, 0);
+}
+
+function recGrandTotal() {
+  return RECEIPT_CATS.reduce((s, c) => s + recBucketTotal(c.id), 0);
+}
+
+function renderRecForm() {
+  $('rec-cat-grid').innerHTML = RECEIPT_CATS.map(c => {
+    const total     = recBucketTotal(c.id);
+    const itemsHtml = recItems[c.id].map((v, i) =>
+      `<div class="rec-item-entry">
+        <span>${fmtDec(v)}</span>
+        <button class="rec-del-item" data-cat="${c.id}" data-idx="${i}">✕</button>
+      </div>`
+    ).join('');
+    return `
+      <div class="rec-cat-item">
+        <div class="rec-cat-header">
+          <label>${c.label}</label>
+          <span class="rec-bucket-total">${total > 0 ? fmtDec(total) : ''}</span>
+        </div>
+        <div class="rec-item-list">${itemsHtml}</div>
+        <div class="rec-cat-add">
+          <input type="number" class="rec-item-input" data-cat="${c.id}" placeholder="0.00" min="0" step="0.01">
+          <button class="btn btn-sm rec-item-add" data-cat="${c.id}">+</button>
+        </div>
+      </div>`;
+  }).join('');
+  $('rec-running-total').textContent = fmtDec(recGrandTotal());
+}
+
+function addRecItem(catId) {
+  const input = document.querySelector(`.rec-item-input[data-cat="${catId}"]`);
+  const val   = parseFloat(input.value);
+  if (!isNaN(val) && val > 0) {
+    recItems[catId].push(parseFloat(val.toFixed(2)));
+    renderRecForm();
+    document.querySelector(`.rec-item-input[data-cat="${catId}"]`).focus();
+  }
+}
+
+$('rec-cat-grid').addEventListener('click', e => {
+  if (e.target.classList.contains('rec-item-add')) { addRecItem(e.target.dataset.cat); return; }
+  if (e.target.classList.contains('rec-del-item')) {
+    recItems[e.target.dataset.cat].splice(parseInt(e.target.dataset.idx), 1);
+    renderRecForm();
+  }
+});
+
+$('rec-cat-grid').addEventListener('keydown', e => {
+  if (e.target.classList.contains('rec-item-input') && e.key === 'Enter') addRecItem(e.target.dataset.cat);
+});
+
+$('rec-date').value = todayStr();
+
+$('rec-add').addEventListener('click', () => {
+  const store = $('rec-store').value.trim();
+  const date  = $('rec-date').value;
+  if (!store) { $('rec-store').focus(); return; }
+  if (recGrandTotal() <= 0) return;
+
+  const breakdown = {};
+  RECEIPT_CATS.forEach(c => { breakdown[c.id] = recBucketTotal(c.id); });
+
+  if (!state.receipts) state.receipts = [];
+  state.receipts.push({ id: uid(), date, store, breakdown });
+
+  $('rec-store').value = '';
+  RECEIPT_CATS.forEach(c => { recItems[c.id] = []; });
+  renderRecForm();
+  save();
+  renderReceiptAnalysis();
+});
+
+// ── Receipts: delete ──────────────────────────────────────────────────────
+$('receipt-log').addEventListener('click', e => {
+  if (!e.target.classList.contains('del-rec')) return;
+  state.receipts = state.receipts.filter(r => r.id !== e.target.dataset.id);
+  save();
+  renderReceiptAnalysis();
+});
+
+// ── Receipt log: collapse toggle ──────────────────────────────────────────
+$('rec-log-toggle').addEventListener('click', () => {
+  recLogCollapsed = !recLogCollapsed;
+  $('receipt-log').classList.toggle('collapsed', recLogCollapsed);
+  $('rec-log-toggle').textContent = recLogCollapsed ? '▾ Show' : '▴ Hide';
+});
+
+// ── App init (async — waits for Firestore load) ───────────────────────────
+async function initApp() {
+  state = await load();
+  if (!state.receipts) { state.receipts = []; save(); }
+  if (!state.debtStart) {
+    state.debtStart = state.bills.filter(b => b.balance != null).reduce((s, b) => s + b.balance, 0);
+    save();
+  }
+  $('exp-cat').innerHTML = '';
+  $('rec-date').value = todayStr();
+  render();
+}
+
+// ── Auth gate ─────────────────────────────────────────────────────────────
+let appInitialized = false;
+mcAuth.onAuthStateChanged(async user => {
+  if (user) {
+    document.getElementById('signin-overlay').style.display = 'none';
+    if (!appInitialized) {
+      appInitialized = true;
+      await initApp();
+    }
+  } else {
+    document.getElementById('signin-overlay').style.display = 'flex';
+  }
+});
+
+document.getElementById('google-signin-btn').addEventListener('click', () => {
+  mcAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+});
+</script>
+</body>
+</html>
