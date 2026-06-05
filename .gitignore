@@ -1,6 +1,9 @@
 # PlannerApp source — kept private for now, deployed separately via Netlify
 PlannerApp/
 
+# Finance app — contains personal financial data
+finance/
+
 # OS junk
 Thumbs.db
 .DS_Store
