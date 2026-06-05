@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 120">
+  <!-- Vine stem — lazy natural curve, enters bottom exits top at similar x -->
+  <path d="M26,120 C30,100 22,82 25,62 C28,42 20,22 23,0"
+    stroke="#2d4a1e" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Leaf branching right at y≈88 -->
+  <g transform="translate(25,88) rotate(42)" fill="#3a5a20">
+    <path d="M0,-17 C11,-8 11,8 0,17 C-11,8 -11,-8 0,-17Z"/>
+    <line x1="0" y1="-13" x2="0" y2="13" stroke="#c8b89a" stroke-width="0.75"/>
+    <line x1="0" y1="-4" x2="-8" y2="-10" stroke="#c8b89a" stroke-width="0.55"/>
+    <line x1="0" y1="-4" x2="8" y2="-10" stroke="#c8b89a" stroke-width="0.55"/>
+    <line x1="0" y1="5" x2="-7" y2="0" stroke="#c8b89a" stroke-width="0.55"/>
+    <line x1="0" y1="5" x2="7" y2="0" stroke="#c8b89a" stroke-width="0.55"/>
+  </g>
+
+  <!-- Tendril curl right at y≈70 -->
+  <path d="M25,70 C34,67 37,60 32,55 C28,51 24,55 26,59"
+    stroke="#2d4a1e" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+
+  <!-- Leaf branching left at y≈43 -->
+  <g transform="translate(24,43) rotate(-45)" fill="#3a5a20">
+    <path d="M0,-15 C10,-7 10,7 0,15 C-10,7 -10,-7 0,-15Z"/>
+    <line x1="0" y1="-12" x2="0" y2="12" stroke="#c8b89a" stroke-width="0.7"/>
+    <line x1="0" y1="-4" x2="-7" y2="-9" stroke="#c8b89a" stroke-width="0.5"/>
+    <line x1="0" y1="-4" x2="7" y2="-9" stroke="#c8b89a" stroke-width="0.5"/>
+  </g>
+
+  <!-- Small bud right at y≈18 -->
+  <g transform="translate(24,18) rotate(25)" fill="#2d4a1e">
+    <path d="M0,-9 C6,-4 6,4 0,9 C-6,4 -6,-4 0,-9Z"/>
+  </g>
+</svg>

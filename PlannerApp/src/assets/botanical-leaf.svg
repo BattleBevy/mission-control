@@ -1,14 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 50">
-  <g transform="translate(20,25)" fill="#4e6b35">
-    <!-- Leaf body — pointed oval, same formula as the sprig leaves -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
+  <!-- Stem from bottom center -->
+  <path d="M30,70 C30,60 30,50 30,42"
+    stroke="#2d4a1e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+
+  <!-- Left leaf — large, fanning out -->
+  <g transform="translate(30,46) rotate(-50)" fill="#3a5a20">
     <path d="M0,-20 C13,-10 13,10 0,20 C-13,10 -13,-10 0,-20Z"/>
-    <!-- Centre vein -->
-    <line x1="0" y1="-16" x2="0" y2="16" stroke="#faf5eb" stroke-width="1.2"/>
-    <!-- Upper lateral veins -->
-    <line x1="0" y1="-8" x2="-9" y2="-14" stroke="#faf5eb" stroke-width="0.8"/>
-    <line x1="0" y1="-8" x2="9" y2="-14" stroke="#faf5eb" stroke-width="0.8"/>
-    <!-- Lower lateral veins -->
-    <line x1="0" y1="2" x2="-8" y2="-3" stroke="#faf5eb" stroke-width="0.8"/>
-    <line x1="0" y1="2" x2="8" y2="-3" stroke="#faf5eb" stroke-width="0.8"/>
+    <line x1="0" y1="-16" x2="0" y2="16" stroke="#c8b89a" stroke-width="0.85"/>
+    <line x1="0" y1="-7" x2="-9" y2="-13" stroke="#c8b89a" stroke-width="0.6"/>
+    <line x1="0" y1="-7" x2="9" y2="-13" stroke="#c8b89a" stroke-width="0.6"/>
+    <line x1="0" y1="5" x2="-8" y2="0" stroke="#c8b89a" stroke-width="0.6"/>
+    <line x1="0" y1="5" x2="8" y2="0" stroke="#c8b89a" stroke-width="0.6"/>
+  </g>
+
+  <!-- Right leaf — medium -->
+  <g transform="translate(30,46) rotate(44)" fill="#3a5a20">
+    <path d="M0,-16 C11,-8 11,8 0,16 C-11,8 -11,-8 0,-16Z"/>
+    <line x1="0" y1="-12" x2="0" y2="12" stroke="#c8b89a" stroke-width="0.75"/>
+    <line x1="0" y1="-5" x2="-8" y2="-10" stroke="#c8b89a" stroke-width="0.55"/>
+    <line x1="0" y1="-5" x2="8" y2="-10" stroke="#c8b89a" stroke-width="0.55"/>
+  </g>
+
+  <!-- Center leaf — tallest, upright -->
+  <g transform="translate(30,42) rotate(-4)" fill="#2d4a1e">
+    <path d="M0,-23 C15,-11 15,11 0,23 C-15,11 -15,-11 0,-23Z"/>
+    <line x1="0" y1="-19" x2="0" y2="19" stroke="#c8b89a" stroke-width="0.9"/>
+    <line x1="0" y1="-9" x2="-10" y2="-15" stroke="#c8b89a" stroke-width="0.65"/>
+    <line x1="0" y1="-9" x2="10" y2="-15" stroke="#c8b89a" stroke-width="0.65"/>
+    <line x1="0" y1="5" x2="-9" y2="0" stroke="#c8b89a" stroke-width="0.65"/>
+    <line x1="0" y1="5" x2="9" y2="0" stroke="#c8b89a" stroke-width="0.65"/>
   </g>
 </svg>
