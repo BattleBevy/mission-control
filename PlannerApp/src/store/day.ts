@@ -53,6 +53,7 @@ export function subscribeDayPlan(
         template_id: t.id,
         ...(t.notes ? { notes: t.notes } : {}),
         ...(t.all_day ? { all_day: true } : {}),
+        ...(t.tentative ? { tentative: true } : {}),
       }]
     })
     onChange({ day, fixed_events: [...events, ...materialized], flexible_tasks: tasks, anytime_tasks: anytime })

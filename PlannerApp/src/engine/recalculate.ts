@@ -35,10 +35,9 @@ export function recalculate(
   })
 
   // All-day events are label-only — exclude from time-blocking entirely.
-  // Drop timed events that have fully ended; keep ongoing ones so their time stays blocked.
-  const relevantEvents = plan.fixed_events.filter(
-    event => !event.all_day && toMinutes(event.end_datetime) > nowMin,
-  )
+  // Past timed events are included for display even after they end; they don't affect
+  // free interval computation because the scheduling window starts at effectiveStartMin (now).
+  const relevantEvents = plan.fixed_events.filter(event => !event.all_day)
 
   return runScheduler({
     working_hours: { start: fromMinutes(effectiveStartMin), end: workingHours.end },
