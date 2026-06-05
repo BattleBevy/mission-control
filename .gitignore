@@ -1,5 +1,24 @@
-# PlannerApp source — kept private for now, deployed separately via Netlify
-PlannerApp/
+# PlannerApp build artifacts — source is tracked (needed for GitHub Actions build)
+PlannerApp/node_modules/
+PlannerApp/dist/
+
+# PlannerApp — personal planning docs, not needed for the build
+PlannerApp/TODO.md
+PlannerApp/README.md
+PlannerApp/netlify.toml
+PlannerApp/public/_redirects
+
+# PlannerApp — unused Vite starter template assets
+PlannerApp/src/assets/hero.png
+PlannerApp/src/assets/react.svg
+PlannerApp/src/assets/vite.svg
+
+# Claude instructions — local only, not for the repo
+CLAUDE.md
+
+# Office documents — personal reference files, not for the repo
+*.doc
+*.docx
 
 # OS junk
 Thumbs.db

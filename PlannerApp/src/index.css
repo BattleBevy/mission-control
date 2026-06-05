@@ -1,0 +1,71 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Hearth Witch palette */
+  --bg: #ede5d8;
+  --surface: #faf5eb;
+  --border: #d4b896;
+  --text: #2a1a08;
+  --muted: #7a5c3c;
+  --success: #4e6b35;
+  --warn: #c87820;
+  --danger: #8b3530;
+
+  /* Domain accent colors */
+  --accent-finance: #c27c28;
+  --accent-meal: #c06040;
+  --accent-codex: #6b4a7a;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Typography */
+  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-sans: system-ui, 'Segoe UI', sans-serif;
+
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+  background-color: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100svh;
+}
+
+h1,
+.domain-title {
+  font-family: var(--font-serif);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
