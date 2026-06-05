@@ -259,6 +259,13 @@
   border-left: 4px solid var(--accent-finance);
 }
 
+/* Tentative events: same copper palette, dotted border signals "movable" */
+.scheduled-block.fixed.tentative {
+  border-style: dashed;
+  border-left-style: solid;
+  opacity: 0.85;
+}
+
 /* Flexible tasks: copper/amber background, opacity by priority */
 .scheduled-block.flexible {
   border-color: var(--border);

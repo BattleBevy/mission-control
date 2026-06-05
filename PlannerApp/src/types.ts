@@ -61,6 +61,7 @@ export interface FixedEvent {
   notes?: string
   template_id?: string  // set when auto-generated from an EventTemplate
   all_day?: boolean     // label-only; does not block any time slot
+  tentative?: boolean   // preferred time; displaced to next open slot if blocked
 }
 
 /** Reusable template for a recurring fixed event */
@@ -74,6 +75,7 @@ export interface EventTemplate {
   start_date?: DateString  // recurrence fires on/after this date; absent on legacy templates (fire on all days)
   end_date?: DateString    // recurrence stops firing after this date; absent = no end
   all_day?: boolean
+  tentative?: boolean      // preferred time; displaced to next open slot if blocked
 }
 
 /** Unscheduled to-do shown in the Anytime panel; never gets a timeline slot */
@@ -116,6 +118,7 @@ export interface ScheduledBlock {
   start: TimeString
   end: TimeString
   status: TaskStatus
+  tentative?: boolean  // true when the event was displaced from its preferred time
 }
 
 /** Free time between blocks; rendered as a gap on the timeline */

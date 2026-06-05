@@ -202,6 +202,7 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
         day: plan.day,
         ...(fields.notes ? { notes: fields.notes } : {}),
         ...(event.all_day ? { all_day: true } : {}),
+        ...(event.tentative ? { tentative: true } : {}),
       })
     } else {
       // One-time: overwrite the existing doc (no suppression involved)
@@ -214,6 +215,7 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
         day: event.day,
         ...(fields.notes ? { notes: fields.notes } : {}),
         ...(event.all_day ? { all_day: true } : {}),
+        ...(event.tentative ? { tentative: true } : {}),
       })
     }
     setSelectedId(null)
@@ -237,6 +239,7 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
       start_date: plan.day,
       ...(fields.notes ? { notes: fields.notes } : {}),
       ...(oldTemplate.all_day ? { all_day: true } : {}),
+      ...(oldTemplate.tentative ? { tentative: true } : {}),
     }
     await saveEventTemplate(userId, newTemplate)
     await updateEventTemplate(userId, oldTemplate.id, { end_date: offsetDay(plan.day, -1) })
@@ -280,6 +283,7 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
       day: newDay,
       ...(event.notes ? { notes: event.notes } : {}),
       ...(event.all_day ? { all_day: true } : {}),
+      ...(event.tentative ? { tentative: true } : {}),
     })
     setSelectedId(null)
   }

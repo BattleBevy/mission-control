@@ -19,6 +19,7 @@ export function FixedEventForm({ userId, defaultDay, onClose, onSnapshot }: Prop
   const [title, setTitle] = useState('')
   const [day, setDay] = useState(defaultDay)
   const [allDay, setAllDay] = useState(false)
+  const [tentative, setTentative] = useState(false)
   const [startTime, setStartTime] = useState('09:00')
   const [endTime, setEndTime] = useState('10:00')
   const [notes, setNotes] = useState('')
@@ -50,6 +51,7 @@ export function FixedEventForm({ userId, defaultDay, onClose, onSnapshot }: Prop
         recurrence,
         start_date: day,   // also serves as biweekly anchor via the rule JSON
         ...(allDay ? { all_day: true } : {}),
+        ...(tentative && !allDay ? { tentative: true } : {}),
         ...(notes.trim() ? { notes: notes.trim() } : {}),
       }
       await saveEventTemplate(userId, template)
@@ -61,6 +63,7 @@ export function FixedEventForm({ userId, defaultDay, onClose, onSnapshot }: Prop
         end_datetime: allDay ? '' : endTime,
         day,
         ...(allDay ? { all_day: true } : {}),
+        ...(tentative && !allDay ? { tentative: true } : {}),
         ...(notes.trim() ? { notes: notes.trim() } : {}),
       }
       onSnapshot()
@@ -87,10 +90,20 @@ export function FixedEventForm({ userId, defaultDay, onClose, onSnapshot }: Prop
         <input
           type="checkbox"
           checked={allDay}
-          onChange={e => setAllDay(e.target.checked)}
+          onChange={e => { setAllDay(e.target.checked); if (e.target.checked) setTentative(false) }}
         />
         All day
       </label>
+      {!allDay && (
+        <label className="form-label form-label--inline">
+          <input
+            type="checkbox"
+            checked={tentative}
+            onChange={e => setTentative(e.target.checked)}
+          />
+          Tentative (moves to next open slot if blocked)
+        </label>
+      )}
       {!allDay && (
         <div className="form-row">
           <label className="form-label">

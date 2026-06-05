@@ -82,6 +82,7 @@ export function ScheduledBlock({
     block.status === 'skipped' ? 'completed' : '',
     block.status === 'in_progress' ? 'in-progress' : '',
     selected ? 'selected' : '',
+    (block.tentative || event?.tentative) ? 'tentative' : '',
   ].filter(Boolean).join(' ')
 
   function handleClick(e: React.MouseEvent) {
