@@ -109,6 +109,7 @@
   grid-template-columns: 260px 1fr 260px;
   flex: 1;
   min-height: 0;
+  position: relative;
 }
 
 /* ── Side panels ─────────────────────────────────────────────────────────────── */
@@ -1638,7 +1639,7 @@
 
 /* ── Botanical whimsy ─────────────────────────────────────────────────────── */
 
-/* ❧ herbalist ornament in the header — sized to actually be seen */
+/* ❧ herbalist ornament — visible but not loud */
 .app-title::after {
   content: '❧';
   color: var(--success);
@@ -1648,8 +1649,7 @@
   font-style: normal;
 }
 
-/* Vine running the full height of the left gutter — tiles a 52×120 segment,
-   sits at z-index 0 behind blocks, behind hour labels (which read fine over it) */
+/* Vine running the full height of the left gutter (behind hour labels) */
 .timeline-grid::before {
   content: '';
   position: absolute;
@@ -1660,12 +1660,12 @@
   background-image: url('./assets/botanical-vine-tile.svg');
   background-size: 52px 120px;
   background-repeat: repeat-y;
-  opacity: 0.25;
+  opacity: 0.30;
   pointer-events: none;
   z-index: 0;
 }
 
-/* Three-leaf spray above the empty-state message — actually present */
+/* Three-leaf spray above the empty-day message */
 .empty-day-prompt::before {
   content: '';
   display: block;
@@ -1677,4 +1677,43 @@
   background-repeat: no-repeat;
   background-position: center;
   opacity: 0.55;
+}
+
+/* ── Corner botanical compositions ───────────────────────────────────────────
+   Both use position:absolute within .app-layout (which is position:relative).
+   pointer-events:none — clicks pass through. z-index:2 — renders above panel
+   backgrounds but below dialogs (z-index 200+) and the sticky header (100).  */
+
+/* Bottom-left: gnarled vines + mushroom cluster growing into the frame */
+.app-layout::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 300px;
+  height: 350px;
+  background-image: url('./assets/botanical-corner-bl.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: bottom left;
+  opacity: 0.42;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Top-right: trailing vine sweeping in from the corner */
+.app-layout::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 240px;
+  height: 270px;
+  background-image: url('./assets/botanical-corner-tr.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: top right;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 2;
 }
