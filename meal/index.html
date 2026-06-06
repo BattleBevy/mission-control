@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Meal &amp; Nutrition Hub</title>
+<!-- Firebase CDN -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="../firebase-init.js"></script>
 <style>
 :root {
   --bg:      #ede5d8;
@@ -166,8 +171,18 @@ details.more-nutr summary:hover { color: var(--accent); }
 </head>
 <body>
 
+<!-- Sign-in overlay — shown until Google auth resolves -->
+<div id="signin-overlay" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000">
+  <div style="background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:8px;padding:2rem;text-align:center;max-width:320px;width:90%">
+    <div style="font-family:Georgia,serif;font-size:1.25rem;margin-bottom:0.5rem">Meal &amp; Nutrition Hub</div>
+    <div style="font-size:0.875rem;color:var(--muted);margin-bottom:1.5rem">Sign in to access your meal plan</div>
+    <button id="google-signin-btn" class="btn-primary" style="width:100%;padding:10px 16px;font-size:0.9rem">Sign in with Google</button>
+  </div>
+</div>
+
 <header class="site-header">
   <h1>Meal &amp; Nutrition Hub</h1>
+  <button id="import-btn" class="hub-link" style="cursor:pointer;border:1px solid var(--border);background:var(--surface)">Import</button>
   <button id="export-btn" class="hub-link" style="cursor:pointer;border:1px solid var(--border);background:var(--surface)">Export</button>
   <a href="../index.html" class="hub-link">&#8592; Hub</a>
 </header>
@@ -281,6 +296,7 @@ details.more-nutr summary:hover { color: var(--accent); }
 
 <datalist id="food-dl"></datalist>
 <datalist id="cat-dl"></datalist>
+<input type="file" id="file-input" accept=".json" style="display:none">
 
 <script>
 // ── Config ───────────────────────────────────────────────────────────────────
@@ -334,7 +350,24 @@ function blank() {
   };
 }
 
-function load() {
+async function load() {
+  const user = mcAuth.currentUser;
+  if (user) {
+    try {
+      const ref  = mcDb.collection('users').doc(user.uid).collection('data').doc('meal');
+      const snap = await ref.get();
+      if (snap.exists) return snap.data();
+      // Firestore empty — migrate from localStorage if present
+      const local = localStorage.getItem(KEY);
+      if (local) {
+        const parsed = JSON.parse(local);
+        await ref.set(parsed);
+        return parsed;
+      }
+    } catch (e) {
+      console.warn('Firestore load failed, using localStorage fallback:', e);
+    }
+  }
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return blank();
@@ -353,7 +386,15 @@ function load() {
   } catch { return blank(); }
 }
 
-function persist() { localStorage.setItem(KEY, JSON.stringify(D)); }
+function persist() {
+  localStorage.setItem(KEY, JSON.stringify(D));
+  const user = mcAuth.currentUser;
+  if (user) {
+    mcDb.collection('users').doc(user.uid).collection('data').doc('meal')
+      .set(D)
+      .catch(e => console.warn('Firestore save failed:', e));
+  }
+}
 
 let D = load();
 
@@ -1294,12 +1335,61 @@ document.getElementById('export-btn').addEventListener('click', () => {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
-initFoodForm();
-initRecipeForm();
-refreshDatalist();
-renderPlan();
-renderFoods();
-renderRecipes();
+async function initApp() {
+  D = await load();
+  initFoodForm();
+  initRecipeForm();
+  refreshDatalist();
+  renderPlan();
+  renderFoods();
+  renderRecipes();
+}
+
+// ── Auth gate ─────────────────────────────────────────────────────────────────
+let appInitialized = false;
+mcAuth.onAuthStateChanged(async user => {
+  if (user) {
+    document.getElementById('signin-overlay').style.display = 'none';
+    if (!appInitialized) {
+      appInitialized = true;
+      await initApp();
+    }
+  } else {
+    document.getElementById('signin-overlay').style.display = 'flex';
+  }
+});
+
+document.getElementById('google-signin-btn').addEventListener('click', () => {
+  mcAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+});
+
+// ── Import ────────────────────────────────────────────────────────────────────
+document.getElementById('import-btn').addEventListener('click', () =>
+  document.getElementById('file-input').click());
+
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.goals || !data.plan) throw new Error();
+      D = data;
+      persist();
+      initFoodForm();
+      initRecipeForm();
+      refreshDatalist();
+      renderPlan();
+      renderFoods();
+      renderRecipes();
+    } catch {
+      alert('Could not read that file — make sure it was exported from this app.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
 </script>
 </body>
 </html>
