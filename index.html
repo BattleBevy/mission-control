@@ -51,12 +51,14 @@
       display: block;
       max-width: 620px;
       margin: 0 auto;
+      overflow: hidden;
     }
 
     .banner-wrap img {
       width: 100%;
       height: auto;
       display: block;
+      margin-bottom: -15%;
     }
 
     .banner-text {
@@ -78,8 +80,9 @@
 
     header .date {
       font-size: 0.9375rem;
-      color: var(--muted);
+      color: var(--text);
       margin-top: 0.3rem;
+      opacity: 0.75;
     }
 
     .domains {
@@ -92,7 +95,7 @@
       border-style: solid;
       border-width: 55px;
       border-image: url('parchment_slice.png') 25% fill stretch;
-      padding: 0.25rem 1rem 1rem;
+      padding: 0.25rem 0.5rem 1rem;
       text-decoration: none;
       color: var(--text);
       display: flex;
@@ -134,14 +137,14 @@
     }
 
     .domain-title {
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
       font-family: 'Almendra SC', serif;
     }
 
     .domain-desc {
-      font-size: 1.0625rem;
+      font-size: 1.125rem;
       font-weight: 400;
       color: var(--muted);
       line-height: 1.6;
