@@ -150,7 +150,7 @@ function SchedulerView({ user }: { user: User }) {
       )}
       {showTour && <Tour onClose={() => setShowTour(false)} />}
       <header className="app-header">
-        <h1 className="app-title">Daily Scheduler</h1>
+        <h1 className="app-title">The Mossbound Hourglass</h1>
         {view === 'day' && (
           <div className="day-nav">
             <button className="btn-ghost btn-day-nav" onClick={() => setSelectedDay(d => offsetDay(d, -1))}>‹</button>
@@ -295,12 +295,14 @@ function App() {
   if (user === null) {
     return (
       <div id="app" className="app-centered">
-        <h1 className="app-title">Daily Scheduler</h1>
-        <p className="login-subtitle">Constraint-based scheduling that adapts in real time.</p>
-        <div className="login-actions">
-          <button className="btn-primary" onClick={signIn}>Sign in with Google</button>
-          <span className="login-or">or</span>
-          <button className="btn-ghost" onClick={signInAnon}>Try Demo →</button>
+        <div className="login-card">
+          <h1 className="app-title">The Mossbound Hourglass</h1>
+          <p className="login-subtitle">Constraint-based scheduling that adapts in real time.</p>
+          <div className="login-actions">
+            <button className="btn-primary" onClick={signIn}>Sign in with Google</button>
+            <span className="login-or">or</span>
+            <button className="btn-ghost" onClick={signInAnon}>Try Demo →</button>
+          </div>
         </div>
       </div>
     )

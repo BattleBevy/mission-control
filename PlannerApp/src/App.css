@@ -18,15 +18,78 @@
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-3) var(--space-6);
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: url('./assets/leather_desk_blotter.png') no-repeat center / 100% 100%;
+  border-bottom: none;
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
+/* ── Header text + controls on dark leather ──────────────────────────────────── */
+
+.app-header .app-title {
+  color: #ede5d8;
+}
+
+.app-header .app-date {
+  color: rgba(237, 229, 216, 0.72);
+}
+
+.app-header .app-user {
+  color: rgba(237, 229, 216, 0.5);
+}
+
+.app-header .btn-ghost {
+  border-color: rgba(237, 229, 216, 0.28);
+  color: rgba(237, 229, 216, 0.72);
+  background: none;
+}
+
+.app-header .btn-ghost:hover {
+  background: rgba(237, 229, 216, 0.1);
+  border-color: rgba(237, 229, 216, 0.5);
+  color: #ede5d8;
+}
+
+.app-header .btn-today {
+  color: #e8c17a;
+  border-color: rgba(232, 193, 122, 0.6);
+}
+
+.app-header .btn-today:hover {
+  background: rgba(232, 193, 122, 0.15);
+}
+
+.app-header .btn-undo {
+  color: #e8c17a;
+  border-color: rgba(232, 193, 122, 0.6);
+}
+
+.app-header .btn-undo:hover {
+  background: rgba(232, 193, 122, 0.15);
+  color: #e8c17a;
+}
+
+.app-header .view-toggle {
+  border-color: rgba(237, 229, 216, 0.22);
+}
+
+.app-header .btn-view {
+  color: rgba(237, 229, 216, 0.62);
+}
+
+.app-header .btn-view:hover {
+  background: rgba(237, 229, 216, 0.08);
+  color: #ede5d8;
+}
+
+.app-header .btn-view.active {
+  background: rgba(237, 229, 216, 0.18);
+  color: #ede5d8;
+}
+
 .app-title {
-  font-family: var(--font-serif);
+  font-family: 'Almendra SC', Georgia, serif;
   font-size: 1.25rem;
   color: var(--text);
 }
@@ -110,22 +173,20 @@
   flex: 1;
   min-height: 0;
   position: relative;
+  background: transparent;
+  gap: 12px;
+  padding: 12px;
 }
 
 /* ── Side panels ─────────────────────────────────────────────────────────────── */
 
 .panel {
-  background: var(--surface);
   padding: var(--space-4);
   overflow-y: auto;
-}
-
-.panel-bank {
-  border-right: 1px solid var(--border);
-}
-
-.panel-anytime {
-  border-left: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
 }
 
 .panel-title {
@@ -140,7 +201,9 @@
 .timeline-section {
   overflow-y: auto;
   padding: var(--space-4) var(--space-6);
-  background: var(--bg);
+  border-style: solid;
+  border-width: 50px;
+  border-image: url('./assets/parchment.png') 25% fill stretch;
 }
 
 .conflict-banner {
@@ -255,7 +318,7 @@
 
 /* Fixed events: copper/amber feel — immovable, anchored */
 .scheduled-block.fixed {
-  background: #f7ead6;
+  background: rgba(194, 124, 40, 0.18);
   border-color: var(--accent-finance);
   border-left: 4px solid var(--accent-finance);
 }
@@ -364,6 +427,166 @@
 }
 
 /* ── Task Bank panel ─────────────────────────────────────────────────────────── */
+
+/* Panel itself is transparent — cards sit directly on the dark wood */
+.panel-bank {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.panel-bank .panel-title {
+  color: #ede5d8;
+}
+
+.panel-bank .panel-header .btn-icon {
+  color: rgba(237, 229, 216, 0.65);
+  border-color: rgba(237, 229, 216, 0.25);
+}
+
+.panel-bank .panel-header .btn-icon:hover {
+  background: rgba(237, 229, 216, 0.1);
+  color: #ede5d8;
+  border-color: rgba(237, 229, 216, 0.5);
+}
+
+.panel-bank .placeholder-text {
+  color: rgba(237, 229, 216, 0.45);
+}
+
+/* ── Ceramic plate cards ── */
+
+.panel-bank .bank-item {
+  position: relative;
+  border-style: solid;
+  border-width: 28px;
+  border-radius: 0;
+  background: transparent;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+}
+
+/* Dark overlay sits above the border-image plate but below text content.
+   inset: -28px expands outward to cover the full border region (the plate rim). */
+.panel-bank .bank-item::before {
+  content: '';
+  position: absolute;
+  inset: -28px;
+  background: rgba(0, 0, 0, 0.10);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* All direct children float above the darkening overlay */
+.panel-bank .bank-item > * {
+  position: relative;
+  z-index: 1;
+}
+
+.panel-bank .bank-item[data-priority="high"] {
+  border-image: url('./assets/task_bank_high.png') 20% fill stretch;
+}
+
+.panel-bank .bank-item[data-priority="medium"] {
+  border-image: url('./assets/task_bank_medium.png') 20% fill stretch;
+}
+
+.panel-bank .bank-item[data-priority="low"] {
+  border-image: url('./assets/task_bank_low.png') 20% fill stretch;
+}
+
+.panel-bank .bank-item-title {
+  color: #ede5d8;
+  font-weight: 600;
+}
+
+.panel-bank .bank-item-meta {
+  color: rgba(237, 229, 216, 0.6);
+}
+
+.panel-bank .bank-item-warn {
+  color: #e8c17a;
+}
+
+/* Buttons on dark plates */
+.panel-bank .bank-item .btn-add {
+  border-color: rgba(237, 229, 216, 0.55);
+  color: #ede5d8;
+  background: none;
+  font-weight: 600;
+}
+
+.panel-bank .bank-item .btn-add:hover {
+  background: rgba(237, 229, 216, 0.15);
+  border-color: rgba(237, 229, 216, 0.8);
+  color: #ede5d8;
+}
+
+.panel-bank .bank-item .btn-icon {
+  border-color: rgba(237, 229, 216, 0.45);
+  color: rgba(237, 229, 216, 0.9);
+  background: none;
+}
+
+.panel-bank .bank-item .btn-icon:hover {
+  background: rgba(237, 229, 216, 0.15);
+  border-color: rgba(237, 229, 216, 0.7);
+  color: #ede5d8;
+}
+
+.panel-bank .bank-item .btn-icon--danger {
+  border-color: rgba(200, 100, 80, 0.6);
+  color: rgba(220, 120, 100, 0.95);
+  font-weight: 600;
+}
+
+.panel-bank .bank-item .btn-icon--danger:hover {
+  background: rgba(139, 53, 48, 0.45);
+  border-color: rgba(200, 100, 80, 0.6);
+  color: #ede5d8;
+}
+
+/* Edit form on dark plate — transparent so plate shows through */
+.panel-bank .bank-item .inline-form {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.panel-bank .bank-item .form-label {
+  color: rgba(237, 229, 216, 0.7);
+}
+
+.panel-bank .bank-item .form-input {
+  background: rgba(0, 0, 0, 0.28);
+  border-color: rgba(237, 229, 216, 0.22);
+  color: #ede5d8;
+}
+
+.panel-bank .bank-item .form-input:focus {
+  border-color: rgba(237, 229, 216, 0.55);
+  outline: none;
+}
+
+.panel-bank .bank-item .btn-save {
+  background: rgba(237, 229, 216, 0.15);
+  border: 1px solid rgba(237, 229, 216, 0.35);
+  color: #ede5d8;
+}
+
+.panel-bank .bank-item .btn-save:hover {
+  background: rgba(237, 229, 216, 0.25);
+}
+
+.panel-bank .bank-item .btn-cancel {
+  border-color: rgba(237, 229, 216, 0.2);
+  color: rgba(237, 229, 216, 0.55);
+}
+
+.panel-bank .bank-item .btn-cancel:hover {
+  background: rgba(237, 229, 216, 0.08);
+  color: #ede5d8;
+}
 
 .bank-list {
   list-style: none;
@@ -492,22 +715,102 @@
 
 /* ── Anytime panel ───────────────────────────────────────────────────────────── */
 
+.panel-anytime {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.panel-anytime .panel-title {
+  color: #ede5d8;
+}
+
+.panel-anytime .panel-header .btn-icon {
+  color: rgba(237, 229, 216, 0.65);
+  border-color: rgba(237, 229, 216, 0.25);
+}
+
+.panel-anytime .panel-header .btn-icon:hover {
+  background: rgba(237, 229, 216, 0.1);
+  color: #ede5d8;
+  border-color: rgba(237, 229, 216, 0.5);
+}
+
+.panel-anytime .placeholder-text {
+  color: rgba(237, 229, 216, 0.45);
+}
+
 .anytime-list {
   list-style: none;
   display: flex;
   flex-direction: column;
+  gap: var(--space-2);
 }
 
 .anytime-item {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--border);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: none;
+  border-style: solid;
+  border-width: 8px;
+  border-radius: 0;
+  background: transparent;
+  border-image: url('./assets/anytime_task_01.png') 30% fill stretch;
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.45)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.28));
+  position: relative;
+}
+
+.anytime-item::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background: rgba(0, 0, 0, 0.10);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.anytime-item > * {
+  position: relative;
+  z-index: 1;
+}
+
+.panel-anytime .anytime-title {
+  color: #ede5d8;
+}
+
+.panel-anytime .btn-done {
+  border-color: rgba(237, 229, 216, 0.45);
+  color: rgba(237, 229, 216, 0.85);
+  font-weight: 600;
+  background: none;
+}
+
+.panel-anytime .btn-done:hover {
+  background: rgba(78, 107, 53, 0.45);
+  border-color: rgba(78, 107, 53, 0.8);
+  color: #ede5d8;
 }
 
 .anytime-item:last-child {
   border-bottom: none;
+}
+
+.panel-anytime .anytime-item:nth-child(4n+1) {
+  border-image: url('./assets/anytime_task_01.png') 30% fill stretch;
+}
+
+.panel-anytime .anytime-item:nth-child(4n+2) {
+  border-image: url('./assets/anytime_task_02.png') 30% fill stretch;
+}
+
+.panel-anytime .anytime-item:nth-child(4n+3) {
+  border-image: url('./assets/anytime_task_03.png') 30% fill stretch;
+}
+
+.panel-anytime .anytime-item:nth-child(4n) {
+  border-image: url('./assets/anytime_task_04.png') 30% fill stretch;
 }
 
 .anytime-item.completed {
@@ -1494,43 +1797,48 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: var(--space-4) var(--space-6);
-  background: var(--bg);
-  overflow-y: auto;
+  padding: var(--space-4) var(--space-2);
+  background: transparent;
 }
 
 .week-nav {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.week-nav .btn-day-nav {
+  color: #ede5d8;
+  border-color: rgba(237, 229, 216, 0.3);
 }
 
 .week-label {
   font-size: 0.875rem;
-  color: var(--muted);
+  color: #ede5d8;
   min-width: 200px;
   text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
 .week-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: var(--space-2);
+  gap: 4px;
   align-items: start;
   min-width: 0;
 }
 
 .week-day {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  overflow: hidden;
+  background: transparent;
+  border-style: solid;
+  border-width: 40px 8px 10px 8px;
+  border-image: url('./assets/parchment_scroll_col.png') 22% 5% 5% 5% fill stretch;
+  border-radius: 0;
+  overflow: visible;
   min-width: 0;
-}
-
-.week-day--today {
-  border-color: var(--accent-finance);
+  position: relative;
 }
 
 .week-day-header {
@@ -1541,23 +1849,23 @@
   width: 100%;
   background: none;
   border: none;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(212, 184, 150, 0.5);
   border-radius: 0;
   padding: var(--space-2) var(--space-1);
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.8125rem;
+  font-weight: 700;
   color: var(--text);
   min-height: unset;
   cursor: pointer;
 }
 
 .week-day--today .week-day-header {
-  background: rgba(194, 124, 40, 0.08);
+  background: rgba(194, 124, 40, 0.10);
   color: var(--accent-finance);
 }
 
 .week-day-header:hover {
-  background: var(--bg);
+  background: rgba(212, 184, 150, 0.18);
 }
 
 .week-today-dot {
@@ -1570,57 +1878,57 @@
 
 .week-day-blocks {
   list-style: none;
-  padding: var(--space-1);
+  padding: var(--space-1) var(--space-2) 60px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-height: 40px;
+  gap: 4px;
+  min-height: 80px;
 }
 
 .week-empty {
   font-size: 0.75rem;
-  color: var(--border);
+  color: var(--muted);
   text-align: center;
   padding: var(--space-2) 0;
+  opacity: 0.5;
 }
 
 .week-block {
   display: flex;
-  align-items: baseline;
-  gap: 4px;
-  padding: 2px var(--space-1);
+  flex-direction: column;
+  gap: 1px;
+  padding: 3px var(--space-1);
   border-radius: 2px;
   cursor: pointer;
-  overflow: hidden;
+  border-left: 2px solid transparent;
 }
 
 .week-block:hover {
-  background: var(--bg);
+  background: rgba(212, 184, 150, 0.22);
 }
 
 .week-block--fixed {
-  border-left: 2px solid var(--accent-finance);
-  background: rgba(194, 124, 40, 0.06);
+  border-left-color: var(--accent-finance);
 }
 
 .week-block--flexible {
-  border-left: 2px solid var(--border);
+  border-left-color: rgba(122, 92, 60, 0.5);
 }
 
 .week-block-time {
-  font-size: 0.625rem;
+  font-size: 0.6rem;
   color: var(--muted);
   white-space: nowrap;
-  flex-shrink: 0;
+  letter-spacing: 0.02em;
 }
 
 .week-block-title {
-  font-size: 0.6875rem;
+  font-size: 0.7rem;
   color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+  line-height: 1.3;
+  font-weight: 600;
 }
 
 /* ── Utility ─────────────────────────────────────────────────────────────────── */
@@ -1638,6 +1946,22 @@
 }
 
 /* ── Login screen ────────────────────────────────────────────────────────────── */
+
+.login-card {
+  border-style: solid;
+  border-width: 50px;
+  border-image: url('./assets/parchment.png') 25% fill stretch;
+  background: transparent;
+  padding: 0.5rem 1.5rem 1.5rem;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  filter: drop-shadow(0 8px 48px rgba(0, 0, 0, 0.65)) drop-shadow(0 2px 12px rgba(0, 0, 0, 0.35));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
 
 .login-subtitle {
   font-size: 0.9375rem;
@@ -1660,17 +1984,22 @@
   color: var(--muted);
 }
 
+/* Loading state text on dark wood */
+#app.app-centered .status-text {
+  color: rgba(237, 229, 216, 0.55);
+}
+
 /* ── Demo banner ─────────────────────────────────────────────────────────────── */
 
 .demo-banner {
-  background: rgba(200, 120, 32, 0.10);
-  border-bottom: 1px solid rgba(200, 120, 32, 0.25);
+  background: rgba(20, 10, 4, 0.65);
+  border-bottom: 1px solid rgba(237, 229, 216, 0.14);
   padding: var(--space-2) var(--space-6);
   display: flex;
   align-items: center;
   gap: var(--space-3);
   font-size: 0.8125rem;
-  color: var(--muted);
+  color: rgba(237, 229, 216, 0.7);
 }
 
 .demo-banner-text {
@@ -1799,16 +2128,16 @@
 
 .btn-tour {
   background: none;
-  border: 1px solid rgba(200, 120, 32, 0.5);
+  border: 1px solid rgba(232, 193, 122, 0.45);
   border-radius: 4px;
   padding: var(--space-1) var(--space-3);
   font-size: 0.8125rem;
-  color: var(--accent-finance);
+  color: #e8c17a;
   min-height: 32px;
   white-space: nowrap;
   cursor: pointer;
 }
 
 .btn-tour:hover {
-  background: rgba(200, 120, 32, 0.08);
+  background: rgba(232, 193, 122, 0.12);
 }

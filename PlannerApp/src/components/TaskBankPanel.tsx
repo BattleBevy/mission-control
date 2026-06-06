@@ -345,7 +345,7 @@ export function TaskBankPanel({ userId }: Props) {
       ) : (
         <ul className="bank-list">
           {templates.map(t => (
-            <li key={t.id} className="bank-item bank-item--col">
+            <li key={t.id} className="bank-item bank-item--col" data-priority={(t.default_constraints.priority ?? 'Medium').toLowerCase()}>
               {editingId === t.id ? (
                 <div className="inline-form">
                   <input
