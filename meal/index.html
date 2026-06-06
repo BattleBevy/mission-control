@@ -167,16 +167,48 @@ details.more-nutr summary:hover { color: var(--accent); }
 .modal h3 { font-family: Georgia, serif; margin-bottom: 14px; }
 .modal p { font-size: 0.85rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+
+/* Tour overlay */
+.tour-shade { position: fixed; background: rgba(20,10,4,0.78); pointer-events: all; }
+.tour-ring  { position: fixed; border-radius: 8px; box-shadow: 0 0 0 3px #c06040, 0 0 0 6px rgba(192,96,64,0.28); pointer-events: none; }
+.tour-bubble {
+  position: fixed; width: 300px;
+  background: var(--surface); border: 1px solid var(--border); border-top: 3px solid #c06040;
+  border-radius: 12px; padding: 1.25rem;
+  box-shadow: 0 4px 24px rgba(60,30,5,0.22); pointer-events: all;
+  animation: tour-pop 0.18s ease; z-index: 2001;
+}
+@keyframes tour-pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.tour-top     { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+.tour-counter { font-size: 0.75rem; color: var(--muted); }
+.tour-x       { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 0; line-height: 1; font-family: inherit; }
+.tour-x:hover { color: var(--text); }
+.tour-title   { font-size: 0.9375rem; font-weight: 600; margin-bottom: 0.4rem; }
+.tour-body    { font-size: 0.8125rem; color: var(--muted); line-height: 1.55; margin-bottom: 1rem; }
+.tour-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
+.tour-btn     { font-size: 0.8125rem; font-family: inherit; padding: 0.375rem 0.875rem; border-radius: 6px; cursor: pointer; }
+.tour-back    { background: none; border: 1px solid var(--border); color: var(--text); }
+.tour-back:hover { background: var(--bg); }
+.tour-next    { background: #c06040; border: 1px solid #c06040; color: #fff; }
+.tour-next:hover { background: #a04830; }
 </style>
 </head>
 <body>
 
+<!-- Demo banner — visible only in demo mode -->
+<div id="demo-banner" style="display:none;gap:1rem;flex-wrap:wrap;align-items:center;justify-content:space-between;background:#2a1a08;color:#f5e6c0;padding:0.6rem 1.25rem;font-size:0.875rem;border-bottom:2px solid #c06040;">
+  <span style="font-style:italic">You are browsing the foraging notes of <strong>Mira Thornwick, Journeyman Hedge Witch</strong>. Her meal plan is fictional. Her herb garden is real. Changes are not saved.</span>
+  <button onclick="startTour()" style="white-space:nowrap;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);color:#f5e6c0;font-family:inherit;font-size:0.8125rem;padding:0.35rem 0.875rem;border-radius:6px;cursor:pointer;">Take the tour →</button>
+</div>
+
 <!-- Sign-in overlay — shown until Google auth resolves -->
 <div id="signin-overlay" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000">
   <div style="background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:8px;padding:2rem;text-align:center;max-width:320px;width:90%">
-    <div style="font-family:Georgia,serif;font-size:1.25rem;margin-bottom:0.5rem">Meal &amp; Nutrition Hub</div>
+    <div style="font-family:Georgia,serif;font-size:1.25rem;margin-bottom:0.5rem">The Forager's Pot</div>
     <div style="font-size:0.875rem;color:var(--muted);margin-bottom:1.5rem">Sign in to access your meal plan</div>
-    <button id="google-signin-btn" class="btn-primary" style="width:100%;padding:10px 16px;font-size:0.9rem">Sign in with Google</button>
+    <button id="google-signin-btn" class="btn-primary" style="width:100%;padding:10px 16px;font-size:0.9rem;margin-bottom:0.75rem">Sign in with Google</button>
+    <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.75rem">— or —</div>
+    <button id="try-demo-btn" class="btn-ghost" style="width:100%;padding:9px 16px;font-size:0.875rem">Try Demo (Mira's Plan) →</button>
   </div>
 </div>
 
@@ -297,6 +329,7 @@ details.more-nutr summary:hover { color: var(--accent); }
 <datalist id="food-dl"></datalist>
 <datalist id="cat-dl"></datalist>
 <input type="file" id="file-input" accept=".json" style="display:none">
+<div id="tour-root" style="display:none" role="dialog" aria-modal="true" aria-label="Feature tour"></div>
 
 <script>
 // ── Config ───────────────────────────────────────────────────────────────────
@@ -334,6 +367,7 @@ const MEALS = [
 // ── Storage ──────────────────────────────────────────────────────────────────
 
 const KEY = 'meal-v1';
+let isDemo = false;
 
 const DEFAULT_CATEGORIES = ['Beef', 'Chicken', 'Pork', 'Fish', 'Seafood', 'Vegetarian', 'Pasta', 'Soup / Stew', 'Salad', 'Snack', 'Breakfast', 'Dessert'];
 
@@ -387,6 +421,7 @@ async function load() {
 }
 
 function persist() {
+  if (isDemo) return;
   localStorage.setItem(KEY, JSON.stringify(D));
   const user = mcAuth.currentUser;
   if (user) {
@@ -1333,6 +1368,96 @@ document.getElementById('export-btn').addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
+// ── Demo ─────────────────────────────────────────────────────────────────────
+
+function buildDemoSeed() {
+  return {
+    goals: { cal: 1800, protein: 120, fiber: 35 },
+    nextFoodId: 12,
+    nextRecipeId: 3,
+    nextItemId: 13,
+    categories: ['Breakfast', 'Beef', 'Chicken', 'Pork', 'Fish', 'Seafood', 'Vegetarian', 'Pasta', 'Soup / Stew', 'Salad', 'Snack', 'Dessert'],
+    foods: [
+      { id: 1,  name: 'Ancient Grain Porridge',    serving: '40g dry',        cal: 150, fat: 3,    sfat: 0.5, tfat: 0, chol: 0,  sod: 105, potm: 180, carb: 27,  fiber: 4,    sugar: 1,    added: 0,    protein: 5    },
+      { id: 2,  name: 'Elderbloom Honey',           serving: '1 tbsp (21g)',   cal: 64,  fat: 0,    sfat: 0,   tfat: 0, chol: 0,  sod: 1,   potm: 11,  carb: 17,  fiber: 0,    sugar: 17,   added: 17,   protein: 0    },
+      { id: 3,  name: 'Fresh Bilberries',           serving: '100g',           cal: 57,  fat: 0.5,  sfat: 0,   tfat: 0, chol: 0,  sod: 1,   potm: 77,  carb: 14,  fiber: 3.6,  sugar: 8,    added: 0,    protein: 0.7  },
+      { id: 4,  name: 'Hearthstone Goat Milk',      serving: '1 cup (240ml)',  cal: 150, fat: 9,    sfat: 6,   tfat: 0, chol: 27, sod: 120, potm: 490, carb: 11,  fiber: 0,    sugar: 11,   added: 0,    protein: 8    },
+      { id: 5,  name: 'Foraged Chanterelles',       serving: '100g',           cal: 22,  fat: 0.5,  sfat: 0,   tfat: 0, chol: 0,  sod: 35,  potm: 280, carb: 4,   fiber: 2,    sugar: 1,    added: 0,    protein: 3    },
+      { id: 6,  name: 'Black Bread of the Marsh',   serving: '1 slice (65g)', cal: 65,  fat: 0.5,  sfat: 0,   tfat: 0, chol: 0,  sod: 100, potm: 80,  carb: 13,  fiber: 2,    sugar: 0.5,  added: 0,    protein: 2    },
+      { id: 7,  name: 'Hearthstone Goat Cheese',    serving: '1 oz (28g)',     cal: 75,  fat: 6,    sfat: 4,   tfat: 0, chol: 18, sod: 130, potm: 20,  carb: 0,   fiber: 0,    sugar: 0,    added: 0,    protein: 5    },
+      { id: 8,  name: 'Wild Herb Roasted Chicken',  serving: '100g',           cal: 165, fat: 7,    sfat: 2,   tfat: 0, chol: 85, sod: 280, potm: 350, carb: 0,   fiber: 0,    sugar: 0,    added: 0,    protein: 31   },
+      { id: 9,  name: 'Swamp Root Vegetables',      serving: '1 portion',      cal: 120, fat: 4,    sfat: 1,   tfat: 0, chol: 0,  sod: 180, potm: 350, carb: 20,  fiber: 5,    sugar: 6,    added: 0,    protein: 3    },
+      { id: 10, name: 'Hazel & Bilberry Trail Mix', serving: '30g',            cal: 150, fat: 8,    sfat: 1,   tfat: 0, chol: 0,  sod: 5,   potm: 150, carb: 17,  fiber: 2,    sugar: 8,    added: 0,    protein: 4    },
+      { id: 11, name: 'Cauldron Bone Broth',        serving: '1 cup (240ml)',  cal: 38,  fat: 1,    sfat: 0.5, tfat: 0, chol: 5,  sod: 500, potm: 200, carb: 3,   fiber: 0,    sugar: 1,    added: 0,    protein: 9    },
+    ],
+    recipes: [
+      {
+        id: 1,
+        name: "Morning Porridge of the Hedge Witch",
+        category: 'Breakfast',
+        yields: 1,
+        notes: "Steep in goat's milk, not water. Stir clockwise. Bilberries go in once it's off the heat. The elderbloom honey goes in last — adding it while hot ruins the magic.",
+        ingredients: [
+          { name: 'Ancient Grain Porridge', actual: 1, servingSize: null, unit: null, cal: 150, fat: 3,    sfat: 0.5, tfat: 0, chol: 0,  sod: 105, potm: 180, carb: 27,  fiber: 4,   sugar: 1,   added: 0,   protein: 5    },
+          { name: 'Hearthstone Goat Milk',  actual: 1, servingSize: null, unit: null, cal: 150, fat: 9,    sfat: 6,   tfat: 0, chol: 27, sod: 120, potm: 490, carb: 11,  fiber: 0,   sugar: 11,  added: 0,   protein: 8    },
+          { name: 'Elderbloom Honey',       actual: 1, servingSize: null, unit: null, cal: 32,  fat: 0,    sfat: 0,   tfat: 0, chol: 0,  sod: 0.5, potm: 6,   carb: 8.5, fiber: 0,   sugar: 8.5, added: 8.5, protein: 0    },
+          { name: 'Fresh Bilberries',       actual: 1, servingSize: null, unit: null, cal: 28,  fat: 0.25, sfat: 0,   tfat: 0, chol: 0,  sod: 0.5, potm: 38,  carb: 7,   fiber: 1.8, sugar: 4,   added: 0,   protein: 0.35 },
+        ],
+      },
+      {
+        id: 2,
+        name: "Cauldron Mushroom Broth",
+        category: 'Soup / Stew',
+        yields: 4,
+        notes: "Simmer the chanterelles in broth until the cottage smells like autumn. Add root vegetables in the last twenty minutes. Season with whatever herbs are growing near the doorstep.",
+        ingredients: [
+          { name: 'Foraged Chanterelles',  actual: 4, servingSize: null, unit: null, cal: 22,  fat: 0.5, sfat: 0,   tfat: 0, chol: 0, sod: 35,  potm: 280, carb: 4,  fiber: 2, sugar: 1, added: 0, protein: 3 },
+          { name: 'Cauldron Bone Broth',   actual: 4, servingSize: null, unit: null, cal: 38,  fat: 1,   sfat: 0.5, tfat: 0, chol: 5, sod: 500, potm: 200, carb: 3,  fiber: 0, sugar: 1, added: 0, protein: 9 },
+          { name: 'Swamp Root Vegetables', actual: 1, servingSize: null, unit: null, cal: 120, fat: 4,   sfat: 1,   tfat: 0, chol: 0, sod: 180, potm: 350, carb: 20, fiber: 5, sugar: 6, added: 0, protein: 3 },
+        ],
+      },
+    ],
+    plan: {
+      meal1: [
+        { id: 1, name: "Morning Porridge of the Hedge Witch", servings: 1, isAlt: false, cal: 360,  fat: 12.25, sfat: 6.5,  tfat: 0, chol: 27,  sod: 226, potm: 714, carb: 53.5, fiber: 5.8,  sugar: 24.5, added: 8.5, protein: 13.35 },
+        { id: 2, name: "Rose Hip & Nettle Tea",               servings: 1, isAlt: false, cal: 5,    fat: 0,     sfat: 0,    tfat: 0, chol: 0,   sod: 0,   potm: 40,  carb: 1,    fiber: 0,    sugar: 0,    added: 0,   protein: 0     },
+      ],
+      meal2: [
+        { id: 3, name: "Black Bread of the Marsh",            servings: 2, isAlt: false, cal: 65,   fat: 0.5,   sfat: 0,    tfat: 0, chol: 0,   sod: 100, potm: 80,  carb: 13,   fiber: 2,    sugar: 0.5,  added: 0,   protein: 2     },
+        { id: 4, name: "Hearthstone Goat Cheese",             servings: 1, isAlt: false, cal: 75,   fat: 6,     sfat: 4,    tfat: 0, chol: 18,  sod: 130, potm: 20,  carb: 0,    fiber: 0,    sugar: 0,    added: 0,   protein: 5     },
+        { id: 5, name: "Foraged Chanterelles, Roasted",       servings: 1, isAlt: false, cal: 33,   fat: 0.5,   sfat: 0,    tfat: 0, chol: 0,   sod: 35,  potm: 280, carb: 4,    fiber: 2,    sugar: 1,    added: 0,   protein: 3     },
+      ],
+      meal3: [
+        { id: 6, name: "Wild Herb Roasted Chicken",           servings: 1, isAlt: false, cal: 248,  fat: 10.5,  sfat: 3,    tfat: 0, chol: 128, sod: 420, potm: 525, carb: 0,    fiber: 0,    sugar: 0,    added: 0,   protein: 46.5  },
+        { id: 7, name: "Cauldron Mushroom Broth",             servings: 1, isAlt: false, cal: 90,   fat: 2.5,   sfat: 0.75, tfat: 0, chol: 5,   sod: 580, potm: 570, carb: 12,   fiber: 3.25, sugar: 3.5,  added: 0,   protein: 12.75 },
+        { id: 8, name: "Swamp Root Vegetables",               servings: 1, isAlt: false, cal: 120,  fat: 4,     sfat: 1,    tfat: 0, chol: 0,   sod: 180, potm: 350, carb: 20,   fiber: 5,    sugar: 6,    added: 0,   protein: 3     },
+      ],
+      daysnacks: [
+        { id: 9,  name: "Hazel & Bilberry Trail Mix",         servings: 1, isAlt: false, cal: 150,  fat: 8,     sfat: 1,    tfat: 0, chol: 0,   sod: 5,   potm: 150, carb: 17,   fiber: 2,    sugar: 8,    added: 0,   protein: 4     },
+        { id: 10, name: "Fresh Bilberries",                   servings: 1, isAlt: false, cal: 28,   fat: 0.25,  sfat: 0,    tfat: 0, chol: 0,   sod: 0.5, potm: 38,  carb: 7,    fiber: 1.8,  sugar: 4,    added: 0,   protein: 0.35  },
+      ],
+      nightsnacks: [
+        { id: 11, name: "Chamomile & Honey Nightcap",         servings: 1, isAlt: false, cal: 64,   fat: 0,     sfat: 0,    tfat: 0, chol: 0,   sod: 5,   potm: 20,  carb: 17,   fiber: 0,    sugar: 17,   added: 17,  protein: 0     },
+        { id: 12, name: "Warm Hearthstone Goat Milk",         servings: 1, isAlt: true,  cal: 150,  fat: 9,     sfat: 6,    tfat: 0, chol: 27,  sod: 120, potm: 490, carb: 11,   fiber: 0,    sugar: 11,   added: 0,   protein: 8     },
+      ],
+    },
+  };
+}
+
+async function initDemo() {
+  D = buildDemoSeed();
+  draftIngredients = [];
+  draftYields = 1;
+  editingRecipeId = null;
+  selectedCategory = null;
+  initFoodForm();
+  initRecipeForm();
+  refreshDatalist();
+  renderPlan();
+  renderFoods();
+  renderRecipes();
+}
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 async function initApp() {
@@ -1363,6 +1488,17 @@ document.getElementById('google-signin-btn').addEventListener('click', () => {
   mcAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
 });
 
+document.getElementById('try-demo-btn').addEventListener('click', async () => {
+  isDemo = true;
+  appInitialized = true;
+  document.getElementById('signin-overlay').style.display = 'none';
+  document.getElementById('demo-banner').style.display = 'flex';
+  document.getElementById('import-btn').style.display = 'none';
+  document.getElementById('export-btn').style.display = 'none';
+  document.getElementById('new-week-btn').style.display = 'none';
+  await initDemo();
+});
+
 // ── Import ────────────────────────────────────────────────────────────────────
 document.getElementById('import-btn').addEventListener('click', () =>
   document.getElementById('file-input').click());
@@ -1389,6 +1525,145 @@ document.getElementById('file-input').addEventListener('change', e => {
   };
   reader.readAsText(file);
   e.target.value = '';
+});
+
+// ── Tour ─────────────────────────────────────────────────────────────────────
+
+const TOUR_STEPS = [
+  {
+    title: "The Forager's Pot — A Quick Tour",
+    body: "This is a working nutrition tracker loaded with the very real (fictional) meal plan of Mira Thornwick, Journeyman Hedge Witch. She tracks macros between field expeditions and coven commitments. Let's walk through it.",
+  },
+  {
+    tab: 'plan',
+    sel: '.goals-section',
+    title: 'Daily Totals',
+    body: "Progress bars for Mira's three main goals: calories, protein, and fiber. Below them, a full breakdown of every tracked nutrient. She's hitting about 70% of her targets today — a reasonable hedge witch day. Click any goal target to adjust it.",
+    place: 'below',
+  },
+  {
+    tab: 'plan',
+    sel: '#meal-sections',
+    title: 'The Meal Plan',
+    body: "Five slots: three main meals, plus day and night snacks. Morning porridge, a midday spread of foraged mushrooms and marsh bread, an evening feast with chicken and broth. The warm goat milk in Night Snacks is an alternative — marked in grey and excluded from totals.",
+    place: 'below',
+  },
+  {
+    tab: 'plan',
+    sel: '.plan-toolbar',
+    title: 'Grocery List',
+    body: "The Grocery List button flattens the entire plan and calculates quantities for a configurable number of days — useful when you're planning a week's worth of foraging at once. Copy to clipboard and bring it to the market.",
+    place: 'above',
+  },
+  {
+    tab: 'foods',
+    sel: '#food-form-container',
+    title: 'Food Library',
+    body: "Add any food with full nutrition label data — all 12 fields. Once saved, it autocompletes in the meal plan form. Mira's library covers chanterelles, goat cheese, bone broth, elderbloom honey, and the rest of the hedge-witch pantry.",
+    place: 'below',
+  },
+  {
+    tab: 'recipes',
+    sel: '#recipe-form-container',
+    title: 'Recipe Builder',
+    body: "Build recipes from library ingredients. The Cauldron Mushroom Broth makes 4 servings — the tracker divides nutrition automatically. Recipes appear in the library with per-serving macros and can be added to the plan just like individual foods.",
+    place: 'below',
+  },
+  {
+    title: "That's the tour!",
+    body: "In the real version, everything syncs to the cloud and persists across devices. New Week clears the plan while keeping the food library and recipes. Export saves a full JSON backup any time.",
+  },
+];
+
+const TOUR_PAD = 10;
+const TOUR_BUBBLE_W = 300;
+let tourStep = 0;
+let tourActive = false;
+
+function startTour() {
+  tourActive = true;
+  tourStep = 0;
+  renderTour();
+}
+
+function closeTour() {
+  tourActive = false;
+  document.getElementById('tour-root').style.display = 'none';
+}
+
+function nextTourStep() { if (tourStep < TOUR_STEPS.length - 1) { tourStep++; renderTour(); } }
+function prevTourStep() { if (tourStep > 0) { tourStep--; renderTour(); } }
+
+function renderTour() {
+  const step   = TOUR_STEPS[tourStep];
+  const isLast = tourStep === TOUR_STEPS.length - 1;
+  const root   = document.getElementById('tour-root');
+
+  if (step.tab) {
+    document.querySelector(`.tab-btn[data-tab="${step.tab}"]`)?.click();
+  }
+
+  root.style.cssText = 'display:block;position:fixed;inset:0;z-index:2000;pointer-events:none;';
+
+  let sr = null;
+  if (step.sel) {
+    const el = document.querySelector(step.sel);
+    if (el) {
+      el.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+      const r = el.getBoundingClientRect();
+      sr = { top: r.top - TOUR_PAD, left: r.left - TOUR_PAD, width: r.width + TOUR_PAD * 2, height: r.height + TOUR_PAD * 2 };
+    }
+  }
+
+  const shades = sr
+    ? `<div class="tour-shade" style="top:0;left:0;right:0;height:${sr.top}px"></div>
+       <div class="tour-shade" style="top:${sr.top + sr.height}px;left:0;right:0;bottom:0"></div>
+       <div class="tour-shade" style="top:${sr.top}px;left:0;width:${sr.left}px;height:${sr.height}px"></div>
+       <div class="tour-shade" style="top:${sr.top}px;left:${sr.left + sr.width}px;right:0;height:${sr.height}px"></div>
+       <div class="tour-ring"  style="top:${sr.top}px;left:${sr.left}px;width:${sr.width}px;height:${sr.height}px"></div>`
+    : `<div class="tour-shade" style="inset:0;position:fixed"></div>`;
+
+  const W = window.innerWidth, H = window.innerHeight, MARGIN = 16, GAP = 14;
+  const clampL = l => Math.max(MARGIN, Math.min(W - TOUR_BUBBLE_W - MARGIN, l));
+
+  let bTop, bLeft, bTransform = '';
+  if (!sr) {
+    bTop = '50%'; bLeft = '50%'; bTransform = 'translate(-50%,-50%)';
+  } else if (step.place === 'above') {
+    bTop  = Math.max(MARGIN, sr.top - GAP - 230) + 'px';
+    bLeft = clampL(sr.left + sr.width / 2 - TOUR_BUBBLE_W / 2) + 'px';
+  } else {
+    bTop  = Math.min(H - 260, sr.top + sr.height + GAP) + 'px';
+    bLeft = clampL(sr.left + sr.width / 2 - TOUR_BUBBLE_W / 2) + 'px';
+  }
+
+  const backBtn = tourStep > 0
+    ? `<button class="tour-btn tour-back" onclick="prevTourStep()">← Back</button>`
+    : '';
+  const nextBtn = isLast
+    ? `<button class="tour-btn tour-next" onclick="closeTour()">Done</button>`
+    : `<button class="tour-btn tour-next" onclick="nextTourStep()">Next →</button>`;
+
+  root.innerHTML = `
+    ${shades}
+    <div class="tour-bubble" style="top:${bTop};left:${bLeft};transform:${bTransform}">
+      <div class="tour-top">
+        <span class="tour-counter">${tourStep + 1} / ${TOUR_STEPS.length}</span>
+        <button class="tour-x" onclick="closeTour()" title="Close tour">✕</button>
+      </div>
+      <div class="tour-title">${step.title}</div>
+      <p class="tour-body">${step.body}</p>
+      <div class="tour-actions">${backBtn}${nextBtn}</div>
+    </div>`;
+}
+
+document.addEventListener('keydown', e => {
+  if (!tourActive) return;
+  if (e.key === 'Escape') { closeTour(); return; }
+  if ((e.key === 'ArrowRight' || e.key === 'Enter') && !e.target.closest('.tour-btn')) {
+    if (tourStep === TOUR_STEPS.length - 1) closeTour(); else nextTourStep();
+  }
+  if (e.key === 'ArrowLeft' && tourStep > 0) prevTourStep();
 });
 </script>
 </body>
