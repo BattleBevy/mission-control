@@ -1312,7 +1312,7 @@ async function initDemo() {
 // ── Auth gate ─────────────────────────────────────────────────────────────
 let appInitialized = false;
 mcAuth.onAuthStateChanged(async user => {
-  if (user) {
+  if (user && !user.isAnonymous) {
     document.getElementById('signin-overlay').style.display = 'none';
     if (!appInitialized) {
       appInitialized = true;

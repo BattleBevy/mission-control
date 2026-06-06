@@ -9,13 +9,13 @@ interface Step {
 
 const STEPS: Step[] = [
   {
-    title: 'Welcome to Daily Scheduler',
-    body: "This is a sample day — personal tasks in the morning and evening, work tasks during the day. Take a quick tour to see how it works, or close this and explore on your own.",
+    title: 'Welcome to the Mossbound Hourglass',
+    body: "This is Mira Thornwick's day — a journeyman hedge witch with potions to brew, a toad to manage, and a very relentless coven treasurer. Take a quick tour to see how it works, or close this and explore on your own.",
   },
   {
     sel: '.scheduled-block.fixed',
     title: 'Fixed events anchor the day',
-    body: "Amber-bordered blocks are fixed events — locked to their times. Team Standup, Lunch, meetings. The scheduler builds everything else around them.",
+    body: "Amber-bordered blocks are fixed events — locked to their times. Coven Check-in, Lunch, client consultations. The scheduler builds everything else around them.",
     place: 'below',
   },
   {
@@ -33,7 +33,7 @@ const STEPS: Step[] = [
   {
     sel: '.bank-item',
     title: 'Task Bank — your recurring tasks',
-    body: "Tasks you do regularly live here. 'Review pull requests' every morning, 'Update runbook' on Fridays — add them to today with one click, or set a schedule and they auto-appear.",
+    body: "Tasks you do regularly live here. 'Morning herb harvest', 'Brew potion batch' — add them to today with one click, or set a schedule and they appear automatically.",
     place: 'right',
   },
   {
