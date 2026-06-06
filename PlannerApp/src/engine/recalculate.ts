@@ -1,4 +1,4 @@
-import type { DayPlan, TimeString, WorkingHours, SchedulerOutput } from '../types'
+import type { DayPlan, TimeString, WorkingHours, SchedulerOutput, ScheduledBlock } from '../types'
 import { toMinutes, fromMinutes } from './time'
 import { runScheduler } from './scheduler'
 
@@ -9,8 +9,10 @@ export const DEFAULT_WORKING_HOURS: WorkingHours = {
 
 /**
  * Re-runs the scheduler from the current moment forward.
- * Freezes anything that's already done or in progress;
- * only re-places tasks that haven't started yet.
+ * Freezes tasks that are completed, in_progress, or whose scheduled_start has
+ * already passed — re-places only tasks that haven't started yet.
+ * Frozen tasks are re-injected into the output at their stored positions so
+ * they remain visible on the timeline without being moved.
  */
 export function recalculate(
   plan: DayPlan,
@@ -27,23 +29,43 @@ export function recalculate(
       task.status === 'skipped' ||
       task.status === 'in_progress'
     ) return false
-
-    // Already started — freeze it even if still marked "scheduled"
     if (task.scheduled_start && toMinutes(task.scheduled_start) <= nowMin) return false
-
     return true
   })
 
-  // All-day events are label-only — exclude from time-blocking entirely.
-  // Past timed events are included for display even after they end; they don't affect
-  // free interval computation because the scheduling window starts at effectiveStartMin (now).
+  // Tasks that have started but aren't completed/skipped — keep them pinned.
+  const frozenTasks = plan.flexible_tasks.filter(task => {
+    if (task.status === 'completed' || task.status === 'skipped') return false
+    if (task.status === 'in_progress') return true
+    return !!(task.scheduled_start && toMinutes(task.scheduled_start) <= nowMin)
+  })
+
   const relevantEvents = plan.fixed_events.filter(event => !event.all_day)
 
-  return runScheduler({
+  const liveResult = runScheduler({
     working_hours: { start: fromMinutes(effectiveStartMin), end: workingHours.end },
     fixed_events: relevantEvents,
     flexible_tasks: liveTasks,
     current_time: now,
     day: plan.day,
   })
+
+  // Re-inject frozen tasks at their stored positions so they stay on the timeline.
+  const frozenBlocks: ScheduledBlock[] = frozenTasks
+    .filter(t => t.scheduled_start && t.scheduled_end)
+    .map(t => ({
+      task_id: t.id,
+      title: t.title,
+      type: 'flexible',
+      start: t.scheduled_start!,
+      end: t.scheduled_end!,
+      status: t.status,
+    }))
+
+  return {
+    ...liveResult,
+    scheduled: [...frozenBlocks, ...liveResult.scheduled].sort(
+      (a, b) => toMinutes(a.start) - toMinutes(b.start),
+    ),
+  }
 }

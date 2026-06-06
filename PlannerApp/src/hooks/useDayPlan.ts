@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import type { DayPlan, SchedulerOutput, ConflictSet } from '../types'
 import { subscribeDayPlan, deleteDayData, saveDayPlan } from '../store/day'
+import { updateTask } from '../store/tasks'
 import { subscribeTaskSuppressions, deleteEventSuppression, deleteTaskSuppression } from '../store/suppressions'
 import { recalculate as engineRecalculate, DEFAULT_WORKING_HOURS } from '../engine/recalculate'
 import { runScheduler } from '../engine/scheduler'
@@ -74,6 +75,25 @@ export function useDayPlan(userId: string, day: string): DayPlanState {
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plan, day, recalcKey])
+
+  // Persist scheduled positions to Firestore so the freeze check survives page refreshes.
+  // Only runs for today; only writes tasks whose stored position differs from the new schedule.
+  // Natural loop-break: after one write, Firestore updates plan, scheduler re-runs with the same
+  // output (freeze check now catches the task), comparison finds no difference → no second write.
+  useEffect(() => {
+    if (!scheduled || !plan || day !== todayString()) return
+    const blocksById = new Map(
+      scheduled.scheduled
+        .filter(b => b.type === 'flexible')
+        .map(b => [b.task_id, b]),
+    )
+    plan.flexible_tasks.forEach(task => {
+      const block = blocksById.get(task.id)
+      if (!block) return
+      if (task.scheduled_start === block.start && task.scheduled_end === block.end) return
+      updateTask(userId, task.id, { scheduled_start: block.start, scheduled_end: block.end })
+    })
+  }, [scheduled, plan, userId, day])
 
   const conflicts = useMemo(() => {
     if (!scheduled) return null
