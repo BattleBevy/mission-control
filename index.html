@@ -61,10 +61,13 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 1.5rem;
+      padding: 1.75rem 1.5rem 1.5rem;
       text-decoration: none;
       color: var(--text);
-      display: block;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
       transition: box-shadow 0.2s, transform 0.15s;
       position: relative;
       box-shadow: 0 2px 8px rgba(80, 45, 10, 0.07);
@@ -81,8 +84,22 @@
     }
 
     .domain-icon {
-      font-size: 1.5rem;
-      margin-bottom: 0.875rem;
+      width: 100px;
+      height: 100px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .domain-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .domain-icon.unicode {
+      font-size: 2.5rem;
       line-height: 1;
     }
 
@@ -130,25 +147,31 @@
 <div class="domains">
 
   <a href="https://battlebevy.github.io/mission-control/planner/" class="domain-card planner-card">
-    <div class="domain-icon">&#9670;</div>
+    <div class="domain-icon">
+      <img src="icons/Scheduler_Icon.png" alt="Scheduler">
+    </div>
     <div class="domain-title">Dynamic Adaptive Scheduler</div>
     <div class="domain-desc">Daily schedule &middot; fixed events &middot; flexible tasks &middot; real-time recalculation</div>
   </a>
 
   <a href="finance/index.html" class="domain-card finance-card">
-    <div class="domain-icon">&#9632;</div>
+    <div class="domain-icon">
+      <img src="icons/Finance_icon.png" alt="Finance">
+    </div>
     <div class="domain-title">Finance Command Center</div>
     <div class="domain-desc">Mark bills paid &middot; log expenses &amp; receipts &middot; track debt toward your goal</div>
   </a>
 
   <a href="meal/index.html" class="domain-card meal-card">
-    <div class="domain-icon">&#9651;</div>
+    <div class="domain-icon">
+      <img src="icons/Meal_Icon.png" alt="Meal">
+    </div>
     <div class="domain-title">Meal &amp; Nutrition Hub</div>
     <div class="domain-desc">Weekly plan &middot; nutrition targets &middot; food library &middot; recipes</div>
   </a>
 
   <a href="codex/index.html" class="domain-card codex-card">
-    <div class="domain-icon">&#10022;</div>
+    <div class="domain-icon unicode">&#10022;</div>
     <div class="domain-title">Game World Codex</div>
     <div class="domain-desc">Characters &middot; households &middot; homes &middot; the fairy&rsquo;s chronicle</div>
   </a>
