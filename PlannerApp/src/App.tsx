@@ -18,6 +18,7 @@ import { OverduePrompt } from './components/OverduePrompt'
 import { FixedEventForm } from './components/FixedEventForm'
 import { QuickAddTaskForm } from './components/QuickAddTaskForm'
 import { WeekView } from './components/WeekView'
+import { Tour } from './components/Tour'
 import './App.css'
 
 function nowString(): string {
@@ -55,6 +56,7 @@ function SchedulerView({ user }: { user: User }) {
   const templates = useTemplates(user.uid)
   const eventTemplates = useEventTemplates(user.uid)
   const [conflictDismissed, setConflictDismissed] = useState(false)
+  const [showTour, setShowTour] = useState(false)
   const [showEventForm, setShowEventForm] = useState(false)
   const [showTaskForm, setShowTaskForm] = useState(false)
   const generatedDayRef = useRef<string | null>(null)
@@ -143,9 +145,11 @@ function SchedulerView({ user }: { user: User }) {
       {user.isAnonymous && (
         <div className="demo-banner">
           <span className="demo-banner-text">Demo mode · Exploring a sample schedule.</span>
+          <button className="btn-tour" onClick={() => setShowTour(true)}>Take the tour →</button>
           <button className="btn-demo-signin" onClick={signIn}>Sign in with Google →</button>
         </div>
       )}
+      {showTour && <Tour onClose={() => setShowTour(false)} />}
       <header className="app-header">
         <h1 className="app-title">Daily Scheduler</h1>
         {view === 'day' && (

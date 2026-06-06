@@ -1692,3 +1692,123 @@
   background: var(--accent-finance);
   color: white;
 }
+
+/* ── Product tour ────────────────────────────────────────────────────────────── */
+
+.tour-root {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  pointer-events: none;
+  animation: tour-fade-in 0.18s ease;
+}
+
+@keyframes tour-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.tour-shade {
+  position: fixed;
+  background: rgba(10, 8, 4, 0.62);
+  pointer-events: auto;
+}
+
+.tour-shade--full {
+  inset: 0;
+}
+
+.tour-ring {
+  position: fixed;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--accent-finance), 0 0 0 5px rgba(194, 124, 40, 0.2);
+  pointer-events: none;
+}
+
+.tour-bubble {
+  position: fixed;
+  width: 300px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 18px 14px;
+  box-shadow: 0 6px 28px rgba(10, 8, 4, 0.24);
+  pointer-events: auto;
+  z-index: 901;
+  animation: tour-bubble-in 0.18s ease;
+}
+
+@keyframes tour-bubble-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tour-bubble-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.tour-counter {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.tour-close {
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.tour-close:hover {
+  color: var(--text);
+}
+
+.tour-bubble-title {
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.tour-bubble-body {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+
+.tour-bubble-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.tour-btn {
+  font-size: 0.8125rem;
+  padding: 6px 14px;
+  min-height: 32px;
+}
+
+.btn-tour {
+  background: none;
+  border: 1px solid rgba(200, 120, 32, 0.5);
+  border-radius: 4px;
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.8125rem;
+  color: var(--accent-finance);
+  min-height: 32px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn-tour:hover {
+  background: rgba(200, 120, 32, 0.08);
+}
