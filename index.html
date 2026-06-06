@@ -43,21 +43,41 @@
 
     header {
       margin-bottom: 2.5rem;
+      position: relative;
+    }
+
+    .banner-wrap {
+      position: relative;
+      display: block;
+    }
+
+    .banner-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .banner-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      width: 60%;
     }
 
     header h1 {
       font-size: 2.25rem;
       font-weight: 400;
       font-family: 'Almendra SC', serif;
-      color: #f5e8d5;
-      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 0 40px rgba(194, 124, 40, 0.3);
+      color: var(--text);
+      text-shadow: 0 1px 4px rgba(255, 255, 255, 0.4);
     }
 
     header .date {
       font-size: 0.9375rem;
-      color: #a89070;
+      color: var(--muted);
       margin-top: 0.3rem;
-      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
     }
 
     .domains {
@@ -120,7 +140,7 @@
 
     .domain-desc {
       font-size: 1.0625rem;
-      font-weight: 700;
+      font-weight: 400;
       color: var(--muted);
       line-height: 1.6;
     }
@@ -146,8 +166,13 @@
 <body>
 
 <header>
-  <h1>The Living Grimoire</h1>
-  <div class="date" id="today-date"></div>
+  <div class="banner-wrap">
+    <img src="banner_image.png" alt="">
+    <div class="banner-text">
+      <h1>The Living Grimoire</h1>
+      <div class="date" id="today-date"></div>
+    </div>
+  </div>
 </header>
 
 <div class="domains">
