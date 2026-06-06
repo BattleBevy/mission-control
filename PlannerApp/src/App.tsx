@@ -146,7 +146,6 @@ function SchedulerView({ user }: { user: User }) {
         <div className="demo-banner">
           <span className="demo-banner-text">Demo mode · Exploring a sample schedule.</span>
           <button className="btn-tour" onClick={() => setShowTour(true)}>Take the tour →</button>
-          <button className="btn-demo-signin" onClick={signIn}>Sign in with Google →</button>
         </div>
       )}
       {showTour && <Tour onClose={() => setShowTour(false)} />}
