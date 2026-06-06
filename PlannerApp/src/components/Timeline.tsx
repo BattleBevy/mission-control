@@ -480,7 +480,7 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
           const isRecurringTask = block.type === 'flexible' && !!task?.template_id
           const isRecurringEvent = block.type === 'fixed' && !!event?.template_id
           const isDraggable =
-            (block.type === 'flexible' && block.status === 'scheduled') ||
+            (block.type === 'flexible' && (block.status === 'scheduled' || block.status === 'not_scheduled')) ||
             (block.type === 'fixed' && !event?.all_day)
           const blockTop = toMinutes(block.start) - DAY_START_MIN
           const blockDuration = toMinutes(block.end) - toMinutes(block.start)

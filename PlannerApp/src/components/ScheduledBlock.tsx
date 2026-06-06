@@ -171,7 +171,7 @@ export function ScheduledBlock({
   const isActive = block.status !== 'completed' && block.status !== 'skipped'
 
   return (
-    <div className={classes} style={{ top, height }} onClick={handleClick}>
+    <div className={classes} style={{ top, ...(selected ? {} : { height }) }} onClick={handleClick}>
       <div className="block-header">
         <span className="block-title">{block.title}</span>
         {height >= 24 && <span className="block-time">{block.start}–{block.end}</span>}

@@ -896,6 +896,7 @@
   z-index: 20;
   box-shadow: 0 2px 8px rgba(42, 26, 8, 0.2);
   min-height: 72px;
+  overflow: visible;
 }
 
 .block-actions {
