@@ -515,14 +515,14 @@
   <div class="expense-grid">
     <div>
       <div class="rec-form-top">
-        <input type="text" id="rec-store" placeholder="Store name">
+        <input type="text" id="rec-store" placeholder="Merchant or market">
         <input type="date" id="rec-date">
       </div>
       <div id="rec-cat-grid" class="rec-cat-grid"></div>
       <div class="rec-total-row">Total: <strong id="rec-running-total">$0.00</strong></div>
       <button class="btn btn-primary" id="rec-add" style="width:100%;margin-bottom:0.75rem;">+ Add Receipt</button>
       <div class="sub-header">
-        <span>Receipt Log <span id="rec-count"></span></span>
+        <span>Market Log <span id="rec-count"></span></span>
         <button class="toggle-btn" id="rec-log-toggle">▾ Show</button>
       </div>
       <div id="receipt-log" class="collapsible collapsed"></div>
@@ -555,13 +555,13 @@ const SEED = {
 };
 
 const RECEIPT_CATS = [
-  { id: 'shared-food', label: 'Shared Food' },
-  { id: 'pet',         label: 'Pet' },
-  { id: 'bev-food',    label: 'Bev Food' },
-  { id: 'rich-food',   label: 'Rich Food' },
-  { id: 'misc',        label: 'Misc' },
-  { id: 'deposit',     label: 'Deposit' },
-  { id: 'tax',         label: 'Tax' },
+  { id: 'shared-food', label: 'Communal Provisions' },
+  { id: 'pet',         label: "Gerald's Sundries" },
+  { id: 'bev-food',    label: 'Potable Elixirs' },
+  { id: 'rich-food',   label: 'Unnecessary Indulgences' },
+  { id: 'misc',        label: 'Sundry Oddities' },
+  { id: 'deposit',     label: 'Returnable Vessels' },
+  { id: 'tax',         label: "The Realm's Tithe" },
 ];
 
 let isDemo = false;

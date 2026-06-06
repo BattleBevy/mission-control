@@ -1,4 +1,4 @@
-const CACHE = 'mc-v2';
+const CACHE = 'mc-v3';
 
 const SHELL = [
   './',
@@ -24,6 +24,8 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // Only cache GET requests — POST/PUT/etc. cannot be cached
+  if (e.request.method !== 'GET') return;
   if (!e.request.url.startsWith(self.location.origin)) return;
   // Let PlannerApp's own Workbox SW manage all /planner/ requests
   if (new URL(e.request.url).pathname.startsWith('/mission-control/planner/')) return;
