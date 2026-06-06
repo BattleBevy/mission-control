@@ -151,6 +151,12 @@
   color: var(--text);
 }
 
+a.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .btn-primary {
   background: var(--text);
   border: none;
