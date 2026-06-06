@@ -1,6 +1,7 @@
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInAnonymously,
   signOut as firebaseSignOut,
   onAuthStateChanged,
 } from 'firebase/auth'
@@ -11,6 +12,10 @@ const provider = new GoogleAuthProvider()
 
 export function signIn(): Promise<void> {
   return signInWithPopup(auth, provider).then(() => undefined)
+}
+
+export function signInAnon(): Promise<void> {
+  return signInAnonymously(auth).then(() => undefined)
 }
 
 export function signOut(): Promise<void> {

@@ -4,7 +4,8 @@ import { useAuth } from './hooks/useAuth'
 import { useDayPlan, todayString } from './hooks/useDayPlan'
 import { useTemplates } from './hooks/useTemplates'
 import { useEventTemplates } from './hooks/useEventTemplates'
-import { signIn, signOut } from './store/auth'
+import { signIn, signInAnon, signOut } from './store/auth'
+import { seedDemoIfEmpty } from './demo/seedDemo'
 import { saveTask, moveTask } from './store/tasks'
 import { parseRecurrence, shouldFireOnDay, createInstance } from './engine/recurrence'
 import { toMinutes } from './engine/time'
@@ -139,6 +140,12 @@ function SchedulerView({ user }: { user: User }) {
 
   return (
     <div id="app">
+      {user.isAnonymous && (
+        <div className="demo-banner">
+          <span className="demo-banner-text">Demo mode · Exploring a sample schedule — your real data is never touched.</span>
+          <button className="btn-demo-signin" onClick={signIn}>Sign in with Google →</button>
+        </div>
+      )}
       <header className="app-header">
         <h1 className="app-title">Daily Scheduler</h1>
         {view === 'day' && (
@@ -268,6 +275,12 @@ function SchedulerView({ user }: { user: User }) {
 function App() {
   const user = useAuth()
 
+  useEffect(() => {
+    if (user?.isAnonymous) {
+      seedDemoIfEmpty(user.uid, todayString()).catch(console.warn)
+    }
+  }, [user?.uid, user?.isAnonymous])
+
   if (user === undefined) {
     return (
       <div id="app" className="app-centered">
@@ -280,9 +293,12 @@ function App() {
     return (
       <div id="app" className="app-centered">
         <h1 className="app-title">Daily Scheduler</h1>
-        <button className="btn-primary" onClick={signIn} style={{ marginTop: 'var(--space-6)' }}>
-          Sign in with Google
-        </button>
+        <p className="login-subtitle">Constraint-based scheduling that adapts in real time.</p>
+        <div className="login-actions">
+          <button className="btn-primary" onClick={signIn}>Sign in with Google</button>
+          <span className="login-or">or</span>
+          <button className="btn-ghost" onClick={signInAnon}>Try Demo →</button>
+        </div>
       </div>
     )
   }

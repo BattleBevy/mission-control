@@ -1636,3 +1636,59 @@
   font-size: 0.875rem;
   font-style: italic;
 }
+
+/* ── Login screen ────────────────────────────────────────────────────────────── */
+
+.login-subtitle {
+  font-size: 0.9375rem;
+  color: var(--muted);
+  margin-top: var(--space-2);
+  text-align: center;
+  max-width: 300px;
+}
+
+.login-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.login-or {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+/* ── Demo banner ─────────────────────────────────────────────────────────────── */
+
+.demo-banner {
+  background: rgba(200, 120, 32, 0.10);
+  border-bottom: 1px solid rgba(200, 120, 32, 0.25);
+  padding: var(--space-2) var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.demo-banner-text {
+  flex: 1;
+}
+
+.btn-demo-signin {
+  background: none;
+  border: 1px solid var(--accent-finance);
+  border-radius: 4px;
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.8125rem;
+  color: var(--accent-finance);
+  min-height: 32px;
+  white-space: nowrap;
+}
+
+.btn-demo-signin:hover {
+  background: var(--accent-finance);
+  color: white;
+}

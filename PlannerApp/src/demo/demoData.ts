@@ -1,0 +1,107 @@
+import type { TaskInstance, FixedEvent } from '../types'
+
+export function createDemoSeed(day: string): { tasks: TaskInstance[], events: FixedEvent[] } {
+  const tasks: TaskInstance[] = [
+    {
+      id: 'demo-t1',
+      title: 'Review pull requests',
+      duration_min: 45,
+      earliest_start: '07:00',
+      latest_end: '20:00',
+      priority: 'High',
+      tags: [],
+      splittable: false,
+      status: 'not_scheduled',
+      day,
+    },
+    {
+      id: 'demo-t2',
+      title: 'Morning emails & Slack',
+      duration_min: 20,
+      earliest_start: '07:00',
+      latest_end: '20:00',
+      priority: 'Medium',
+      tags: [],
+      splittable: false,
+      status: 'completed',
+      scheduled_start: '08:30',
+      scheduled_end: '08:50',
+      day,
+    },
+    {
+      id: 'demo-t3',
+      title: 'Update on-call runbook',
+      duration_min: 60,
+      earliest_start: '09:30',
+      latest_end: '22:00',
+      priority: 'Medium',
+      tags: [],
+      splittable: false,
+      status: 'not_scheduled',
+      day,
+    },
+    {
+      id: 'demo-t4',
+      title: 'Write unit tests — auth service',
+      duration_min: 90,
+      earliest_start: '07:00',
+      latest_end: '22:00',
+      priority: 'High',
+      tags: [],
+      splittable: false,
+      status: 'not_scheduled',
+      day,
+    },
+    {
+      id: 'demo-t5',
+      title: 'Performance metrics review',
+      duration_min: 45,
+      earliest_start: '13:00',
+      latest_end: '22:00',
+      priority: 'Medium',
+      tags: [],
+      splittable: false,
+      status: 'not_scheduled',
+      day,
+    },
+    {
+      id: 'demo-t6',
+      title: 'Clear inbox backlog',
+      duration_min: 30,
+      earliest_start: '07:00',
+      latest_end: '23:30',
+      priority: 'Low',
+      tags: [],
+      splittable: false,
+      status: 'not_scheduled',
+      day,
+    },
+  ]
+
+  const events: FixedEvent[] = [
+    {
+      id: 'demo-e1',
+      title: 'Team Standup',
+      start_datetime: '09:00',
+      end_datetime: '09:30',
+      day,
+    },
+    {
+      id: 'demo-e2',
+      title: 'Lunch',
+      start_datetime: '12:00',
+      end_datetime: '13:00',
+      day,
+    },
+    {
+      id: 'demo-e3',
+      title: 'Architecture Review',
+      start_datetime: '15:00',
+      end_datetime: '15:45',
+      day,
+      tentative: true,
+    },
+  ]
+
+  return { tasks, events }
+}
