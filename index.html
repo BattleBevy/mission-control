@@ -3,14 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mission Control</title>
+  <title>The Living Grimoire</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Almendra+SC&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
   <meta name="theme-color" content="#2a1a08">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Mission Control">
+  <meta name="apple-mobile-web-app-title" content="The Living Grimoire">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      background: #0d1a10 url('mossy_backdrop.png') center/cover no-repeat fixed;
+      min-height: 100%;
+    }
 
     :root {
       --bg:      #ede5d8;
@@ -24,9 +32,8 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      background-image: radial-gradient(ellipse at top center, #f5e8d5 0%, #ede5d8 65%);
+      font-family: 'IM Fell English SC', serif;
+      background: transparent;
       color: var(--text);
       min-height: 100vh;
       padding: 2rem 1.5rem;
@@ -40,9 +47,8 @@
 
     header h1 {
       font-size: 1.875rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      font-family: Georgia, 'Book Antiqua', serif;
+      font-weight: 400;
+      font-family: 'Almendra SC', serif;
     }
 
     header .date {
@@ -104,9 +110,9 @@
 
     .domain-title {
       font-size: 1.0625rem;
-      font-weight: 600;
+      font-weight: 400;
       margin-bottom: 0.375rem;
-      font-family: Georgia, 'Book Antiqua', serif;
+      font-family: 'Almendra SC', serif;
     }
 
     .domain-desc {
@@ -136,7 +142,7 @@
 <body>
 
 <header>
-  <h1>Mission Control</h1>
+  <h1>The Living Grimoire</h1>
   <div class="date" id="today-date"></div>
 </header>
 
@@ -146,7 +152,7 @@
     <div class="domain-icon">
       <img src="icons/Scheduler_Icon.png" alt="Scheduler">
     </div>
-    <div class="domain-title">Dynamic Adaptive Scheduler</div>
+    <div class="domain-title">The Mossbound Hourglass</div>
     <div class="domain-desc">Daily schedule &middot; fixed events &middot; flexible tasks &middot; real-time recalculation</div>
   </a>
 
@@ -154,7 +160,7 @@
     <div class="domain-icon">
       <img src="icons/Finance_icon.png" alt="Finance">
     </div>
-    <div class="domain-title">Finance Command Center</div>
+    <div class="domain-title">The Lantern‑Scale Ledger</div>
     <div class="domain-desc">Mark bills paid &middot; log expenses &amp; receipts &middot; track debt toward your goal</div>
   </a>
 
@@ -162,7 +168,7 @@
     <div class="domain-icon">
       <img src="icons/Meal_Icon.png" alt="Meal">
     </div>
-    <div class="domain-title">Meal &amp; Nutrition Hub</div>
+    <div class="domain-title">The Forager’s Pot </div>
     <div class="domain-desc">Weekly plan &middot; nutrition targets &middot; food library &middot; recipes</div>
   </a>
 
@@ -170,7 +176,7 @@
     <div class="domain-icon">
       <img src="icons/Codex_Icon.png" alt="Codex">
     </div>
-    <div class="domain-title">Game World Codex</div>
+    <div class="domain-title">The Rune‑Root Codex</div>
     <div class="domain-desc">Characters &middot; households &middot; homes &middot; the fairy&rsquo;s chronicle</div>
   </a>
 

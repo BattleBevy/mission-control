@@ -142,7 +142,7 @@ function SchedulerView({ user }: { user: User }) {
     <div id="app">
       {user.isAnonymous && (
         <div className="demo-banner">
-          <span className="demo-banner-text">Demo mode · Exploring a sample schedule — your real data is never touched.</span>
+          <span className="demo-banner-text">Demo mode · Exploring a sample schedule.</span>
           <button className="btn-demo-signin" onClick={signIn}>Sign in with Google →</button>
         </div>
       )}
