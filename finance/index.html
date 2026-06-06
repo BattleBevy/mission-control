@@ -424,32 +424,39 @@
 </head>
 <body>
 
+<!-- Demo banner — visible only in demo mode -->
+<div id="demo-banner" style="display:none;background:#2a1a08;color:#f5e6c0;padding:0.75rem 1.5rem;font-size:0.875rem;text-align:center;border-bottom:2px solid #c27c28;">
+  <span style="font-style:italic">You are consulting the ledger of <strong>Mira Thornwick, Journeyman Hedge Witch</strong>. Her finances are fictional. Her toad is fictional. Her student loans are painfully real. Changes are not saved.</span>
+</div>
+
 <!-- Sign-in overlay — shown until Google auth resolves -->
 <div id="signin-overlay" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000">
-  <div style="background:var(--surface);border:1px solid var(--border);border-top:3px solid #c27c28;border-radius:14px;padding:2rem;text-align:center;max-width:320px;width:90%;box-shadow:0 4px 20px rgba(80,45,10,0.12)">
-    <div style="font-family:Georgia,serif;font-size:1.25rem;margin-bottom:0.5rem">Finance Command Center</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-top:3px solid #c27c28;border-radius:14px;padding:2rem;text-align:center;max-width:340px;width:90%;box-shadow:0 4px 20px rgba(80,45,10,0.12)">
+    <div style="font-family:Georgia,serif;font-size:1.25rem;margin-bottom:0.5rem">The Lantern-Scale Ledger</div>
     <div style="font-size:0.875rem;color:var(--muted);margin-bottom:1.5rem">Sign in to access your financial dashboard</div>
-    <button id="google-signin-btn" class="btn btn-primary" style="width:100%">Sign in with Google</button>
+    <button id="google-signin-btn" class="btn btn-primary" style="width:100%;margin-bottom:0.75rem">Sign in with Google</button>
+    <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.75rem">— or —</div>
+    <button id="try-demo-btn" class="btn" style="width:100%">Try Demo (Mira's Ledger) →</button>
   </div>
 </div>
 
 <header>
   <div class="header-left">
-    <h1>Finance Command Center</h1>
+    <h1>The Lantern-Scale Ledger</h1>
     <div class="subtitle" id="subtitle"></div>
   </div>
   <div class="header-actions">
     <a href="../index.html" class="btn">← Hub</a>
     <button class="btn" id="import-btn">Import</button>
     <button class="btn" id="export-btn">Export</button>
-    <button class="btn btn-primary" id="new-month-btn">New Month →</button>
+    <button class="btn btn-primary" id="new-month-btn">New Moon Cycle →</button>
   </div>
 </header>
 
 <!-- Bills -->
 <div class="card">
   <div class="card-header">
-    <span class="card-title">Bills This Month</span>
+    <span class="card-title">Monthly Obligations to the Realm</span>
     <span class="card-meta" id="bills-stat"></span>
   </div>
   <div id="bills-list"></div>
@@ -459,7 +466,7 @@
 <!-- Debt Overview -->
 <div class="card">
   <div class="card-header">
-    <span class="card-title">Total Debt</span>
+    <span class="card-title">Debts Owed to Various Entities</span>
     <span class="card-meta" id="debt-meta"></span>
   </div>
   <div class="debt-layout">
@@ -473,7 +480,7 @@
 
   <div class="card">
     <div class="card-header">
-      <span class="card-title">Log an Expense</span>
+      <span class="card-title">Record an Expenditure</span>
     </div>
     <div class="exp-form-row">
       <select id="exp-cat"></select>
@@ -491,7 +498,7 @@
 
   <div class="card">
     <div class="card-header">
-      <span class="card-title">Spending by Category</span>
+      <span class="card-title">The Expenditure Grimoire</span>
       <span class="card-meta" id="exp-total-label"></span>
     </div>
     <div id="category-totals"></div>
@@ -502,7 +509,7 @@
 <!-- Receipt Analysis -->
 <div class="card">
   <div class="card-header">
-    <span class="card-title">Receipt Analysis</span>
+    <span class="card-title">Market Tallies</span>
     <span class="card-meta" id="rec-meta"></span>
   </div>
   <div class="expense-grid">
@@ -557,6 +564,66 @@ const RECEIPT_CATS = [
   { id: 'tax',         label: 'Tax' },
 ];
 
+let isDemo = false;
+
+function demoDate(day) {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+}
+
+function buildDemoSeed() {
+  return {
+    month: new Date().toISOString().slice(0, 7),
+    debtGoal: 20000,
+    debtStart: 26000,
+    categories: [
+      { id: 'walmart',    label: 'Apothecary & Market' },
+      { id: 'other-food', label: 'Tavern & Feasting' },
+      { id: 'amazon',     label: 'Arcane Merchant' },
+      { id: 'vet',        label: "Gerald's Veterinary Arts" },
+      { id: 'anet',       label: 'Guild & Fellowship' },
+      { id: 'gas',        label: 'Hex & Charcoal' },
+      { id: 'house',      label: 'Cottage & Hearth' },
+      { id: 'other',      label: 'Miscellaneous Enchantments' },
+      { id: 'yearly',     label: 'Annual Rituals & Renewals' },
+    ],
+    bills: [
+      // Monthly bills
+      { id: 1,  name: 'Mosswood Cottage Rent',                     amount: 950, dueDay: 1,  paid: true, amountPaid: 950 },
+      { id: 2,  name: 'Crystal Ball Broadband',                    amount: 65,  dueDay: 5,  autopay: true, paid: true, amountPaid: 65, notes: 'Required for remote hexing work' },
+      { id: 3,  name: 'Cauldron & Hearth Gas',                     amount: 43,  dueDay: 8  },
+      { id: 4,  name: 'Moonlit Lantern Power',                     amount: 78,  dueDay: 12 },
+      { id: 5,  name: 'Broomstick Insurance',                      amount: 89,  dueDay: 15, autopay: true },
+      { id: 6,  name: "Gerald's Wellness Plan",                    amount: 35,  dueDay: 18 },
+      { id: 7,  name: 'Hex-flix + SpellTube Premium',              amount: 22,  dueDay: 20, autopay: true },
+      { id: 8,  name: 'Coven Dues',                                amount: 15,  dueDay: 25 },
+      { id: 9,  name: 'Potion Box Monthly',                        amount: 48,  dueDay: 28 },
+      // Debt accounts (balance field makes them appear in debt tracker)
+      { id: 10, name: 'Goblin Bank Credit Line',                   amount: 45,  dueDay: 3,  paid: true, amountPaid: 45, balance: 2340,  notes: '19.99% APR — standard goblin rates' },
+      { id: 11, name: 'Academy of Arcane Arts — Student Loans',    amount: 210, dueDay: 7,  balance: 18750, notes: '7.2% interest — she is mostly fine about it' },
+      { id: 12, name: 'Hextech Pro 3000 Cauldron — 0% until Dec', amount: 89,  dueDay: 14, balance: 890,  notes: '0% financing until December — almost done!' },
+      { id: 13, name: 'Emergency Broom Repair — 24% APR',         amount: 75,  dueDay: 22, balance: 430,  notes: "The Incident of Last Autumn. We don't talk about it." },
+    ],
+    expenses: [
+      { id: 'e1', date: demoDate(2),  category: 'walmart',    amount: 127.43, description: 'nightshade was on sale' },
+      { id: 'e2', date: demoDate(4),  category: 'other-food', amount: 34.80,  description: 'coven brunch — Mildred insisted on the good tavern' },
+      { id: 'e3', date: demoDate(5),  category: 'amazon',     amount: 67.99,  description: 'bulk beeswax + new mortar, definitely needed' },
+      { id: 'e4', date: demoDate(5),  category: 'vet',        amount: 89.00,  description: "Gerald's annual checkup — he was impossible about it" },
+      { id: 'e5', date: demoDate(6),  category: 'gas',        amount: 52.00,  description: 'enchanted fuel prices are outrageous this season' },
+    ],
+    receipts: [
+      {
+        id: 'r1', date: demoDate(2), store: 'Mosswick Apothecary',
+        breakdown: { 'shared-food': 67.50, 'pet': 18.99, 'bev-food': 12.40, 'rich-food': 14.20, 'misc': 8.30, 'deposit': 0, 'tax': 6.04 }
+      },
+      {
+        id: 'r2', date: demoDate(5), store: 'Thornwick General Store',
+        breakdown: { 'shared-food': 23.50, 'pet': 0, 'bev-food': 8.99, 'rich-food': 0, 'misc': 5.50, 'deposit': 2.00, 'tax': 3.00 }
+      },
+    ],
+  };
+}
+
 let expLogCollapsed = true;
 let recLogCollapsed = true;
 
@@ -590,6 +657,7 @@ async function load() {
 }
 
 function save() {
+  if (isDemo) return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   const user = mcAuth.currentUser;
   if (user) {
@@ -1234,6 +1302,13 @@ async function initApp() {
   render();
 }
 
+async function initDemo() {
+  state = buildDemoSeed();
+  $('exp-cat').innerHTML = '';
+  $('rec-date').value = todayStr();
+  render();
+}
+
 // ── Auth gate ─────────────────────────────────────────────────────────────
 let appInitialized = false;
 mcAuth.onAuthStateChanged(async user => {
@@ -1245,11 +1320,22 @@ mcAuth.onAuthStateChanged(async user => {
     }
   } else {
     document.getElementById('signin-overlay').style.display = 'flex';
+    appInitialized = false;
   }
 });
 
 document.getElementById('google-signin-btn').addEventListener('click', () => {
   mcAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+});
+
+document.getElementById('try-demo-btn').addEventListener('click', async () => {
+  isDemo = true;
+  document.getElementById('signin-overlay').style.display = 'none';
+  document.getElementById('demo-banner').style.display = 'block';
+  document.getElementById('import-btn').style.display = 'none';
+  document.getElementById('export-btn').style.display = 'none';
+  document.getElementById('new-month-btn').style.display = 'none';
+  await initDemo();
 });
 </script>
 </body>
