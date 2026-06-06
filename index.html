@@ -16,7 +16,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html {
-      background: #0d1a10 url('mossy_backdrop.png') center/cover no-repeat fixed;
+      background: #0d1a10 url('mossy_backdrop.png') center/cover no-repeat scroll;
       min-height: 100%;
     }
 
@@ -36,38 +36,39 @@
       background: transparent;
       color: var(--text);
       min-height: 100vh;
-      padding: 1rem 1.5rem;
+      padding: 0.5rem 1.5rem;
       max-width: 900px;
       margin: 0 auto;
     }
 
     header {
-      margin-bottom: 0.75rem;
+      margin-bottom: -20px;
       position: relative;
+      z-index: 1;
     }
 
     .banner-wrap {
       position: relative;
-      display: block;
       max-width: 620px;
       margin: 0 auto;
       overflow: hidden;
+      height: 210px;
     }
 
     .banner-wrap img {
       width: 100%;
       height: auto;
       display: block;
-      margin-bottom: -15%;
+      margin-top: -28px;
     }
 
     .banner-text {
       position: absolute;
-      top: 50%;
+      top: 40%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      width: 60%;
+      width: 55%;
     }
 
     header h1 {
@@ -79,16 +80,15 @@
     }
 
     header .date {
-      font-size: 0.9375rem;
+      font-size: 1rem;
       color: var(--text);
-      margin-top: 0.3rem;
-      opacity: 0.75;
+      margin-top: 0.25rem;
     }
 
     .domains {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 0.875rem;
+      gap: 0.5rem;
     }
 
     .domain-card {
