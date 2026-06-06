@@ -41,16 +41,19 @@ export function useDayPlan(userId: string, day: string): DayPlanState {
   const [recalcKey, setRecalcKey] = useState(0)
   const [canUndo, setCanUndo] = useState(false)
   const [suppressedTaskTemplateIds, setSuppressedTaskTemplateIds] = useState<Set<string>>(new Set())
+  const [serverConfirmed, setServerConfirmed] = useState(false)
   const undoPlanRef = useRef<DayPlan | null>(null)
   const undoSuppressionRef = useRef<SuppressionRef | null>(null)
 
   useEffect(() => {
     setPlan(null)
     setLoading(true)
+    setServerConfirmed(false)
     undoPlanRef.current = null
     undoSuppressionRef.current = null
     setCanUndo(false)
-    return subscribeDayPlan(userId, day, p => {
+    return subscribeDayPlan(userId, day, (p, confirmed) => {
+      if (confirmed) setServerConfirmed(true)
       setPlan(p)
       setLoading(false)
     })
@@ -81,7 +84,7 @@ export function useDayPlan(userId: string, day: string): DayPlanState {
   // Natural loop-break: after one write, Firestore updates plan, scheduler re-runs with the same
   // output (freeze check now catches the task), comparison finds no difference → no second write.
   useEffect(() => {
-    if (!scheduled || !plan || day !== todayString()) return
+    if (!scheduled || !plan || day !== todayString() || !serverConfirmed) return
     const blocksById = new Map(
       scheduled.scheduled
         .filter(b => b.type === 'flexible')
@@ -93,7 +96,7 @@ export function useDayPlan(userId: string, day: string): DayPlanState {
       if (task.scheduled_start === block.start && task.scheduled_end === block.end) return
       updateTask(userId, task.id, { scheduled_start: block.start, scheduled_end: block.end })
     })
-  }, [scheduled, plan, userId, day])
+  }, [scheduled, plan, userId, day, serverConfirmed])
 
   const conflicts = useMemo(() => {
     if (!scheduled) return null

@@ -27,13 +27,14 @@ export function getPreviousPlan(): DayPlan | null {
 export function subscribeDayPlan(
   userId: string,
   day: DateString,
-  onChange: (plan: DayPlan) => void,
+  onChange: (plan: DayPlan, serverConfirmed: boolean) => void,
 ): () => void {
   let tasks: TaskInstance[] = []
   let events: FixedEvent[] = []
   let eventTemplates: EventTemplate[] = []
   let anytime: AnytimeTask[] = []
   let suppressedEventTemplates: Set<string> = new Set()
+  let serverConfirmed = false
 
   const emit = () => {
     // Materialize recurring event templates for this day in memory — no Firestore writes needed.
@@ -56,12 +57,16 @@ export function subscribeDayPlan(
         ...(t.tentative ? { tentative: true } : {}),
       }]
     })
-    onChange({ day, fixed_events: [...events, ...materialized], flexible_tasks: tasks, anytime_tasks: anytime })
+    onChange({ day, fixed_events: [...events, ...materialized], flexible_tasks: tasks, anytime_tasks: anytime }, serverConfirmed)
   }
 
   const unsub1 = onSnapshot(
     query(collection(db, 'users', userId, 'tasks'), where('day', '==', day)),
-    snap => { tasks = snap.docs.map(d => d.data() as TaskInstance); emit() },
+    snap => {
+      tasks = snap.docs.map(d => d.data() as TaskInstance)
+      if (!snap.metadata.fromCache) serverConfirmed = true
+      emit()
+    },
   )
   const unsub2 = onSnapshot(
     query(collection(db, 'users', userId, 'events'), where('day', '==', day)),
