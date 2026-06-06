@@ -134,7 +134,12 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
       }
     } else {
       onSnapshot()
-      await updateTask(userId, d.taskId, { earliest_start: newStart, latest_end: newEnd })
+      await updateTask(userId, d.taskId, {
+        earliest_start: newStart,
+        latest_end: newEnd,
+        scheduled_start: newStart,
+        scheduled_end: newEnd,
+      })
     }
   }
 

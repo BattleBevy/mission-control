@@ -1,4 +1,4 @@
-const CACHE = 'mc-v1';
+const CACHE = 'mc-v2';
 
 const SHELL = [
   './',
@@ -7,7 +7,7 @@ const SHELL = [
   './meal/index.html',
   './codex/index.html',
   './manifest.json',
-  './icons/icon.svg',
+  './icons/icon.png',
 ];
 
 self.addEventListener('install', e => {
@@ -25,8 +25,9 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Only handle same-origin requests — let external links (PlannerApp) go to browser normally
   if (!e.request.url.startsWith(self.location.origin)) return;
+  // Let PlannerApp's own Workbox SW manage all /planner/ requests
+  if (new URL(e.request.url).pathname.startsWith('/mission-control/planner/')) return;
 
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {

@@ -1,6 +1,6 @@
 {
-  "name": "Mission Control",
-  "short_name": "Mission Control",
+  "name": "The Living Grimoire",
+  "short_name": "Living Grimoire",
   "description": "Personal life OS — schedule, finance, meals, and more",
   "start_url": "./",
   "display": "standalone",
