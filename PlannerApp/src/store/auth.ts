@@ -4,6 +4,8 @@ import {
   signInAnonymously,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  setPersistence,
+  inMemoryPersistence,
 } from 'firebase/auth'
 import type { User } from 'firebase/auth'
 import { auth } from '../firebase'
@@ -14,8 +16,9 @@ export function signIn(): Promise<void> {
   return signInWithPopup(auth, provider).then(() => undefined)
 }
 
-export function signInAnon(): Promise<void> {
-  return signInAnonymously(auth).then(() => undefined)
+export async function signInAnon(): Promise<void> {
+  await setPersistence(auth, inMemoryPersistence)
+  await signInAnonymously(auth)
 }
 
 export function signOut(): Promise<void> {
