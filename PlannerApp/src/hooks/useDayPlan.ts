@@ -94,6 +94,9 @@ export function useDayPlan(userId: string, day: string): DayPlanState {
       const block = blocksById.get(task.id)
       if (!block) return
       if (task.scheduled_start === block.start && task.scheduled_end === block.end) return
+      // Don't persist a position that's already at or before now — the task would freeze
+      // immediately. The scheduler will keep placing it fresh until its stored time arrives.
+      if (block.start <= nowString()) return
       updateTask(userId, task.id, { scheduled_start: block.start, scheduled_end: block.end })
     })
   }, [scheduled, plan, userId, day, serverConfirmed])
