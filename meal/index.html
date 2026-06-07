@@ -121,9 +121,12 @@ body {
   transition: background 0.15s, color 0.15s;
 }
 .tab-btn.active {
-  background: var(--bg);
+  border-style: solid;
+  border-width: 14px;
+  border-bottom-width: 0;
+  border-image: url('../PlannerApp/src/assets/parchment.png') 25% fill stretch;
+  background: transparent;
   color: var(--accent);
-  border-color: var(--border);
   padding-top: 0.6rem;
 }
 .tab-btn:hover:not(.active) {
