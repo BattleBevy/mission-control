@@ -594,7 +594,17 @@ const SEED = {
   ]
 };
 
-const RECEIPT_CATS = [
+const REAL_RECEIPT_CATS = [
+  { id: 'shared-food', label: 'Communal Provisions' },
+  { id: 'bev-food',    label: "Witch's Fare" },
+  { id: 'rich-food',   label: "Rogue's Fare" },
+  { id: 'pet',         label: 'Pet Supplies' },
+  { id: 'misc',        label: 'Sundry Oddities' },
+  { id: 'deposit',     label: 'Returnable Vessels' },
+  { id: 'tax',         label: "The Realm's Tithe" },
+];
+
+const DEMO_RECEIPT_CATS = [
   { id: 'shared-food', label: 'Communal Provisions' },
   { id: 'pet',         label: "Gerald's Sundries" },
   { id: 'bev-food',    label: 'Potable Elixirs' },
@@ -981,8 +991,8 @@ function renderReceiptAnalysis() {
   } else {
     log.innerHTML = '';
     sorted.forEach(r => {
-      const total  = RECEIPT_CATS.reduce((s, c) => s + (r.breakdown[c.id] || 0), 0);
-      const parts  = RECEIPT_CATS
+      const total  = (isDemo ? DEMO_RECEIPT_CATS : REAL_RECEIPT_CATS).reduce((s, c) => s + (r.breakdown[c.id] || 0), 0);
+      const parts  = (isDemo ? DEMO_RECEIPT_CATS : REAL_RECEIPT_CATS)
         .filter(c => r.breakdown[c.id] > 0)
         .map(c => `${c.label}: ${fmtDec(r.breakdown[c.id])}`);
       const div = document.createElement('div');
@@ -1006,7 +1016,7 @@ function renderReceiptAnalysis() {
   // Subcategory totals
   const totalsEl  = $('receipt-totals');
   const grandTotal = receipts.reduce((s, r) =>
-    s + RECEIPT_CATS.reduce((t, c) => t + (r.breakdown[c.id] || 0), 0), 0);
+    s + (isDemo ? DEMO_RECEIPT_CATS : REAL_RECEIPT_CATS).reduce((t, c) => t + (r.breakdown[c.id] || 0), 0), 0);
   totalsEl.innerHTML = '';
 
   if (!grandTotal) {
@@ -1018,12 +1028,12 @@ function renderReceiptAnalysis() {
   $('rec-meta').textContent = fmtDec(grandTotal) + ' total';
 
   const catTotals = {};
-  RECEIPT_CATS.forEach(c => {
+  (isDemo ? DEMO_RECEIPT_CATS : REAL_RECEIPT_CATS).forEach(c => {
     catTotals[c.id] = receipts.reduce((s, r) => s + (r.breakdown[c.id] || 0), 0);
   });
   const maxCat = Math.max(...Object.values(catTotals).filter(v => v > 0));
 
-  RECEIPT_CATS.forEach(c => {
+  (isDemo ? DEMO_RECEIPT_CATS : REAL_RECEIPT_CATS).forEach(c => {
     const amt = catTotals[c.id];
     if (!amt) return;
     const row = document.createElement('div');
@@ -1191,7 +1201,7 @@ $('new-month-btn').addEventListener('click', () => {
   state.expenses  = [];
   state.receipts  = [];
   save();
-  RECEIPT_CATS.forEach(c => { recItems[c.id] = []; });
+  (isDemo ? DEMO_RECEIPT_CATS : REAL_RECEIPT_CATS).forEach(c => { recItems[c.id] = []; });
   $('exp-cat').innerHTML = '';
   render();
 });
@@ -1236,18 +1246,18 @@ $('exp-log-toggle').addEventListener('click', () => {
 });
 
 // ── Receipts: accumulator ─────────────────────────────────────────────────
-const recItems = Object.fromEntries(RECEIPT_CATS.map(c => [c.id, []]));
+const recItems = Object.fromEntries((isDemo ? DEMO_RECEIPT_CATS : REAL_RECEIPT_CATS).map(c => [c.id, []]));
 
 function recBucketTotal(catId) {
   return recItems[catId].reduce((s, v) => s + v, 0);
 }
 
 function recGrandTotal() {
-  return RECEIPT_CATS.reduce((s, c) => s + recBucketTotal(c.id), 0);
+  return (isDemo ? DEMO_RECEIPT_CATS : REAL_RECEIPT_CATS).reduce((s, c) => s + recBucketTotal(c.id), 0);
 }
 
 function renderRecForm() {
-  $('rec-cat-grid').innerHTML = RECEIPT_CATS.map(c => {
+  $('rec-cat-grid').innerHTML = (isDemo ? DEMO_RECEIPT_CATS : REAL_RECEIPT_CATS).map(c => {
     const total     = recBucketTotal(c.id);
     const itemsHtml = recItems[c.id].map((v, i) =>
       `<div class="rec-item-entry">
@@ -1302,13 +1312,13 @@ $('rec-add').addEventListener('click', () => {
   if (recGrandTotal() <= 0) return;
 
   const breakdown = {};
-  RECEIPT_CATS.forEach(c => { breakdown[c.id] = recBucketTotal(c.id); });
+  (isDemo ? DEMO_RECEIPT_CATS : REAL_RECEIPT_CATS).forEach(c => { breakdown[c.id] = recBucketTotal(c.id); });
 
   if (!state.receipts) state.receipts = [];
   state.receipts.push({ id: uid(), date, store, breakdown });
 
   $('rec-store').value = '';
-  RECEIPT_CATS.forEach(c => { recItems[c.id] = []; });
+  (isDemo ? DEMO_RECEIPT_CATS : REAL_RECEIPT_CATS).forEach(c => { recItems[c.id] = []; });
   renderRecForm();
   save();
   renderReceiptAnalysis();
