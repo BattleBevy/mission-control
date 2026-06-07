@@ -905,6 +905,12 @@ a.btn-ghost {
   overflow: visible;
 }
 
+/* When any block is selected, prevent overlapping non-selected blocks
+   from intercepting pointer events meant for the selected block's buttons. */
+.timeline-grid:has(.scheduled-block.selected) .scheduled-block:not(.selected) {
+  pointer-events: none;
+}
+
 .block-actions {
   display: flex;
   gap: var(--space-1);
@@ -915,10 +921,10 @@ a.btn-ghost {
 .btn-action {
   border: 1px solid;
   border-radius: 4px;
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-2) var(--space-2);
   font-size: 0.6875rem;
   font-weight: 600;
-  min-height: 28px;
+  min-height: 36px;
   white-space: nowrap;
 }
 
