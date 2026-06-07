@@ -27,17 +27,23 @@ export function FixedEventForm({ userId, defaultDay, onClose, onSnapshot }: Prop
   const [recurrenceDays, setRecurrenceDays] = useState<number[]>([])
   const [monthlyDate, setMonthlyDate] = useState(1)
   const [monthlyNth, setMonthlyNth] = useState(1)
+  const [recurrenceError, setRecurrenceError] = useState('')
+
+  const needsWeekday = recurrenceType === 'weekly' || recurrenceType === 'biweekly' || recurrenceType === 'monthly_weekday'
 
   function toggleDay(d: number) {
+    setRecurrenceError('')
     setRecurrenceDays(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d])
   }
 
-  const needsDays = recurrenceType === 'weekly' || recurrenceType === 'biweekly' || recurrenceType === 'monthly_weekday'
-  const dayError = needsDays && recurrenceDays.length === 0
-
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    if (dayError) return
+    if (needsWeekday && recurrenceDays.length === 0) {
+      setRecurrenceError('Pick at least one weekday for this recurrence.')
+      return
+    }
+    setRecurrenceError('')
+
     const recurrence = buildRecurrenceString(
       recurrenceType,
       recurrenceDays,
@@ -137,7 +143,11 @@ export function FixedEventForm({ userId, defaultDay, onClose, onSnapshot }: Prop
         <select
           className="form-input"
           value={recurrenceType}
-          onChange={e => { setRecurrenceType(e.target.value as RecurrenceType); setRecurrenceDays([]) }}
+          onChange={e => {
+            setRecurrenceType(e.target.value as RecurrenceType)
+            setRecurrenceDays([])
+            setRecurrenceError('')
+          }}
         >
           <option value="never">Never (one-time)</option>
           <option value="daily">Every day</option>
@@ -163,9 +173,6 @@ export function FixedEventForm({ userId, defaultDay, onClose, onSnapshot }: Prop
             )
           })}
         </div>
-      )}
-      {dayError && (recurrenceType === 'weekly' || recurrenceType === 'biweekly') && (
-        <p className="form-error">Select at least one day.</p>
       )}
       {recurrenceType === 'monthly_date' && (
         <label className="form-label">
@@ -203,15 +210,19 @@ export function FixedEventForm({ userId, defaultDay, onClose, onSnapshot }: Prop
                   key={day}
                   type="button"
                   className={`btn-day-toggle ${recurrenceDays.includes(day) ? 'active' : ''}`}
-                  onClick={() => setRecurrenceDays([day])}
+                onClick={() => { setRecurrenceError(''); setRecurrenceDays([day]) }}
                 >
                   {label}
                 </button>
               )
             })}
           </div>
-          {dayError && <p className="form-error">Select at least one day.</p>}
         </>
+      )}
+      {recurrenceError && (
+        <p role="alert" style={{ color: 'var(--warn)', margin: '4px 0 0', fontSize: '0.85rem' }}>
+          {recurrenceError}
+        </p>
       )}
       {(recurrenceType === 'never' || recurrenceType === 'biweekly') && (
         <label className="form-label">

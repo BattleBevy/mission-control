@@ -60,6 +60,7 @@ export function useWeekPlan(
         const materialized: FixedEvent[] = eventTemplates.flatMap(t => {
           if (suppressionMap.get(t.id)?.has(day)) return []
           if (t.start_date && day < t.start_date) return []
+          if (t.end_date && day > t.end_date) return []
           const rule = parseRecurrence(t.recurrence)
           if (!rule || !shouldFireOnDay(rule, day)) return []
           return [{
@@ -90,11 +91,12 @@ export function useWeekPlan(
 
       if (!cancelled) {
         setDays(result)
-        setLoading(false)
       }
     }
 
-    fetchWeek().catch(console.error)
+    fetchWeek()
+      .catch(console.error)
+      .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [userId, weekStart])
 

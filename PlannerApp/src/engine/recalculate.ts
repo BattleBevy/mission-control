@@ -42,9 +42,23 @@ export function recalculate(
 
   const relevantEvents = plan.fixed_events.filter(event => !event.all_day)
 
+  // Frozen flexible tasks must be passed as obstacles so the scheduler doesn't
+  // place live tasks inside their already-occupied slots.
+  const frozenAsEvents = frozenTasks
+    .filter(t => t.scheduled_start && t.scheduled_end)
+    .map(t => ({
+      id: t.id,
+      title: t.title,
+      start_datetime: t.scheduled_start!,
+      end_datetime: t.scheduled_end!,
+      day: plan.day,
+      tentative: false,
+      all_day: false,
+    }))
+
   const liveResult = runScheduler({
     working_hours: { start: fromMinutes(effectiveStartMin), end: workingHours.end },
-    fixed_events: relevantEvents,
+    fixed_events: [...relevantEvents, ...frozenAsEvents],
     flexible_tasks: liveTasks,
     current_time: now,
     day: plan.day,
