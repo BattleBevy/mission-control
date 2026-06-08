@@ -16,7 +16,9 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html {
-      background: #0d1a10 url('finance_background.png') repeat top left;
+      background:
+        linear-gradient(rgba(13,26,16,0.92), rgba(13,26,16,0.92)),
+        url('finance_background.png') repeat top left #0d1a10;
     }
 
     :root {
@@ -44,23 +46,11 @@
 
     /* ── Header ─────────────────────────────────────────────────────────── */
     header {
-      position: relative;
-      overflow: hidden;
       background: #0d1a10;
+      border-bottom: 1px solid rgba(212,184,150,0.15);
       margin-bottom: 1.5rem;
     }
-    .site-header-img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center center;
-      display: block;
-    }
     .header-content {
-      position: relative;
-      z-index: 1;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -146,12 +136,18 @@
 
     /* ── Card ───────────────────────────────────────────────────────────── */
     .card {
-      border-image: url('../parchment_slice.png') 25% fill stretch;
-      border-width: 50px;
-      border-style: solid;
+      background: rgba(237,229,216,0.05);
+      border: 1px solid rgba(212,184,150,0.18);
+      border-radius: 8px;
       padding: 1.25rem 1.5rem;
       margin-bottom: 1.25rem;
-      filter: drop-shadow(0 4px 18px rgba(0,0,0,0.55));
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      color: #e8dcc8;
+      --text:    #2a1a08;
+      --muted:   #a89070;
+      --success: #7ab55c;
+      --warn:    #d4921e;
+      --danger:  #c8605c;
     }
 
     .card-header {
@@ -502,7 +498,7 @@
 <!-- Demo banner — visible only in demo mode -->
 <div id="demo-banner" style="display:none;gap:1rem;align-items:center;justify-content:space-between;background:#2a1a08;color:#f5e6c0;padding:0.6rem 1.25rem;font-size:0.875rem;border-bottom:2px solid #c27c28;">
   <button onclick="startTour()" style="flex-shrink:0;white-space:nowrap;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);color:#f5e6c0;font-family:inherit;font-size:0.8125rem;padding:0.35rem 0.875rem;border-radius:6px;cursor:pointer;">Take the tour →</button>
-  <span style="font-style:italic;text-align:right">You are consulting the ledger of <strong>Mira Thornwick, Journeyman Hedge Witch</strong>. Her finances are fictional. Her toad is fictional. Her student loans are painfully real. Changes are not saved.</span>
+  <span style="font-style:italic;text-align:right">You are consulting the ledger of <strong>Mira Thornwick, Journeyman Hedge Witch</strong>.<br>Her finances are fictional. Her toad is fictional. Her student loans are painfully real. Changes are not saved.</span>
 </div>
 
 <!-- Sign-in overlay — shown until Google auth resolves -->
@@ -517,7 +513,6 @@
 </div>
 
 <header>
-  <img src="finance_header_new.png" class="site-header-img" alt="">
   <div class="header-content">
     <div class="header-left">
       <h1>The Lantern-Scale Ledger<span id="subtitle" class="header-date"></span></h1>
@@ -693,9 +688,9 @@ function buildDemoSeed() {
       { id: 9,  name: 'Potion Box Monthly',                        amount: 48,  dueDay: 28 },
       // Debt accounts (balance field makes them appear in debt tracker)
       { id: 10, name: 'Goblin Bank Credit Line',                   amount: 45,  dueDay: 3,  paid: true, amountPaid: 45, balance: 2340,  notes: '19.99% APR — standard goblin rates' },
-      { id: 11, name: 'Academy of Arcane Arts — Student Loans',    amount: 210, dueDay: 7,  balance: 18750, notes: '7.2% interest — she is mostly fine about it' },
+      { id: 11, name: 'Academy of Arcane Arts — Student Loans',    amount: 210, dueDay: 7,  balance: 18750, notes: '7.2% interest' },
       { id: 12, name: 'Hextech Pro 3000 Cauldron — 0% until Dec', amount: 89,  dueDay: 14, balance: 890,  notes: '0% financing until December — almost done!' },
-      { id: 13, name: 'Emergency Broom Repair — 24% APR',         amount: 75,  dueDay: 22, balance: 430,  notes: "The Incident of Last Autumn. We don't talk about it." },
+      { id: 13, name: 'Emergency Broom Repair — 24% APR',         amount: 75,  dueDay: 22, balance: 430,  notes: "The Incident of Last Autumn." },
     ],
     expenses: [
       { id: 'e1', date: demoDate(2),  category: 'walmart',    amount: 127.43, description: 'nightshade was on sale' },

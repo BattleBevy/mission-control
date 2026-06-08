@@ -27,7 +27,9 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
-  background: #0d1a10 url('meal_background.png') center / cover no-repeat fixed;
+  background:
+    linear-gradient(rgba(13,26,16,0.92), rgba(13,26,16,0.92)),
+    url('meal_background.png') center/cover no-repeat fixed #0d1a10;
 }
 
 body {
@@ -44,23 +46,11 @@ body {
 
 /* Header */
 .site-header {
-  position: relative;
-  overflow: hidden;
   background: #0d1a10;
+  border-bottom: 1px solid rgba(212,184,150,0.15);
   margin-bottom: 1.5rem;
 }
-.site-header-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center center;
-  display: block;
-}
 .header-content {
-  position: relative;
-  z-index: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -118,13 +108,11 @@ body {
   transition: background 0.15s, color 0.15s;
 }
 .tab-btn.active {
-  border-style: solid;
-  border-width: 14px;
-  border-bottom-width: 0;
-  border-image: url('../parchment.png') 25% fill stretch;
-  background: transparent;
+  background: rgba(237,229,216,0.12);
+  border: 1px solid rgba(212,184,150,0.5);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
   color: var(--accent);
-  padding-top: 0.6rem;
 }
 .tab-btn:hover:not(.active) {
   background: rgba(237,229,216,0.2);
@@ -154,12 +142,26 @@ body {
 
 /* Goals section */
 .goals-section {
-  border-image: url('../parchment.png') 25% fill stretch;
-  border-width: 50px;
-  border-style: solid;
-  padding: 0.25rem 0.75rem;
+  background: rgba(237,229,216,0.05);
+  border: 1px solid rgba(212,184,150,0.18);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
   margin-bottom: 0.625rem;
-  filter: drop-shadow(0 4px 18px rgba(0,0,0,0.55));
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  color: #e8dcc8;
+  --text:    #2a1a08;
+  --muted:   #c0a882;
+  --success: #7ab55c;
+  --warn:    #d4921e;
+  --danger:  #c8605c;
+}
+.meal-section, .section-card {
+  --text:    #2a1a08;
+  --muted:   #c0a882;
+  --success: #7ab55c;
+  --warn:    #d4921e;
+  --danger:  #c8605c;
+  color: #e8dcc8;
 }
 .goals-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 .goals-header h2 { font-family: 'Almendra SC', Georgia, serif; font-size: 0.95rem; font-weight: 700; color: var(--muted); }
@@ -182,11 +184,12 @@ body {
 
 /* Meal sections */
 .meal-section {
-  border-image: url('../parchment.png') 25% fill stretch;
-  border-width: 50px;
-  border-style: solid;
+  background: rgba(237,229,216,0.05);
+  border: 1px solid rgba(212,184,150,0.18);
+  border-radius: 8px;
+  overflow: hidden;
   margin-bottom: 0.625rem;
-  filter: drop-shadow(0 4px 18px rgba(0,0,0,0.55));
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 .meal-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: rgba(0,0,0,0.06); border-bottom: 1px solid var(--border); }
 .meal-header h3 { font-family: 'Almendra SC', Georgia, serif; font-size: 1rem; font-weight: 700; }
@@ -194,14 +197,14 @@ body {
 .item-list { list-style: none; }
 .item-row { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
 .item-row:last-child { border-bottom: none; }
-.item-row.is-alt { background: var(--bg); opacity: 0.72; }
+.item-row.is-alt { background: rgba(0,0,0,0.18); opacity: 0.72; color: var(--success); }
 .item-name { flex: 1; }
 .item-svgLabel { font-size: 0.76rem; color: var(--muted); }
 .item-macros { display: flex; gap: 10px; font-size: 0.76rem; color: var(--muted); }
 .item-macros span { min-width: 56px; text-align: right; }
 .item-remove { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1.1rem; opacity: 0.45; padding: 0 2px; flex-shrink: 0; }
 .item-remove:hover { opacity: 1; }
-.alt-label { padding: 5px 16px; font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; background: var(--bg); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.alt-label { padding: 5px 16px; font-size: 0.7rem; color: var(--success); text-transform: uppercase; letter-spacing: 0.07em; background: rgba(60,90,40,0.25); border-top: 1px solid rgba(90,140,60,0.25); border-bottom: 1px solid rgba(90,140,60,0.25); }
 
 /* Add-item area */
 .add-area { padding: 10px 16px; background: transparent; border-top: 1px solid var(--border); }
@@ -230,12 +233,12 @@ details.more-nutr summary:hover { color: var(--accent); }
 
 /* Section cards (Foods/Recipes tabs) */
 .section-card {
-  border-image: url('../parchment.png') 25% fill stretch;
-  border-width: 50px;
-  border-style: solid;
-  padding: 0.25rem 0.75rem;
+  background: rgba(237,229,216,0.05);
+  border: 1px solid rgba(212,184,150,0.18);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
   margin-bottom: 0.625rem;
-  filter: drop-shadow(0 4px 18px rgba(0,0,0,0.55));
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 .section-card h2 { font-family: 'Almendra SC', Georgia, serif; font-size: 0.95rem; font-weight: 700; color: var(--muted); margin-bottom: 14px; }
 .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 10px; }
@@ -256,14 +259,14 @@ details.more-nutr summary:hover { color: var(--accent); }
 .food-table th { text-align: left; padding: 5px 8px; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
 .food-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
 .food-table tr:last-child td { border-bottom: none; }
-.food-table tr:hover td { background: var(--bg); }
+.food-table tr:hover td { background: rgba(237,229,216,0.1); }
 .food-table .num { text-align: right; color: var(--muted); }
 .food-table .actions { text-align: right; }
 
 /* Recipe cards */
-.recipe-card { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; }
+.recipe-card { background: rgba(237,229,216,0.06); border: 1px solid rgba(212,184,150,0.2); border-radius: 6px; margin-bottom: 10px; }
 .recipe-card-head { display: flex; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer; }
-.recipe-card-head:hover { background: var(--surface); border-radius: 6px; }
+.recipe-card-head:hover { background: rgba(237,229,216,0.12); border-radius: 6px; }
 .recipe-title { flex: 1; font-weight: 600; font-size: 0.92rem; }
 .recipe-macros { display: flex; gap: 12px; font-size: 0.78rem; color: var(--muted); flex-wrap: wrap; }
 .recipe-chevron { color: var(--muted); font-size: 0.75rem; }
@@ -271,7 +274,7 @@ details.more-nutr summary:hover { color: var(--accent); }
 .recipe-body.open { display: block; }
 .recipe-body-nutr { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px 12px; margin-bottom: 12px; font-size: 0.8rem; }
 .recipe-body-nutr span { color: var(--muted); }
-.recipe-body-nutr strong { color: var(--text); }
+.recipe-body-nutr strong { color: #e8dcc8; }
 .recipe-notes-text { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
 .recipe-body-actions { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
 
@@ -289,7 +292,7 @@ details.more-nutr summary:hover { color: var(--accent); }
 .cat-chip { padding: 4px 12px; border: 1px solid var(--border); border-radius: 99px; background: var(--bg); color: var(--muted); cursor: pointer; font-size: 0.78rem; font-family: inherit; }
 .cat-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .cat-chip:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
-.cat-badge { display: inline-block; padding: 1px 7px; border-radius: 99px; background: #e8d5cd; color: var(--accent); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em; }
+.cat-badge { display: inline-block; padding: 1px 7px; border-radius: 99px; background: var(--bg); color: var(--muted); border: 1px solid var(--border); font-size: 0.72rem; letter-spacing: 0.03em; }
 
 /* Modals */
 .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.38); z-index: 200; align-items: center; justify-content: center; }
@@ -344,7 +347,6 @@ details.more-nutr summary:hover { color: var(--accent); }
 </div>
 
 <header class="site-header">
-  <img src="meal_header_new.png" class="site-header-img" alt="">
   <div class="header-content">
     <div class="header-left">
       <h1>The Forager's Pot</h1>
@@ -1209,7 +1211,7 @@ function buildRecipeFormHTML() {
     const yBar = draftYields > 1
       ? ` &nbsp;|&nbsp; per serving (&#247;${draftYields}): <strong style="color:var(--accent)">${r(t.cal/draftYields)} kcal</strong> &middot; <strong>${r(t.protein/draftYields)}g prot</strong> &middot; <strong>${r(t.fiber/draftYields)}g fib</strong>`
       : '';
-    totalsBar = `<div style="padding:8px 14px;font-size:0.82rem;color:var(--muted);background:var(--bg);border-top:1px solid var(--border)">
+    totalsBar = `<div style="padding:8px 14px;font-size:0.82rem;color:var(--muted);background:rgba(0,0,0,0.15);border-top:1px solid var(--border)">
       Total &mdash; <strong style="color:var(--accent)">${r(t.cal)} kcal</strong> &middot; <strong>${r(t.protein)}g prot</strong> &middot; <strong>${r(t.fiber)}g fib</strong>${yBar}
     </div>`;
   }
@@ -1233,13 +1235,13 @@ function buildRecipeFormHTML() {
       </div>
     </div>
 
-    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;margin-bottom:12px;overflow:hidden">
+    <div style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:6px;margin-bottom:12px;overflow:hidden">
       <div style="padding:8px 14px;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);border-bottom:1px solid var(--border)">Ingredients</div>
       <ul class="item-list">${ingRows}</ul>
       ${totalsBar}
     </div>
 
-    <div class="add-area" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:14px">
+    <div class="add-area" style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:14px">
       <button class="add-toggle-btn" id="recipe-ing-toggle">+ Add Ingredient</button>
       <div class="add-form" id="recipe-ing-form">${buildAddFormHTML()}</div>
     </div>
