@@ -1,4 +1,4 @@
-const CACHE = 'mc-v6';
+const CACHE = 'mc-v7';
 
 const SHELL = [
   './',
