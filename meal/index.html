@@ -91,7 +91,7 @@ body {
   align-items: flex-end;
   gap: 4px;
   padding: 0.75rem 0 0;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 .tab-btn {
   font-family: 'Almendra SC', Georgia, serif;
@@ -100,25 +100,29 @@ body {
   letter-spacing: 0.04em;
   padding: 0.45rem 1.25rem 0.55rem;
   color: #c8b89a;
-  background: rgba(237,229,216,0.18);
-  border: 1px solid rgba(212,184,150,0.4);
+  background: rgba(237,229,216,0.06);
+  border: 1px solid rgba(212,184,150,0.25);
   border-bottom: none;
   border-radius: 6px 6px 0 0;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
+  position: relative;
+  z-index: 0;
+  margin-bottom: -1px;
 }
 .tab-btn.active {
-  background: rgba(237,229,216,0.12);
-  border: 1px solid rgba(212,184,150,0.5);
+  background: rgba(237,229,216,0.18);
+  border: 1px solid rgba(212,184,150,0.45);
   border-bottom: none;
   border-radius: 6px 6px 0 0;
   color: var(--accent);
+  z-index: 2;
 }
 .tab-btn:hover:not(.active) {
-  background: rgba(237,229,216,0.2);
+  background: rgba(237,229,216,0.12);
   color: #e0d0b8;
 }
-.tab-content { display: none; padding: 0.75rem 0 2rem; }
+.tab-content { display: none; padding: 0 0 2rem; }
 .tab-content.active { display: block; }
 .plan-actions {
   display: flex;
