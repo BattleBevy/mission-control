@@ -460,44 +460,13 @@ a.btn-ghost {
   color: rgba(237, 229, 216, 0.45);
 }
 
-/* ── Ceramic plate cards ── */
+/* ── Glass panel cards ── */
 
 .panel-bank .bank-item {
-  position: relative;
-  border-style: solid;
-  border-width: 28px;
-  border-radius: 0;
-  background: transparent;
-  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
-}
-
-/* Dark overlay sits above the border-image plate but below text content.
-   inset: -28px expands outward to cover the full border region (the plate rim). */
-.panel-bank .bank-item::before {
-  content: '';
-  position: absolute;
-  inset: -28px;
-  background: rgba(0, 0, 0, 0.10);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* All direct children float above the darkening overlay */
-.panel-bank .bank-item > * {
-  position: relative;
-  z-index: 1;
-}
-
-.panel-bank .bank-item[data-priority="high"] {
-  border-image: url('./assets/task_bank_high.png') 20% fill stretch;
-}
-
-.panel-bank .bank-item[data-priority="medium"] {
-  border-image: url('./assets/task_bank_medium.png') 20% fill stretch;
-}
-
-.panel-bank .bank-item[data-priority="low"] {
-  border-image: url('./assets/task_bank_low.png') 20% fill stretch;
+  background: rgba(0,0,0,0.28);
+  border: 1px solid rgba(212,184,150,0.18);
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 
 .panel-bank .bank-item-title {
@@ -758,28 +727,10 @@ a.btn-ghost {
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  border-bottom: none;
-  border-style: solid;
-  border-width: 8px;
-  border-radius: 0;
-  background: transparent;
-  border-image: url('./assets/anytime_task_01.png') 30% fill stretch;
-  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.45)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.28));
-  position: relative;
-}
-
-.anytime-item::before {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  background: rgba(0, 0, 0, 0.10);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.anytime-item > * {
-  position: relative;
-  z-index: 1;
+  background: rgba(0,0,0,0.28);
+  border: 1px solid rgba(212,184,150,0.18);
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 
 .panel-anytime .anytime-title {
@@ -797,26 +748,6 @@ a.btn-ghost {
   background: rgba(78, 107, 53, 0.45);
   border-color: rgba(78, 107, 53, 0.8);
   color: #ede5d8;
-}
-
-.anytime-item:last-child {
-  border-bottom: none;
-}
-
-.panel-anytime .anytime-item:nth-child(4n+1) {
-  border-image: url('./assets/anytime_task_01.png') 30% fill stretch;
-}
-
-.panel-anytime .anytime-item:nth-child(4n+2) {
-  border-image: url('./assets/anytime_task_02.png') 30% fill stretch;
-}
-
-.panel-anytime .anytime-item:nth-child(4n+3) {
-  border-image: url('./assets/anytime_task_03.png') 30% fill stretch;
-}
-
-.panel-anytime .anytime-item:nth-child(4n) {
-  border-image: url('./assets/anytime_task_04.png') 30% fill stretch;
 }
 
 .anytime-item.completed {
@@ -2011,8 +1942,8 @@ a.btn-ghost {
 /* ── Demo banner ─────────────────────────────────────────────────────────────── */
 
 .demo-banner {
-  background: rgba(20, 10, 4, 0.65);
-  border-bottom: 1px solid rgba(237, 229, 216, 0.14);
+  background: #1a0c08;
+  border-bottom: 1px solid rgba(212, 184, 150, 0.25);
   padding: var(--space-2) var(--space-6);
   display: flex;
   align-items: center;
