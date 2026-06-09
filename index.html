@@ -36,54 +36,35 @@
       background: transparent;
       color: var(--text);
       min-height: 100vh;
-      padding: 0 1.5rem;
+    }
+
+    .content {
       max-width: 900px;
       margin: 0 auto;
+      padding: 0 1.5rem 1.5rem;
     }
 
     header {
-      margin-bottom: -60px;
-      position: relative;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    .banner-wrap {
-      position: relative;
-      max-width: 620px;
-      margin: 0 auto;
-      overflow: hidden;
-    }
-
-    .banner-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-      margin-top: -40px;
-      margin-bottom: -50px;
-    }
-
-    .banner-text {
-      position: absolute;
-      top: 44%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      background: url('leather_desk_blotter.png') no-repeat center / 100% 100%;
+      border-bottom: none;
+      margin-bottom: 1.5rem;
+      padding: 1.5rem 2rem;
       text-align: center;
-      width: 55%;
     }
 
     header h1 {
       font-size: 2.25rem;
       font-weight: 400;
       font-family: 'Almendra SC', serif;
-      color: var(--text);
-      text-shadow: 0 1px 4px rgba(255, 255, 255, 0.4);
+      color: #f5e6c0;
+      text-shadow: 0 1px 10px rgba(0,0,0,0.9);
     }
 
     header .date {
       font-size: 1rem;
-      color: var(--text);
+      color: #f5e6c0;
       margin-top: 0.25rem;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.8);
     }
 
     .domains {
@@ -179,15 +160,11 @@
 <body>
 
 <header>
-  <div class="banner-wrap">
-    <img src="banner_image.png" alt="">
-    <div class="banner-text">
-      <h1>The Living Grimoire</h1>
-      <div class="date" id="today-date"></div>
-    </div>
-  </div>
+  <h1>The Living Grimoire</h1>
+  <div class="date" id="today-date"></div>
 </header>
 
+<div class="content">
 <div class="domains">
 
   <a href="./planner/" class="domain-card planner-card">
@@ -230,6 +207,7 @@
     </div>
   </a>
 
+</div>
 </div>
 
 <script>
