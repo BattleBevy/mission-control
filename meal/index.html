@@ -1627,7 +1627,7 @@ mcAuth.onAuthStateChanged(async user => {
       appInitialized = true;
       await initApp();
     }
-  } else {
+  } else if (!isDemo) {
     document.getElementById('signin-overlay').style.display = 'flex';
   }
 });

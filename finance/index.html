@@ -1406,7 +1406,7 @@ mcAuth.onAuthStateChanged(async user => {
       appInitialized = true;
       await initApp();
     }
-  } else {
+  } else if (!isDemo) {
     document.getElementById('signin-overlay').style.display = 'flex';
     appInitialized = false;
   }
@@ -1418,6 +1418,7 @@ document.getElementById('google-signin-btn').addEventListener('click', () => {
 
 document.getElementById('try-demo-btn').addEventListener('click', async () => {
   isDemo = true;
+  appInitialized = true;
   document.getElementById('signin-overlay').style.display = 'none';
   document.getElementById('demo-banner').style.display = 'flex';
   document.getElementById('import-btn').style.display = 'none';
