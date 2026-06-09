@@ -13,8 +13,14 @@ export function CurrentTimeLine() {
   const [time, setTime] = useState(nowString)
 
   useEffect(() => {
-    const id = setInterval(() => setTime(nowString()), 60_000)
-    return () => clearInterval(id)
+    const tick = () => setTime(nowString())
+    const id = setInterval(tick, 60_000)
+    const onVisible = () => { if (document.visibilityState === 'visible') tick() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [])
 
   const minutes = toMinutes(time)

@@ -64,9 +64,17 @@ function SchedulerView({ user }: { user: User }) {
   const isToday = selectedDay === todayString()
 
   // Tick every minute so the overdue check re-runs even without a plan change.
+  // Also snap forward immediately when the tab becomes visible (Android timers pause
+  // while the screen is off, so the interval can drift many minutes behind reality).
   useEffect(() => {
-    const interval = setInterval(() => setNow(nowString()), 60_000)
-    return () => clearInterval(interval)
+    const tick = () => setNow(nowString())
+    const interval = setInterval(tick, 60_000)
+    const onVisible = () => { if (document.visibilityState === 'visible') tick() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [])
 
   // First scheduled task whose end time has passed and hasn't been actioned yet.

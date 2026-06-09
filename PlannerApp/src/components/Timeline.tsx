@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import type { DayPlan, SchedulerOutput, TaskTemplate, EventTemplate } from '../types'
 import { updateTask, saveTask, deleteTask, moveTask } from '../store/tasks'
 import { saveTemplate, updateTemplate, deleteTemplate } from '../store/templates'
@@ -73,6 +73,27 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
     setGhostTopState(top)
   }
 
+  // Fallback cleanup: if Android system gestures (pull-to-refresh, back, notification)
+  // intercept a touch mid-drag, pointercancel may not reach the captured element.
+  // This document-level listener catches those cases and clears any stuck drag state.
+  // In the normal case dragDataRef is already null by the time this fires, so it's a noop.
+  useEffect(() => {
+    function emergencyCleanup() {
+      if (dragDataRef.current) {
+        dragDataRef.current = null
+        setDraggingId(null)
+        ghostTopRef.current = null
+        setGhostTopState(null)
+      }
+    }
+    document.addEventListener('pointerup', emergencyCleanup)
+    document.addEventListener('pointercancel', emergencyCleanup)
+    return () => {
+      document.removeEventListener('pointerup', emergencyCleanup)
+      document.removeEventListener('pointercancel', emergencyCleanup)
+    }
+  }, [])
+
   function handleDragHandlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
     const d = dragDataRef.current
     if (!d) return
@@ -99,6 +120,9 @@ export function Timeline({ plan, scheduled, userId, onSnapshot, templates, event
     if (!d?.started || currentGhostTop === null) return
 
     const newStartMin = currentGhostTop + DAY_START_MIN
+    // Skip write if the block was dropped at its original position.
+    if (newStartMin === d.blockOriginalTop + DAY_START_MIN) return
+
     const newStart = fromMinutes(newStartMin)
     const newEnd = fromMinutes(newStartMin + d.duration)
 
