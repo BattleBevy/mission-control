@@ -170,7 +170,7 @@ function SchedulerView({ user }: { user: User }) {
           </div>
         )}
         <div className="app-header-right">
-          <a href="../" className="btn-ghost btn-hub">← Hub</a>
+          <a href={user.isAnonymous ? '../demo/' : '../'} className="btn-ghost btn-hub">← Hub</a>
           <div className="view-toggle">
             <button className={`btn-view${view === 'day' ? ' active' : ''}`} onClick={() => setView('day')}>Day</button>
             <button className={`btn-view${view === 'week' ? ' active' : ''}`} onClick={() => { setView('week'); setWeekStart(getMondayOfWeek(selectedDay)) }}>Week</button>
