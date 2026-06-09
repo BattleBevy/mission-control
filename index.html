@@ -87,23 +87,22 @@
     }
 
     .domains {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      row-gap: 0.25rem;
-      column-gap: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
     .domain-card {
       border-style: solid;
-      border-width: 55px;
-      border-image: url('parchment_slice.png') 25% fill stretch;
-      padding: 0.25rem 0.5rem 1rem;
+      border-width: 28px;
+      border-image: url('PlannerApp/src/assets/parchment.png') 25% fill stretch;
+      padding: 0.5rem 1rem 0.75rem;
       text-decoration: none;
       color: var(--text);
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
-      text-align: center;
+      gap: 1.5rem;
       transition: filter 0.2s, transform 0.15s;
       position: relative;
     }
@@ -118,10 +117,15 @@
       cursor: default;
     }
 
+    .domain-card-text {
+      flex: 1;
+      min-width: 0;
+    }
+
     .domain-icon {
-      width: 160px;
-      height: 160px;
-      margin-bottom: 1rem;
+      width: 96px;
+      height: 96px;
+      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -139,17 +143,17 @@
     }
 
     .domain-title {
-      font-size: 1.4rem;
+      font-size: 1.7rem;
       font-weight: 700;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
       font-family: 'Almendra SC', serif;
     }
 
     .domain-desc {
-      font-size: 1.125rem;
+      font-size: 1rem;
       font-weight: 400;
       color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.5;
     }
 
     .coming-soon-tag {
@@ -166,8 +170,10 @@
       border-radius: 99px;
     }
 
-    /* domain accent colors — used for text, not borders */
-    /* planner: #4e6b35 · finance: #c27c28 · meal: #c06040 · codex: #6b4a7a */
+    .planner-card .domain-title { color: #4e6b35; }
+    .finance-card .domain-title { color: #c27c28; }
+    .meal-card    .domain-title { color: #c06040; }
+    .codex-card   .domain-title { color: #6b4a7a; }
   </style>
 </head>
 <body>
@@ -185,35 +191,43 @@
 <div class="domains">
 
   <a href="./planner/" class="domain-card planner-card">
+    <div class="domain-card-text">
+      <div class="domain-title">The Mossbound Hourglass</div>
+      <div class="domain-desc">Daily schedule &middot; fixed events &middot; flexible tasks &middot; real-time recalculation</div>
+    </div>
     <div class="domain-icon">
       <img src="icons/Scheduler_Icon.png" alt="Scheduler">
     </div>
-    <div class="domain-title">The Mossbound Hourglass</div>
-    <div class="domain-desc">Daily schedule &middot; fixed events &middot; flexible tasks &middot; real-time recalculation</div>
   </a>
 
   <a href="finance/index.html" class="domain-card finance-card">
+    <div class="domain-card-text">
+      <div class="domain-title">The Lantern&#8209;Scale Ledger</div>
+      <div class="domain-desc">Mark bills paid &middot; log expenses &amp; receipts &middot; track debt toward your goal</div>
+    </div>
     <div class="domain-icon">
       <img src="icons/Finance_icon.png" alt="Finance">
     </div>
-    <div class="domain-title">The Lantern‑Scale Ledger</div>
-    <div class="domain-desc">Mark bills paid &middot; log expenses &amp; receipts &middot; track debt toward your goal</div>
   </a>
 
   <a href="meal/index.html" class="domain-card meal-card">
+    <div class="domain-card-text">
+      <div class="domain-title">The Forager&rsquo;s Pot</div>
+      <div class="domain-desc">Weekly plan &middot; nutrition targets &middot; food library &middot; recipes</div>
+    </div>
     <div class="domain-icon">
       <img src="icons/Meal_Icon.png" alt="Meal">
     </div>
-    <div class="domain-title">The Forager’s Pot </div>
-    <div class="domain-desc">Weekly plan &middot; nutrition targets &middot; food library &middot; recipes</div>
   </a>
 
   <a href="codex/index.html" class="domain-card codex-card">
+    <div class="domain-card-text">
+      <div class="domain-title">The Rune&#8209;Root Codex</div>
+      <div class="domain-desc">Characters &middot; households &middot; homes &middot; the fairy&rsquo;s chronicle</div>
+    </div>
     <div class="domain-icon">
       <img src="icons/Codex_Icon.png" alt="Codex">
     </div>
-    <div class="domain-title">The Rune‑Root Codex</div>
-    <div class="domain-desc">Characters &middot; households &middot; homes &middot; the fairy&rsquo;s chronicle</div>
   </a>
 
 </div>
