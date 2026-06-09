@@ -3,9 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Game World Codex</title>
+  <title>The Rune-Root Codex</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Almendra+SC&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="../firebase-init.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      background:
+        linear-gradient(rgba(13,26,16,0.92), rgba(13,26,16,0.92)),
+        url('codex_background.png') center/cover no-repeat fixed #0d1a10;
+    }
 
     :root {
       --bg:      #ede5d8;
@@ -13,47 +26,49 @@
       --border:  #d4b896;
       --text:    #2a1a08;
       --muted:   #7a5c3c;
+      --codex:   #6b4a7a;
       --success: #4e6b35;
       --warn:    #c87820;
       --danger:  #8b3530;
-      --codex:   #6b4a7a;
-      --codex-lt: rgba(107,74,122,0.12);
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'IM Fell English SC', Georgia, serif;
+      color: #e8dcc8;
       min-height: 100vh;
     }
 
+    /* ── Header ── */
     header {
-      background: var(--surface);
-      border-bottom: 3px solid var(--codex);
-      padding: 0.875rem 1.5rem;
+      background: url('../leather_desk_blotter.png') no-repeat center / 100% 100%;
+      border-bottom: none;
+      margin-bottom: 1.5rem;
+    }
+
+    .header-content {
       display: flex;
       align-items: center;
-      gap: 1.25rem;
+      gap: 0.75rem;
+      padding: 12px 24px;
       flex-wrap: wrap;
     }
 
     .site-title {
-      font-family: Georgia, serif;
+      font-family: 'Almendra SC', Georgia, serif;
       font-size: 1.375rem;
-      color: var(--codex);
+      font-weight: 700;
+      color: #f5e6c0;
+      text-shadow: 0 1px 10px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,1);
       cursor: pointer;
       white-space: nowrap;
     }
 
-    .nav-links {
-      display: flex;
-      gap: 0.25rem;
-      flex-wrap: wrap;
-    }
+    .nav-links { display: flex; gap: 0.25rem; flex-wrap: wrap; }
 
     .nav-link {
+      font-family: 'IM Fell English SC', Georgia, serif;
       font-size: 0.875rem;
-      color: var(--muted);
+      color: rgba(237,229,216,0.7);
       cursor: pointer;
       padding: 0.3rem 0.65rem;
       border-radius: 6px;
@@ -61,27 +76,37 @@
       white-space: nowrap;
     }
 
-    .nav-link:hover { background: var(--codex-lt); color: var(--codex); }
-    .nav-link.active { background: var(--codex-lt); color: var(--codex); font-weight: 600; }
+    .nav-link:hover  { background: rgba(107,74,122,0.25); color: #c8a8e0; }
+    .nav-link.active { background: rgba(107,74,122,0.3);  color: #c8a8e0; font-weight: 600; }
 
-    .back-link {
-      margin-left: auto;
-      font-size: 0.8125rem;
-      color: var(--muted);
-      text-decoration: none;
+    .header-actions { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; }
+
+    .header-actions .btn {
+      background: none;
+      border-color: rgba(237,229,216,0.28);
+      color: rgba(237,229,216,0.72);
     }
 
+    .header-actions .btn:hover {
+      background: rgba(237,229,216,0.1);
+      border-color: rgba(237,229,216,0.5);
+      color: #f5e6c0;
+    }
+
+    /* ── Layout ── */
     #main {
-      max-width: 860px;
+      max-width: 900px;
       margin: 0 auto;
-      padding: 1.5rem;
+      padding: 0 1.5rem 2rem;
     }
 
     /* ── Typography ── */
     .page-title {
-      font-family: Georgia, serif;
-      font-size: 1.75rem;
+      font-family: 'Almendra SC', Georgia, serif;
+      font-size: 1.625rem;
+      font-weight: 700;
       margin-bottom: 1.25rem;
+      color: #e8dcc8;
       display: flex;
       align-items: baseline;
       gap: 0.75rem;
@@ -92,7 +117,7 @@
 
     .breadcrumb {
       font-size: 0.8125rem;
-      color: var(--muted);
+      color: #a89090;
       margin-bottom: 0.875rem;
       display: flex;
       gap: 0.35rem;
@@ -100,34 +125,60 @@
       flex-wrap: wrap;
     }
 
-    .crumb { color: var(--codex); cursor: pointer; text-decoration: underline; }
+    .crumb { color: #c8a8e0; cursor: pointer; text-decoration: underline; }
 
-    /* ── Cards ── */
+    /* ── Dark Glass Cards ── */
+    .card {
+      background: rgba(237,229,216,0.05);
+      border: 1px solid rgba(212,184,150,0.18);
+      border-radius: 8px;
+      padding: 1.125rem 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      color: #e8dcc8;
+      --text:    #2a1a08;
+      --muted:   #a89090;
+      --success: #7ab55c;
+      --warn:    #d4921e;
+      --danger:  #c8605c;
+    }
+
+    .card h3 {
+      font-family: 'Almendra SC', Georgia, serif;
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: #c8a8e0;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.375rem;
+      border-bottom: 1px solid rgba(212,184,150,0.18);
+    }
+
+    /* ── Overview cards ── */
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
 
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
+    .overview-card {
+      background: rgba(107,74,122,0.1);
+      border: 1px solid rgba(107,74,122,0.22);
       border-radius: 10px;
       padding: 1rem 1.125rem;
       cursor: pointer;
-      transition: box-shadow 0.15s, transform 0.12s;
+      transition: background 0.12s, transform 0.12s;
     }
 
-    .card:hover { box-shadow: 0 4px 14px rgba(80,45,10,0.12); transform: translateY(-1px); }
-    .card-title { font-family: Georgia, serif; font-size: 1rem; margin-bottom: 0.2rem; }
-    .card-meta  { font-size: 0.8125rem; color: var(--muted); }
+    .overview-card:hover { background: rgba(107,74,122,0.2); transform: translateY(-1px); }
+    .overview-card-title { font-family: 'Almendra SC', Georgia, serif; font-size: 1rem; font-weight: 700; color: #c8a8e0; margin-bottom: 0.2rem; }
+    .overview-card-meta  { font-size: 0.8125rem; color: #a89090; }
 
     /* ── Entity list rows ── */
     .entity-list {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
+      background: rgba(237,229,216,0.03);
+      border: 1px solid rgba(212,184,150,0.15);
+      border-radius: 8px;
       overflow: hidden;
       margin-bottom: 1.25rem;
     }
@@ -136,159 +187,85 @@
       display: flex;
       align-items: center;
       padding: 0.7rem 1rem;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(212,184,150,0.1);
       gap: 0.75rem;
       cursor: pointer;
       transition: background 0.1s;
     }
 
     .entity-row:last-child { border-bottom: none; }
-    .entity-row:hover { background: var(--codex-lt); }
-    .entity-row .row-name { font-weight: 500; flex: 1; min-width: 0; }
-    .entity-row .row-meta { font-size: 0.8125rem; color: var(--muted); white-space: nowrap; }
+    .entity-row:hover      { background: rgba(107,74,122,0.1); }
+    .entity-row .row-name  { font-weight: 500; flex: 1; min-width: 0; color: #e8dcc8; }
+    .entity-row .row-meta  { font-size: 0.8125rem; color: #a89090; white-space: nowrap; }
 
-    .row-actions {
-      display: flex;
-      gap: 0.35rem;
-      opacity: 0;
-      transition: opacity 0.1s;
-      flex-shrink: 0;
-    }
-
+    .row-actions { display: flex; gap: 0.35rem; opacity: 0; transition: opacity 0.1s; flex-shrink: 0; }
     .entity-row:hover .row-actions { opacity: 1; }
 
-    /* ── Detail sections ── */
-    .detail-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.125rem 1.25rem;
-      margin-bottom: 1rem;
-    }
-
-    .detail-section h3 {
-      font-family: Georgia, serif;
-      font-size: 0.9375rem;
-      color: var(--codex);
-      margin-bottom: 0.75rem;
-      padding-bottom: 0.375rem;
-      border-bottom: 1px solid var(--border);
-    }
-
+    /* ── Detail ── */
     .info-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 0.75rem;
     }
 
-    .info-item label {
-      font-size: 0.6875rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--muted);
-      display: block;
-      margin-bottom: 0.2rem;
-    }
-
-    .info-item .val { font-size: 0.9375rem; }
+    .info-item label { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.06em; color: #a89090; display: block; margin-bottom: 0.2rem; }
+    .info-item .val  { font-size: 0.9375rem; color: #e8dcc8; }
 
     .trait-list { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.875rem; }
 
     .trait-tag {
-      background: var(--codex-lt);
-      color: var(--codex);
-      border: 1px solid rgba(107,74,122,0.25);
+      background: rgba(107,74,122,0.15);
+      color: #c8a8e0;
+      border: 1px solid rgba(107,74,122,0.28);
       border-radius: 99px;
       padding: 0.175rem 0.6rem;
       font-size: 0.8125rem;
     }
 
-    .long-text { line-height: 1.75; white-space: pre-wrap; font-size: 0.9375rem; }
+    .long-text { line-height: 1.75; white-space: pre-wrap; font-size: 0.9375rem; color: #e8dcc8; }
 
-    /* ── Relationships ── */
     .rel-list { display: flex; flex-direction: column; gap: 0.625rem; }
-
     .rel-item { display: flex; gap: 0.5rem; align-items: flex-start; flex-wrap: wrap; }
 
-    .rel-name {
-      font-weight: 600;
-      color: var(--codex);
-      cursor: pointer;
-      text-decoration: underline;
-      white-space: nowrap;
-    }
-
-    .rel-label {
-      font-size: 0.8rem;
-      background: rgba(212,184,150,0.5);
-      padding: 0.1rem 0.45rem;
-      border-radius: 99px;
-      white-space: nowrap;
-    }
-
-    .rel-notes { font-size: 0.875rem; color: var(--muted); }
+    .rel-name  { font-weight: 600; color: #c8a8e0; cursor: pointer; text-decoration: underline; white-space: nowrap; }
+    .rel-label { font-size: 0.8rem; background: rgba(107,74,122,0.15); padding: 0.1rem 0.45rem; border-radius: 99px; white-space: nowrap; color: #e8dcc8; }
+    .rel-notes { font-size: 0.875rem; color: #a89090; }
 
     /* ── Badges ── */
-    .badge {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 0.15rem 0.5rem;
-      border-radius: 99px;
-    }
-
-    .badge-original    { background: #e8dcc8; color: var(--muted); }
-    .badge-in-progress { background: rgba(200,120,32,0.15); color: var(--warn); }
-    .badge-renovated   { background: rgba(78,107,53,0.15); color: var(--success); }
-    .badge-rebuilt     { background: var(--codex-lt); color: var(--codex); }
+    .badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 99px; }
+    .badge-original    { background: rgba(237,229,216,0.1); color: #a89090; }
+    .badge-in-progress { background: rgba(200,120,32,0.2);  color: #d4921e; }
+    .badge-renovated   { background: rgba(78,107,53,0.2);   color: #7ab55c; }
+    .badge-rebuilt     { background: rgba(107,74,122,0.2);  color: #c8a8e0; }
 
     /* ── Chronicle ── */
     .chronicle-entry {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--codex);
-      border-radius: 0 10px 10px 0;
+      background: rgba(107,74,122,0.07);
+      border: 1px solid rgba(107,74,122,0.18);
+      border-left: 4px solid #6b4a7a;
+      border-radius: 0 8px 8px 0;
       padding: 1rem 1.25rem;
       margin-bottom: 0.875rem;
     }
 
-    .chronicle-num  { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.2rem; }
-    .chronicle-home { font-family: Georgia, serif; font-size: 1.05rem; color: var(--codex); cursor: pointer; text-decoration: underline; margin-bottom: 0.25rem; }
-    .chronicle-notes { font-size: 0.875rem; line-height: 1.65; white-space: pre-wrap; color: var(--muted); margin-top: 0.375rem; }
+    .chronicle-num   { font-size: 0.75rem; color: #a89090; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.2rem; }
+    .chronicle-home  { font-family: 'Almendra SC', Georgia, serif; font-size: 1.05rem; color: #c8a8e0; cursor: pointer; text-decoration: underline; margin-bottom: 0.25rem; }
+    .chronicle-notes { font-size: 0.875rem; line-height: 1.65; white-space: pre-wrap; color: #a89090; margin-top: 0.375rem; }
 
     /* ── Stats ── */
     .stats-bar { display: flex; gap: 2rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
-    .stat .num { font-size: 1.75rem; font-weight: 700; color: var(--codex); line-height: 1; }
-    .stat .lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat .num { font-size: 1.75rem; font-weight: 700; color: #c8a8e0; line-height: 1; font-family: 'Almendra SC', Georgia, serif; }
+    .stat .lbl { font-size: 0.75rem; color: #a89090; text-transform: uppercase; letter-spacing: 0.05em; }
 
-    /* ── Section header ── */
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.875rem;
-    }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.875rem; }
+    .section-header h2 { font-family: 'Almendra SC', Georgia, serif; font-size: 1.25rem; font-weight: 700; color: #e8dcc8; }
 
-    .section-header h2 { font-family: Georgia, serif; font-size: 1.25rem; }
-
-    /* ── Neighborhood grouping ── */
     .nbhood-section { margin-bottom: 1.75rem; }
+    .nbhood-title { font-family: 'Almendra SC', Georgia, serif; font-size: 1.0625rem; font-weight: 700; color: #c8a8e0; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
+    .nbhood-count { font-size: 0.8125rem; color: #a89090; font-family: 'IM Fell English SC', Georgia, serif; font-weight: normal; }
 
-    .nbhood-title {
-      font-family: Georgia, serif;
-      font-size: 1.0625rem;
-      color: var(--codex);
-      margin-bottom: 0.6rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .nbhood-count { font-size: 0.8125rem; color: var(--muted); font-family: sans-serif; font-weight: normal; }
-
-    .empty { text-align: center; color: var(--muted); padding: 1.5rem; font-style: italic; }
-
-    .wiki-link { color: var(--codex); text-decoration: underline; cursor: pointer; }
+    .empty     { text-align: center; color: #a89090; padding: 1.5rem; font-style: italic; }
+    .wiki-link { color: #c8a8e0; text-decoration: underline; cursor: pointer; }
 
     /* ── Buttons ── */
     .btn {
@@ -296,30 +273,136 @@
       align-items: center;
       gap: 0.3rem;
       padding: 0.45rem 0.9rem;
-      border: none;
+      border: 1px solid rgba(212,184,150,0.3);
       border-radius: 6px;
       font-size: 0.875rem;
       font-weight: 500;
       cursor: pointer;
-      transition: opacity 0.12s;
+      transition: background 0.12s;
       font-family: inherit;
+      background: rgba(237,229,216,0.07);
+      color: #e8dcc8;
     }
 
-    .btn:hover { opacity: 0.82; }
-    .btn-primary { background: var(--codex); color: #fff; }
-    .btn-ghost   { background: transparent; border: 1px solid var(--border); color: var(--muted); }
-    .btn-ghost:hover { background: var(--bg); opacity: 1; }
-    .btn-danger  { background: var(--danger); color: #fff; }
-    .btn-sm      { padding: 0.25rem 0.6rem; font-size: 0.8125rem; }
+    .btn:hover    { background: rgba(237,229,216,0.14); }
+    .btn-primary  { background: #6b4a7a; border-color: #6b4a7a; color: #fff; }
+    .btn-primary:hover { background: #5a3a68; border-color: #5a3a68; }
+    .btn-ghost    { background: transparent; border: 1px solid rgba(212,184,150,0.22); color: #a89090; }
+    .btn-ghost:hover { background: rgba(237,229,216,0.08); }
+    .btn-danger   { background: rgba(140,53,48,0.5); border-color: rgba(140,53,48,0.3); color: #f5a89a; }
+    .btn-danger:hover { background: rgba(140,53,48,0.75); }
+    .btn-sm       { padding: 0.25rem 0.6rem; font-size: 0.8125rem; }
 
     .quick-actions { display: flex; gap: 0.625rem; flex-wrap: wrap; margin-top: 0.5rem; }
 
-    /* ── Modal ── */
+    /* ── Outfit Gallery ── */
+    .outfit-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .outfit-slot { display: flex; flex-direction: column; gap: 0.35rem; }
+    .outfit-slot-label { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #a89090; text-align: center; }
+
+    .outfit-photo {
+      position: relative;
+      aspect-ratio: 3/4;
+      border: 1px dashed rgba(107,74,122,0.28);
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      background: rgba(107,74,122,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.12s, background 0.12s;
+    }
+
+    .outfit-photo:hover     { border-color: rgba(107,74,122,0.55); background: rgba(107,74,122,0.12); }
+    .outfit-photo img       { width: 100%; height: 100%; object-fit: cover; }
+    .outfit-photo-empty     { font-size: 1.25rem; color: rgba(107,74,122,0.4); }
+
+    .photo-del {
+      position: absolute;
+      top: 4px; right: 4px;
+      background: rgba(0,0,0,0.65);
+      color: #f5a89a;
+      border: none;
+      border-radius: 99px;
+      width: 22px; height: 22px;
+      cursor: pointer;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.1s;
+      padding: 0;
+    }
+
+    .outfit-photo:hover .photo-del { opacity: 1; }
+
+    /* ── Home / Household Gallery ── */
+    .photo-gallery { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-start; }
+
+    .gallery-item {
+      position: relative;
+      width: 160px; height: 120px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid rgba(212,184,150,0.15);
+    }
+
+    .gallery-item img           { width: 100%; height: 100%; object-fit: cover; }
+    .gallery-item .photo-del    { opacity: 0; }
+    .gallery-item:hover .photo-del { opacity: 1; }
+
+    .gallery-add-btn {
+      width: 160px; height: 120px;
+      border: 1px dashed rgba(107,74,122,0.28);
+      border-radius: 6px;
+      background: rgba(107,74,122,0.06);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      color: rgba(107,74,122,0.5);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      transition: border-color 0.12s, background 0.12s, color 0.12s;
+    }
+
+    .gallery-add-btn:hover { border-color: rgba(107,74,122,0.55); background: rgba(107,74,122,0.12); color: #c8a8e0; }
+
+    .hh-photo-slot {
+      position: relative;
+      width: 160px; height: 120px;
+      border: 1px dashed rgba(107,74,122,0.28);
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      background: rgba(107,74,122,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.12s, background 0.12s;
+    }
+
+    .hh-photo-slot:hover          { border-color: rgba(107,74,122,0.55); background: rgba(107,74,122,0.12); }
+    .hh-photo-slot img            { width: 100%; height: 100%; object-fit: cover; }
+    .hh-photo-slot .photo-del     { opacity: 0; }
+    .hh-photo-slot:hover .photo-del { opacity: 1; }
+    .hh-photo-slot-empty          { font-size: 1.5rem; color: rgba(107,74,122,0.4); }
+
+    /* ── Modals ── */
     .modal-backdrop {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(42,26,8,0.5);
+      background: rgba(13,26,16,0.75);
       z-index: 100;
       overflow-y: auto;
       padding: 2rem 1rem;
@@ -334,9 +417,10 @@
       max-width: 600px;
       margin: 0 auto;
       padding: 1.5rem;
+      color: var(--text);
     }
 
-    .modal h2 { font-family: Georgia, serif; font-size: 1.25rem; margin-bottom: 1.25rem; }
+    .modal h2 { font-family: 'Almendra SC', Georgia, serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--text); }
 
     .form-group { margin-bottom: 0.875rem; }
 
@@ -365,114 +449,89 @@
 
     .form-group input:focus,
     .form-group textarea:focus,
-    .form-group select:focus { outline: 2px solid var(--codex); outline-offset: 1px; }
+    .form-group select:focus { outline: 2px solid #6b4a7a; outline-offset: 1px; }
 
     .form-group textarea { resize: vertical; }
-
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
 
     .modal-footer { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem; }
 
-    /* Relationship builder */
+    .modal .btn       { background: var(--surface); border-color: var(--border); color: var(--text); }
+    .modal .btn:hover { background: var(--bg); }
+    .modal .btn-ghost { background: transparent; border-color: var(--border); color: var(--muted); }
+    .modal .btn-ghost:hover { background: var(--bg); }
+    .modal .btn-primary { background: #6b4a7a; border-color: #6b4a7a; color: #fff; }
+    .modal .btn-primary:hover { background: #5a3a68; border-color: #5a3a68; }
+    .modal .btn-danger  { background: var(--danger); border-color: var(--danger); color: #fff; }
+
     .rel-builder { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .rel-builder-list { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.35rem; max-height: 160px; overflow-y: auto; }
 
-    .rel-builder-list {
-      padding: 0.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      max-height: 160px;
-      overflow-y: auto;
-    }
-
-    .rbi {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--bg);
-      border-radius: 4px;
-      padding: 0.35rem 0.5rem;
-      font-size: 0.875rem;
-    }
-
+    .rbi { display: flex; align-items: center; gap: 0.5rem; background: var(--bg); border-radius: 4px; padding: 0.35rem 0.5rem; font-size: 0.875rem; }
     .rbi-name  { font-weight: 500; flex: 1; }
     .rbi-label { color: var(--muted); font-size: 0.8rem; }
 
-    .rel-add-form {
-      border-top: 1px solid var(--border);
-      background: var(--bg);
-      padding: 0.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.375rem;
-    }
+    .rel-add-form { border-top: 1px solid var(--border); background: var(--bg); padding: 0.5rem; display: flex; flex-direction: column; gap: 0.375rem; }
+    .rel-add-row  { display: flex; gap: 0.375rem; }
+    .rel-add-form select, .rel-add-form input { padding: 0.35rem 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); font-family: inherit; font-size: 0.875rem; color: var(--text); flex: 1; }
 
-    .rel-add-row { display: flex; gap: 0.375rem; }
-
-    .rel-add-form select,
-    .rel-add-form input {
-      padding: 0.35rem 0.5rem;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: var(--surface);
-      font-family: inherit;
-      font-size: 0.875rem;
-      color: var(--text);
-      flex: 1;
-    }
-
-    /* Checkbox group */
-    .checkbox-group {
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.5rem;
-      max-height: 180px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    .checkbox-group label {
-      display: flex !important;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem !important;
-      font-weight: normal !important;
-      text-transform: none !important;
-      letter-spacing: 0 !important;
-      color: var(--text) !important;
-      cursor: pointer;
-    }
-
+    .checkbox-group { border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem; max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.35rem; }
+    .checkbox-group label { display: flex !important; align-items: center; gap: 0.5rem; font-size: 0.875rem !important; font-weight: normal !important; text-transform: none !important; letter-spacing: 0 !important; color: var(--text) !important; cursor: pointer; }
     .checkbox-group input[type="checkbox"] { width: auto; }
 
-    .fairy-check-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.875rem;
-    }
-
-    .fairy-check-wrap input { width: auto; }
-    .fairy-check-wrap label { font-size: 0.9375rem; color: var(--codex); font-weight: 600; cursor: pointer; }
+    .fairy-check-wrap { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.875rem; }
+    .fairy-check-wrap input  { width: auto; }
+    .fairy-check-wrap label  { font-size: 0.9375rem; color: #6b4a7a; font-weight: 600; cursor: pointer; }
   </style>
 </head>
 <body>
 
+<!-- Sign-in overlay -->
+<div id="signin-overlay" style="position:fixed;inset:0;background:rgba(13,26,16,0.93);display:flex;align-items:center;justify-content:center;z-index:1000">
+  <div style="background:rgba(237,229,216,0.08);border:1px solid rgba(212,184,150,0.25);border-top:3px solid #6b4a7a;border-radius:14px;padding:2.5rem 2rem;max-width:360px;width:90%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.5)">
+    <div style="font-family:'Almendra SC',Georgia,serif;font-size:1.5rem;font-weight:700;color:#c8a8e0;margin-bottom:0.5rem">The Rune-Root Codex</div>
+    <p style="font-family:'IM Fell English SC',Georgia,serif;color:#a89090;font-size:0.9375rem;margin-bottom:1.75rem">Sign in to access your game world codex.</p>
+    <button id="google-signin-btn" style="width:100%;padding:0.6rem 1rem;background:#6b4a7a;border:none;border-radius:8px;font-family:'IM Fell English SC',Georgia,serif;font-size:1rem;color:#fff;cursor:pointer;transition:background 0.15s">Sign in with Google</button>
+  </div>
+</div>
+
 <header>
-  <div class="site-title" data-nav="home">✦ Game World Codex</div>
-  <nav class="nav-links">
-    <span class="nav-link" data-nav="all-characters">Characters</span>
-    <span class="nav-link" data-nav="all-households">Households</span>
-    <span class="nav-link" data-nav="all-homes">Homes &amp; Lots</span>
-    <span class="nav-link" data-nav="chronicle">The Fairy's Chronicle</span>
-  </nav>
-  <a href="../index.html" class="back-link">← Mission Control</a>
+  <div class="header-content">
+    <div class="site-title" data-nav="home">✦ The Rune-Root Codex</div>
+    <nav class="nav-links">
+      <span class="nav-link" data-nav="all-characters">Characters</span>
+      <span class="nav-link" data-nav="all-households">Households</span>
+      <span class="nav-link" data-nav="all-homes">Homes &amp; Lots</span>
+      <span class="nav-link" data-nav="chronicle">The Fairy's Chronicle</span>
+    </nav>
+    <div class="header-actions">
+      <a href="../index.html" class="btn">← Hub</a>
+      <button class="btn" onclick="mcAuth.signOut()">Sign Out</button>
+    </div>
+  </div>
 </header>
 
 <div id="main"></div>
 
+<!-- Photo URL modal -->
+<div class="modal-backdrop" id="photo-url-backdrop">
+  <div class="modal" style="max-width:440px">
+    <h2 id="photo-url-title">Add Photo</h2>
+    <div class="form-group">
+      <label>Image URL</label>
+      <input id="photo-url-input" type="url" placeholder="Paste image link here…">
+    </div>
+    <p style="font-size:0.8rem;color:var(--muted);margin-top:-0.5rem;line-height:1.5">
+      Discord: drag screenshot into any DM → right-click the image → Copy Link
+    </p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closePhotoModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmPhotoUrl()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Entity modal -->
 <div class="modal-backdrop" id="modal-backdrop">
   <div class="modal">
     <h2 id="modal-title"></h2>
@@ -486,24 +545,26 @@
 
 <script>
 // ── Data ─────────────────────────────────────────────────────────────────────
-
-const KEY = 'codex-v1';
+let D   = null;
+let uid = null;
 
 function blank() {
   return { characters: [], households: [], homes: [], nextCharId: 1, nextHouseholdId: 1, nextHomeId: 1 };
 }
 
-function load() {
-  try { const r = localStorage.getItem(KEY); return r ? { ...blank(), ...JSON.parse(r) } : blank(); }
-  catch { return blank(); }
+async function persist() {
+  if (!uid) return;
+  await mcDb.collection('users').doc(uid).collection('data').doc('codex').set(D);
 }
 
-function save() { localStorage.setItem(KEY, JSON.stringify(D)); }
-
-let D = load();
+async function initApp(user) {
+  uid = user.uid;
+  const snap = await mcDb.collection('users').doc(uid).collection('data').doc('codex').get();
+  D = snap.exists ? { ...blank(), ...snap.data() } : blank();
+  renderMain();
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 function byId(arr, id) { return arr.find(x => x.id === id); }
@@ -521,28 +582,122 @@ function neighborhoods() {
   return out.sort();
 }
 
-// ── Router ────────────────────────────────────────────────────────────────────
+const AGES     = ['Infant','Toddler','Child','Teen','Young Adult','Adult','Elder'];
+const OCCULTS  = ['Human','Spellcaster','Vampire','Mermaid','Werewolf','Alien','Servo','Ghost','Other'];
+const STATUSES = ['original','in-progress','renovated','rebuilt'];
 
-let curView = 'home', curId = null;
+const OUTFITS = [
+  { key: 'everyday',    label: 'Everyday'     },
+  { key: 'formal',      label: 'Formal'       },
+  { key: 'athletic',    label: 'Athletic'     },
+  { key: 'sleep',       label: 'Sleep'        },
+  { key: 'party',       label: 'Party'        },
+  { key: 'swimwear',    label: 'Swimwear'     },
+  { key: 'coldWeather', label: 'Cold Weather' },
+];
 
-function navigate(view, id = null) {
-  curView = view; curId = id;
-  renderMain();
-  window.scrollTo(0, 0);
+// ── Photo URL modal ───────────────────────────────────────────────────────────
+let pendingPhotoType   = null;
+let pendingPhotoEntity = null;
+let pendingPhotoSlot   = null;
+
+function openPhotoInput(type, entityId, slot) {
+  pendingPhotoType   = type;
+  pendingPhotoEntity = entityId;
+  pendingPhotoSlot   = slot;
+
+  // Pre-fill with existing URL if replacing
+  let current = '';
+  if (type === 'outfit') {
+    const c = byId(D.characters, entityId);
+    current = c?.outfitPhotos?.[slot] || '';
+  } else if (type === 'hh-photo') {
+    const hh = byId(D.households, entityId);
+    current = hh?.photoUrl || '';
+  }
+
+  const input = document.getElementById('photo-url-input');
+  input.value = current;
+  document.getElementById('photo-url-backdrop').classList.add('open');
+  setTimeout(() => input.focus(), 50);
 }
 
+function closePhotoModal() {
+  document.getElementById('photo-url-backdrop').classList.remove('open');
+  pendingPhotoType = pendingPhotoEntity = pendingPhotoSlot = null;
+}
+
+async function confirmPhotoUrl() {
+  const url = document.getElementById('photo-url-input').value.trim();
+  closePhotoModal();
+  if (!url) return;
+
+  if (pendingPhotoType === 'outfit') {
+    const c = byId(D.characters, pendingPhotoEntity);
+    if (c) { if (!c.outfitPhotos) c.outfitPhotos = {}; c.outfitPhotos[pendingPhotoSlot] = url; }
+  } else if (pendingPhotoType === 'home-photo') {
+    const h = byId(D.homes, pendingPhotoEntity);
+    if (h) { if (!h.photos) h.photos = []; h.photos.push(url); }
+  } else if (pendingPhotoType === 'hh-photo') {
+    const hh = byId(D.households, pendingPhotoEntity);
+    if (hh) hh.photoUrl = url;
+  }
+
+  await persist();
+  renderMain();
+}
+
+document.getElementById('photo-url-backdrop').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closePhotoModal();
+});
+
+document.getElementById('photo-url-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmPhotoUrl();
+  if (e.key === 'Escape') closePhotoModal();
+});
+
+async function deleteOutfitPhoto(charId, slot, e) {
+  e.stopPropagation();
+  const c = byId(D.characters, charId);
+  if (c?.outfitPhotos) { c.outfitPhotos[slot] = ''; }
+  await persist();
+  renderMain();
+}
+
+async function deleteHomePhoto(homeId, idx, e) {
+  e.stopPropagation();
+  const h = byId(D.homes, homeId);
+  if (h?.photos) { h.photos.splice(idx, 1); }
+  await persist();
+  renderMain();
+}
+
+async function deleteHHPhoto(hhId, e) {
+  e.stopPropagation();
+  const hh = byId(D.households, hhId);
+  if (hh) hh.photoUrl = '';
+  await persist();
+  renderMain();
+}
+
+// ── Router ────────────────────────────────────────────────────────────────────
+let curView = 'home', curId = null;
+
+function navigate(view, id = null) { curView = view; curId = id; renderMain(); window.scrollTo(0, 0); }
+
 function renderMain() {
+  if (!D) return;
   document.querySelectorAll('.nav-link').forEach(l => l.classList.toggle('active', l.dataset.nav === curView));
   const el = document.getElementById('main');
   switch (curView) {
-    case 'home':           el.innerHTML = vHome();           break;
-    case 'all-characters': el.innerHTML = vAllChars();       break;
-    case 'character':      el.innerHTML = vChar(curId);      break;
-    case 'all-households': el.innerHTML = vAllHH();          break;
-    case 'household':      el.innerHTML = vHH(curId);        break;
-    case 'all-homes':      el.innerHTML = vAllHomes();       break;
-    case 'home-detail':    el.innerHTML = vHomeDetail(curId);break;
-    case 'chronicle':      el.innerHTML = vChronicle();      break;
+    case 'home':           el.innerHTML = vHome();            break;
+    case 'all-characters': el.innerHTML = vAllChars();        break;
+    case 'character':      el.innerHTML = vChar(curId);       break;
+    case 'all-households': el.innerHTML = vAllHH();           break;
+    case 'household':      el.innerHTML = vHH(curId);         break;
+    case 'all-homes':      el.innerHTML = vAllHomes();        break;
+    case 'home-detail':    el.innerHTML = vHomeDetail(curId); break;
+    case 'chronicle':      el.innerHTML = vChronicle();       break;
     default:               el.innerHTML = vHome();
   }
 }
@@ -550,16 +705,16 @@ function renderMain() {
 // ── Views ─────────────────────────────────────────────────────────────────────
 
 function vHome() {
-  const f = fairy();
+  const f       = fairy();
   const nbhoods = neighborhoods();
 
   const nbCards = nbhoods.length === 0
     ? `<p class="empty">No homes added yet — add one to get started.</p>`
     : nbhoods.map(n => {
         const ct = D.homes.filter(h => h.neighborhood === n).length;
-        return `<div class="card" data-nav="all-homes" data-filter="${esc(n)}">
-          <div class="card-title">${esc(n)}</div>
-          <div class="card-meta">${ct} home${ct !== 1 ? 's' : ''}</div>
+        return `<div class="overview-card" data-nav="all-homes" data-filter="${esc(n)}">
+          <div class="overview-card-title">${esc(n)}</div>
+          <div class="overview-card-meta">${ct} home${ct !== 1 ? 's' : ''}</div>
         </div>`;
       }).join('');
 
@@ -571,13 +726,11 @@ function vHome() {
         <div class="stat"><div class="num">${D.homes.length}</div><div class="lbl">Homes</div></div>
         ${f ? `<div class="stat"><div class="num">✦</div><div class="lbl">${esc(f.name)}</div></div>` : ''}
       </div>
-
       <div class="section-header">
         <h2>Neighborhoods</h2>
         <button class="btn btn-primary btn-sm" onclick="openModal('home',null)">+ Add Home</button>
       </div>
       <div class="card-grid">${nbCards}</div>
-
       <div class="quick-actions">
         <button class="btn btn-ghost" onclick="openModal('character',null)">+ New Character</button>
         <button class="btn btn-ghost" onclick="openModal('household',null)">+ New Household</button>
@@ -589,22 +742,71 @@ function vAllChars() {
   const sorted = [...D.characters].sort((a,b) => a.name.localeCompare(b.name));
   const rows = sorted.length === 0
     ? `<div class="empty">No characters yet.</div>`
-    : sorted.map(c => `
-        <div class="entity-row" data-nav="character" data-id="${c.id}">
+    : sorted.map(c => {
+        const meta = [c.age, c.occultType || 'Human', c.career || '—'].filter(Boolean).join(' · ');
+        return `<div class="entity-row" data-nav="character" data-id="${c.id}">
           <div class="row-name">${esc(c.name)}${c.isTheFairy ? ' ✦' : ''}</div>
-          <div class="row-meta">${esc(c.occultType || 'Human')} · ${esc(c.career || '—')}</div>
+          <div class="row-meta">${esc(meta)}</div>
           <div class="row-actions" onclick="event.stopPropagation()">
             <button class="btn btn-ghost btn-sm" onclick="openModal('character',${c.id})">Edit</button>
             <button class="btn btn-danger btn-sm" onclick="deleteChar(${c.id})">Del</button>
           </div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
 
   return `
-    <div class="section-header">
-      <h2>All Characters</h2>
-      <button class="btn btn-primary btn-sm" onclick="openModal('character',null)">+ Add</button>
-    </div>
+    <div class="section-header"><h2>All Characters</h2><button class="btn btn-primary btn-sm" onclick="openModal('character',null)">+ Add</button></div>
     <div class="entity-list">${rows}</div>`;
+}
+
+function outfitGalleryHtml(c) {
+  const photos = c.outfitPhotos || {};
+  const slots = OUTFITS.map(o => {
+    const url = photos[o.key] || '';
+    const inner = url
+      ? `<div class="outfit-photo" onclick="openPhotoInput('outfit',${c.id},'${o.key}')">
+           <img src="${esc(url)}" alt="${esc(o.label)}">
+           <button class="photo-del" onclick="deleteOutfitPhoto(${c.id},'${o.key}',event)">✕</button>
+         </div>`
+      : `<div class="outfit-photo" onclick="openPhotoInput('outfit',${c.id},'${o.key}')">
+           <span class="outfit-photo-empty">+</span>
+         </div>`;
+    return `<div class="outfit-slot"><div class="outfit-slot-label">${esc(o.label)}</div>${inner}</div>`;
+  }).join('');
+  return `<div class="card"><h3>Outfit Gallery</h3><div class="outfit-gallery">${slots}</div></div>`;
+}
+
+function homeGalleryHtml(h) {
+  const photos = h.photos || [];
+  const canAdd = photos.length < 7;
+
+  const items = photos.map((url, i) => `
+    <div class="gallery-item">
+      <img src="${esc(url)}" alt="Photo ${i+1}">
+      <button class="photo-del" onclick="deleteHomePhoto(${h.id},${i},event)">✕</button>
+    </div>`).join('');
+
+  const addBtn = canAdd
+    ? `<button class="gallery-add-btn" onclick="openPhotoInput('home-photo',${h.id},null)"><span style="font-size:1.25rem">+</span><span>Add Photo</span></button>`
+    : '';
+
+  return `<div class="card"><h3>Gallery</h3><div class="photo-gallery">${items}${addBtn}</div></div>`;
+}
+
+function hhPhotoHtml(hh) {
+  const url  = hh.photoUrl || '';
+  const slot = url
+    ? `<div class="hh-photo-slot" onclick="openPhotoInput('hh-photo',${hh.id},null)">
+         <img src="${esc(url)}" alt="Household photo">
+         <button class="photo-del" onclick="deleteHHPhoto(${hh.id},event)">✕</button>
+       </div>`
+    : `<div class="hh-photo-slot" onclick="openPhotoInput('hh-photo',${hh.id},null)">
+         <span class="hh-photo-slot-empty">+</span>
+       </div>`;
+  return `<div style="margin-bottom:1rem">
+    <div style="font-size:0.6875rem;text-transform:uppercase;letter-spacing:0.06em;color:#a89090;margin-bottom:0.5rem">Household Photo</div>
+    ${slot}
+  </div>`;
 }
 
 function vChar(id) {
@@ -616,8 +818,8 @@ function vChar(id) {
 
   const traitHtml = (c.traits || []).length
     ? `<div style="margin-top:0.875rem">
-         <div style="font-size:0.6875rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:0.4rem">Traits</div>
-         <div class="trait-list">${(c.traits).map(t => `<span class="trait-tag">${esc(t)}</span>`).join('')}</div>
+         <div style="font-size:0.6875rem;text-transform:uppercase;letter-spacing:0.06em;color:#a89090;margin-bottom:0.4rem">Traits</div>
+         <div class="trait-list">${c.traits.map(t => `<span class="trait-tag">${esc(t)}</span>`).join('')}</div>
        </div>` : '';
 
   const relHtml = (c.relationships || []).map(r => {
@@ -631,10 +833,9 @@ function vChar(id) {
 
   const chronicleHtml = c.isTheFairy ? (() => {
     const visits = D.homes.filter(h => h.storyOrder != null).sort((a,b) => a.storyOrder - b.storyOrder);
-    return `<div class="detail-section">
-      <h3>Chronicle of Visits</h3>
+    return `<div class="card"><h3>Chronicle of Visits</h3>
       ${visits.length === 0
-        ? `<p style="color:var(--muted);font-style:italic;font-size:0.875rem">No visits recorded yet. Set a Story Order on a Home to begin.</p>`
+        ? `<p style="color:#a89090;font-style:italic;font-size:0.875rem">No visits recorded yet.</p>`
         : visits.map(h => `
           <div class="chronicle-entry">
             <div class="chronicle-num">Visit #${h.storyOrder}</div>
@@ -645,20 +846,18 @@ function vChar(id) {
   })() : '';
 
   return `
-    <div class="breadcrumb">
-      <span class="crumb" data-nav="all-characters">Characters</span> › ${esc(c.name)}
-    </div>
+    <div class="breadcrumb"><span class="crumb" data-nav="all-characters">Characters</span> › ${esc(c.name)}</div>
     <div class="page-title">
-      ${esc(c.name)}${c.isTheFairy ? ' <span style="font-size:1rem;color:var(--codex)">✦ The Fairy</span>' : ''}
+      ${esc(c.name)}${c.isTheFairy ? ' <span style="font-size:1rem;color:#c8a8e0">✦ The Fairy</span>' : ''}
       <div class="actions">
         <button class="btn btn-ghost btn-sm" onclick="openModal('character',${c.id})">Edit</button>
         <button class="btn btn-danger btn-sm" onclick="deleteChar(${c.id})">Delete</button>
       </div>
     </div>
 
-    <div class="detail-section">
-      <h3>Profile</h3>
+    <div class="card"><h3>Profile</h3>
       <div class="info-grid">
+        ${c.age ? `<div class="info-item"><label>Age</label><div class="val">${esc(c.age)}</div></div>` : ''}
         <div class="info-item"><label>Occult Type</label><div class="val">${esc(c.occultType || 'Human')}</div></div>
         <div class="info-item"><label>Career</label><div class="val">${esc(c.career || '—')}</div></div>
         <div class="info-item"><label>Aspiration</label><div class="val">${esc(c.aspiration || '—')}</div></div>
@@ -668,8 +867,9 @@ function vChar(id) {
       ${traitHtml}
     </div>
 
-    ${c.backstory ? `<div class="detail-section"><h3>Their Story</h3><div class="long-text">${esc(c.backstory)}</div></div>` : ''}
-    ${relHtml    ? `<div class="detail-section"><h3>Relationships</h3><div class="rel-list">${relHtml}</div></div>` : ''}
+    ${outfitGalleryHtml(c)}
+    ${c.backstory ? `<div class="card"><h3>Their Story</h3><div class="long-text">${esc(c.backstory)}</div></div>` : ''}
+    ${relHtml     ? `<div class="card"><h3>Relationships</h3><div class="rel-list">${relHtml}</div></div>` : ''}
     ${chronicleHtml}`;
 }
 
@@ -679,22 +879,18 @@ function vAllHH() {
     ? `<div class="empty">No households yet.</div>`
     : sorted.map(hh => {
         const names = (hh.memberIds || []).map(charName).join(', ');
-        return `
-          <div class="entity-row" data-nav="household" data-id="${hh.id}">
-            <div class="row-name">${esc(hh.name)}</div>
-            <div class="row-meta">${esc(names || 'No members')}</div>
-            <div class="row-actions" onclick="event.stopPropagation()">
-              <button class="btn btn-ghost btn-sm" onclick="openModal('household',${hh.id})">Edit</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteHH(${hh.id})">Del</button>
-            </div>
-          </div>`;
+        return `<div class="entity-row" data-nav="household" data-id="${hh.id}">
+          <div class="row-name">${esc(hh.name)}</div>
+          <div class="row-meta">${esc(names || 'No members')}</div>
+          <div class="row-actions" onclick="event.stopPropagation()">
+            <button class="btn btn-ghost btn-sm" onclick="openModal('household',${hh.id})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteHH(${hh.id})">Del</button>
+          </div>
+        </div>`;
       }).join('');
 
   return `
-    <div class="section-header">
-      <h2>All Households</h2>
-      <button class="btn btn-primary btn-sm" onclick="openModal('household',null)">+ Add</button>
-    </div>
+    <div class="section-header"><h2>All Households</h2><button class="btn btn-primary btn-sm" onclick="openModal('household',null)">+ Add</button></div>
     <div class="entity-list">${rows}</div>`;
 }
 
@@ -706,16 +902,15 @@ function vHH(id) {
   const memberRows = (hh.memberIds || []).map(mid => {
     const c = byId(D.characters, mid);
     if (!c) return '';
+    const meta = [c.age, c.occultType || 'Human', c.career || '—'].filter(Boolean).join(' · ');
     return `<div class="entity-row" data-nav="character" data-id="${c.id}">
-      <div class="row-name">${esc(c.name)}${c.isTheFairy?' ✦':''}</div>
-      <div class="row-meta">${esc(c.occultType||'Human')} · ${esc(c.career||'—')}</div>
+      <div class="row-name">${esc(c.name)}${c.isTheFairy ? ' ✦' : ''}</div>
+      <div class="row-meta">${esc(meta)}</div>
     </div>`;
   }).join('');
 
   return `
-    <div class="breadcrumb">
-      <span class="crumb" data-nav="all-households">Households</span> › ${esc(hh.name)}
-    </div>
+    <div class="breadcrumb"><span class="crumb" data-nav="all-households">Households</span> › ${esc(hh.name)}</div>
     <div class="page-title">
       ${esc(hh.name)}
       <div class="actions">
@@ -724,23 +919,24 @@ function vHH(id) {
       </div>
     </div>
 
-    <div class="detail-section">
-      <h3>About This Household</h3>
+    <div class="card"><h3>About This Household</h3>
+      ${hhPhotoHtml(hh)}
       ${hh.description
         ? `<p class="long-text">${esc(hh.description)}</p>`
-        : `<p style="color:var(--muted);font-style:italic">No description yet.</p>`}
+        : `<p style="color:#a89090;font-style:italic">No description yet.</p>`}
       ${home ? `
         <div style="margin-top:0.875rem">
-          <label style="font-size:0.6875rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted)">Home</label>
-          <div style="margin-top:0.2rem">
-            <span class="wiki-link" data-nav="home-detail" data-id="${home.id}">${esc(home.lotName)}</span>
-            <span style="color:var(--muted);font-size:0.875rem"> · ${esc(home.neighborhood)}</span>
-            ${renovBadge(home.renovationStatus)}
-          </div>
+          <div style="font-size:0.6875rem;text-transform:uppercase;letter-spacing:0.06em;color:#a89090;margin-bottom:0.3rem">Home</div>
+          <span class="wiki-link" data-nav="home-detail" data-id="${home.id}">${esc(home.lotName)}</span>
+          <span style="color:#a89090;font-size:0.875rem"> · ${esc(home.neighborhood)}</span>
+          ${renovBadge(home.renovationStatus)}
         </div>` : ''}
     </div>
 
-    ${memberRows ? `<div class="detail-section"><h3>Members</h3><div class="entity-list" style="margin:0">${memberRows}</div></div>` : ''}`;
+    ${memberRows ? `<div class="card" style="padding:0;overflow:hidden">
+      <h3 style="padding:1rem 1.25rem 0.75rem;margin:0">Members</h3>
+      <div class="entity-list" style="margin:0;border:none;border-radius:0">${memberRows}</div>
+    </div>` : ''}`;
 }
 
 function vAllHomes() {
@@ -756,7 +952,7 @@ function vAllHomes() {
     content = `<div class="entity-list">${homes.map(homeRow).join('')}</div>`;
   } else {
     const byN = {};
-    homes.forEach(h => { const n = h.neighborhood||'Unknown'; (byN[n] = byN[n]||[]).push(h); });
+    homes.forEach(h => { const n = h.neighborhood||'Unknown'; (byN[n]=byN[n]||[]).push(h); });
     content = Object.entries(byN).sort(([a],[b])=>a.localeCompare(b)).map(([n,hs]) => `
       <div class="nbhood-section">
         <div class="nbhood-title">${esc(n)} <span class="nbhood-count">${hs.length} home${hs.length!==1?'s':''}</span></div>
@@ -775,23 +971,22 @@ function vAllHomes() {
 
 function homeRow(h) {
   const hh = h.householdId ? byId(D.households, h.householdId) : null;
-  return `
-    <div class="entity-row" data-nav="home-detail" data-id="${h.id}">
-      <div class="row-name">${esc(h.lotName)}</div>
-      <div class="row-meta">${hh ? esc(hh.name) : 'Unoccupied'}${h.storyOrder!=null?' · Visit #'+h.storyOrder:''}</div>
-      <div style="flex-shrink:0">${renovBadge(h.renovationStatus)}</div>
-      <div class="row-actions" onclick="event.stopPropagation()">
-        <button class="btn btn-ghost btn-sm" onclick="openModal('home',${h.id})">Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteHome(${h.id})">Del</button>
-      </div>
-    </div>`;
+  return `<div class="entity-row" data-nav="home-detail" data-id="${h.id}">
+    <div class="row-name">${esc(h.lotName)}</div>
+    <div class="row-meta">${hh ? esc(hh.name) : 'Unoccupied'}${h.storyOrder!=null?' · Visit #'+h.storyOrder:''}</div>
+    <div style="flex-shrink:0">${renovBadge(h.renovationStatus)}</div>
+    <div class="row-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-ghost btn-sm" onclick="openModal('home',${h.id})">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteHome(${h.id})">Del</button>
+    </div>
+  </div>`;
 }
 
 function vHomeDetail(id) {
   const h = byId(D.homes, id);
   if (!h) return `<p class="empty">Home not found.</p>`;
 
-  const hh = h.householdId ? byId(D.households, h.householdId) : null;
+  const hh      = h.householdId ? byId(D.households, h.householdId) : null;
   const members = hh ? (hh.memberIds||[]).map(mid => {
     const c = byId(D.characters, mid);
     return c ? `<span class="wiki-link" data-nav="character" data-id="${c.id}">${esc(c.name)}</span>` : '';
@@ -811,8 +1006,9 @@ function vHomeDetail(id) {
       </div>
     </div>
 
-    <div class="detail-section">
-      <h3>Location &amp; Status</h3>
+    ${homeGalleryHtml(h)}
+
+    <div class="card"><h3>Location &amp; Status</h3>
       <div class="info-grid">
         <div class="info-item"><label>Neighborhood</label><div class="val">${esc(h.neighborhood||'—')}</div></div>
         <div class="info-item"><label>Status</label><div class="val">${renovBadge(h.renovationStatus)}</div></div>
@@ -823,12 +1019,12 @@ function vHomeDetail(id) {
       </div>
     </div>
 
-    ${h.styleNotes?`<div class="detail-section"><h3>Design &amp; Style Notes</h3><div class="long-text">${esc(h.styleNotes)}</div></div>`:''}
-    ${h.fairyVisitNotes&&h.storyOrder!=null?`<div class="detail-section"><h3>The Fairy's Notes</h3><div class="long-text">${esc(h.fairyVisitNotes)}</div></div>`:''}`;
+    ${h.styleNotes      ? `<div class="card"><h3>Design &amp; Style Notes</h3><div class="long-text">${esc(h.styleNotes)}</div></div>` : ''}
+    ${h.fairyVisitNotes && h.storyOrder!=null ? `<div class="card"><h3>The Fairy's Notes</h3><div class="long-text">${esc(h.fairyVisitNotes)}</div></div>` : ''}`;
 }
 
 function vChronicle() {
-  const f = fairy();
+  const f       = fairy();
   const visited = D.homes.filter(h => h.storyOrder!=null).sort((a,b)=>a.storyOrder-b.storyOrder);
 
   const entries = visited.length === 0
@@ -838,7 +1034,7 @@ function vChronicle() {
         return `<div class="chronicle-entry">
           <div class="chronicle-num">Visit #${h.storyOrder} · ${esc(h.neighborhood||'')}</div>
           <div class="chronicle-home wiki-link" data-nav="home-detail" data-id="${h.id}">${esc(h.lotName)}</div>
-          ${hh?`<div style="font-size:0.875rem;color:var(--muted);margin-bottom:0.25rem"><span class="wiki-link" data-nav="household" data-id="${hh.id}">${esc(hh.name)}</span></div>`:''}
+          ${hh?`<div style="font-size:0.875rem;color:#a89090;margin-bottom:0.25rem"><span class="wiki-link" data-nav="household" data-id="${hh.id}">${esc(hh.name)}</span></div>`:''}
           ${h.fairyVisitNotes?`<div class="chronicle-notes">${esc(h.fairyVisitNotes)}</div>`:''}
         </div>`;
       }).join('');
@@ -846,22 +1042,18 @@ function vChronicle() {
   return `
     <div class="page-title">
       ✦ The Fairy's Chronicle
-      ${f?`<span style="font-size:0.9rem;font-weight:normal;color:var(--muted);font-family:sans-serif"><span class="wiki-link" data-nav="character" data-id="${f.id}">${esc(f.name)}</span></span>`:''}
+      ${f?`<span style="font-size:0.9rem;font-weight:normal;color:#a89090;font-family:'IM Fell English SC',Georgia,serif"><span class="wiki-link" data-nav="character" data-id="${f.id}">${esc(f.name)}</span></span>`:''}
     </div>
     ${entries}`;
 }
 
 // ── Modals ────────────────────────────────────────────────────────────────────
-
 let mType=null, mId=null, pendingRels=[];
-
-const OCCULTS  = ['Human','Spellcaster','Vampire','Mermaid','Werewolf','Alien','Servo','Ghost','Other'];
-const STATUSES = ['original','in-progress','renovated','rebuilt'];
 
 function openModal(type, id) {
   mType = type; mId = id;
-  const title = document.getElementById('modal-title');
-  const body  = document.getElementById('modal-body');
+  const title   = document.getElementById('modal-title');
+  const body    = document.getElementById('modal-body');
   const saveBtn = document.getElementById('modal-save-btn');
 
   if (type === 'character') {
@@ -873,33 +1065,38 @@ function openModal(type, id) {
 
     body.innerHTML = `
       <div class="form-row">
-        <div class="form-group"><label>Name *</label><input id="c-name" value="${esc(c?.name||'')}"/></div>
-        <div class="form-group"><label>Occult Type</label>
-          <select id="c-occult">${OCCULTS.map(o=>`<option ${(c?.occultType||'Human')===o?'selected':''}>${o}</option>`).join('')}</select>
+        <div class="form-group"><label>Name *</label><input id="c-name" value="${esc(c?.name||'')}"></div>
+        <div class="form-group"><label>Age</label>
+          <select id="c-age">
+            <option value="">— Select —</option>
+            ${AGES.map(a=>`<option ${(c?.age||'')===a?'selected':''}>${a}</option>`).join('')}
+          </select>
         </div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Career</label><input id="c-career" value="${esc(c?.career||'')}"/></div>
-        <div class="form-group"><label>Aspiration</label><input id="c-aspiration" value="${esc(c?.aspiration||'')}"/></div>
+        <div class="form-group"><label>Occult Type</label>
+          <select id="c-occult">${OCCULTS.map(o=>`<option ${(c?.occultType||'Human')===o?'selected':''}>${o}</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><label>Career</label><input id="c-career" value="${esc(c?.career||'')}"></div>
       </div>
+      <div class="form-group"><label>Aspiration</label><input id="c-aspiration" value="${esc(c?.aspiration||'')}"></div>
       <div class="form-group"><label>Traits (one per line)</label><textarea id="c-traits" rows="3">${esc((c?.traits||[]).join('\n'))}</textarea></div>
       <div class="form-group"><label>Their Story / Backstory</label><textarea id="c-backstory" rows="5">${esc(c?.backstory||'')}</textarea></div>
       <div class="fairy-check-wrap">
         <input type="checkbox" id="c-fairy" ${c?.isTheFairy?'checked':''}>
         <label for="c-fairy">✦ This character is The Fairy</label>
       </div>
-      <div class="form-group">
-        <label>Relationships</label>
+      <div class="form-group"><label>Relationships</label>
         <div class="rel-builder">
           <div class="rel-builder-list" id="rel-list"></div>
           <div class="rel-add-form">
             ${others.length > 0 ? `
               <div class="rel-add-row">
                 <select id="rel-who">${others.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select>
-                <input id="rel-label" placeholder="Label (e.g. Spouse, Rival)" style="flex:1"/>
+                <input id="rel-label" placeholder="Label (e.g. Spouse, Rival)" style="flex:1">
               </div>
               <div class="rel-add-row">
-                <input id="rel-notes" placeholder="Notes (optional)" style="flex:1"/>
+                <input id="rel-notes" placeholder="Notes (optional)" style="flex:1">
                 <button class="btn btn-primary btn-sm" onclick="addRel()" style="flex-shrink:0">Add</button>
               </div>` : `<div style="padding:0.4rem;font-size:0.8125rem;color:var(--muted)">Add other characters first.</div>`}
           </div>
@@ -913,7 +1110,7 @@ function openModal(type, id) {
     saveBtn.onclick = saveHH;
 
     body.innerHTML = `
-      <div class="form-group"><label>Household Name *</label><input id="hh-name" value="${esc(hh?.name||'')}"/></div>
+      <div class="form-group"><label>Household Name *</label><input id="hh-name" value="${esc(hh?.name||'')}"></div>
       <div class="form-group"><label>Description</label><textarea id="hh-desc" rows="4">${esc(hh?.description||'')}</textarea></div>
       <div class="form-group"><label>Home / Lot</label>
         <select id="hh-home">
@@ -923,7 +1120,7 @@ function openModal(type, id) {
       </div>
       <div class="form-group"><label>Members</label>
         ${D.characters.length > 0
-          ? `<div class="checkbox-group">${D.characters.map(c=>`<label><input type="checkbox" value="${c.id}" ${(hh?.memberIds||[]).includes(c.id)?'checked':''}>${esc(c.name)} <span style="color:var(--muted)">${esc(c.occultType||'Human')}</span></label>`).join('')}</div>`
+          ? `<div class="checkbox-group">${D.characters.map(c=>`<label><input type="checkbox" value="${c.id}" ${(hh?.memberIds||[]).includes(c.id)?'checked':''}>${esc(c.name)}${c.age?' — '+esc(c.age):''}</label>`).join('')}</div>`
           : `<p style="color:var(--muted);font-size:0.875rem">No characters yet.</p>`}
       </div>`;
 
@@ -934,8 +1131,8 @@ function openModal(type, id) {
 
     body.innerHTML = `
       <div class="form-row">
-        <div class="form-group"><label>Lot Name *</label><input id="h-name" value="${esc(h?.lotName||'')}"/></div>
-        <div class="form-group"><label>Neighborhood</label><input id="h-nbhood" value="${esc(h?.neighborhood||'')}"/></div>
+        <div class="form-group"><label>Lot Name *</label><input id="h-name" value="${esc(h?.lotName||'')}"></div>
+        <div class="form-group"><label>Neighborhood</label><input id="h-nbhood" value="${esc(h?.neighborhood||'')}"></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Renovation Status</label>
@@ -949,8 +1146,8 @@ function openModal(type, id) {
         </div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Design Order #</label><input id="h-dorder" type="number" min="1" value="${h?.designOrder??''}" placeholder="Your build sequence"/></div>
-        <div class="form-group"><label>Story Order # (Fairy's Visit)</label><input id="h-sorder" type="number" min="1" value="${h?.storyOrder??''}" placeholder="Leave blank if not visited"/></div>
+        <div class="form-group"><label>Design Order #</label><input id="h-dorder" type="number" min="1" value="${h?.designOrder??''}" placeholder="Your build sequence"></div>
+        <div class="form-group"><label>Story Order # (Fairy's Visit)</label><input id="h-sorder" type="number" min="1" value="${h?.storyOrder??''}" placeholder="Leave blank if not visited"></div>
       </div>
       <div class="form-group"><label>Design &amp; Style Notes</label><textarea id="h-style" rows="3">${esc(h?.styleNotes||'')}</textarea></div>
       <div class="form-group"><label>The Fairy's Visit Notes</label><textarea id="h-fairy" rows="3">${esc(h?.fairyVisitNotes||'')}</textarea></div>`;
@@ -991,17 +1188,17 @@ function removeRel(i) {
   renderRelList(D.characters.filter(x => x.id !== mId));
 }
 
-function saveChar() {
+async function saveChar() {
   const name = document.getElementById('c-name')?.value.trim();
   if (!name) { alert('Name is required.'); return; }
 
-  const traits    = (document.getElementById('c-traits')?.value||'').split('\n').map(t=>t.trim()).filter(Boolean);
-  const isFairy   = document.getElementById('c-fairy')?.checked;
-
+  const traits  = (document.getElementById('c-traits')?.value||'').split('\n').map(t=>t.trim()).filter(Boolean);
+  const isFairy = document.getElementById('c-fairy')?.checked;
   if (isFairy) D.characters.forEach(c => { if (c.id !== mId) c.isTheFairy = false; });
 
   const data = {
     name,
+    age:           document.getElementById('c-age')?.value || '',
     occultType:    document.getElementById('c-occult')?.value || 'Human',
     career:        document.getElementById('c-career')?.value.trim() || '',
     aspiration:    document.getElementById('c-aspiration')?.value.trim() || '',
@@ -1011,42 +1208,51 @@ function saveChar() {
     relationships: pendingRels,
   };
 
+  let navId;
   if (mId) {
     Object.assign(byId(D.characters, mId), data);
+    navId = mId;
   } else {
-    D.characters.push({ id: D.nextCharId++, householdId: null, ...data });
+    const newChar = { id: D.nextCharId++, householdId: null, outfitPhotos: {}, ...data };
+    D.characters.push(newChar);
+    navId = newChar.id;
   }
 
-  save(); closeModal();
-  navigate('character', mId || D.characters[D.characters.length-1].id);
+  await persist();
+  closeModal();
+  navigate('character', navId);
 }
 
-function saveHH() {
+async function saveHH() {
   const name = document.getElementById('hh-name')?.value.trim();
   if (!name) { alert('Household name is required.'); return; }
 
   const memberIds = [...document.querySelectorAll('#modal-body .checkbox-group input:checked')].map(el=>parseInt(el.value));
   const homeId    = parseInt(document.getElementById('hh-home')?.value)||null;
 
+  let navId;
   if (mId) {
     const hh = byId(D.households, mId);
     hh.name = name; hh.description = document.getElementById('hh-desc')?.value.trim()||'';
     hh.memberIds = memberIds; hh.homeId = homeId;
+    navId = mId;
   } else {
-    D.households.push({ id: D.nextHouseholdId++, name, description: document.getElementById('hh-desc')?.value.trim()||'', memberIds, homeId });
+    const newHH = { id: D.nextHouseholdId++, name, description: document.getElementById('hh-desc')?.value.trim()||'', memberIds, homeId, photoUrl: '' };
+    D.households.push(newHH);
+    navId = newHH.id;
   }
 
-  // Keep character.householdId in sync
   D.characters.forEach(c => {
     const found = D.households.find(hh => (hh.memberIds||[]).includes(c.id));
     c.householdId = found ? found.id : null;
   });
 
-  save(); closeModal();
-  navigate('household', mId || D.households[D.households.length-1].id);
+  await persist();
+  closeModal();
+  navigate('household', navId);
 }
 
-function saveHome() {
+async function saveHome() {
   const name = document.getElementById('h-name')?.value.trim();
   if (!name) { alert('Lot name is required.'); return; }
 
@@ -1065,14 +1271,19 @@ function saveHome() {
     fairyVisitNotes:  document.getElementById('h-fairy')?.value.trim()||'',
   };
 
+  let navId;
   if (mId) {
     Object.assign(byId(D.homes, mId), data);
+    navId = mId;
   } else {
-    D.homes.push({ id: D.nextHomeId++, ...data });
+    const newHome = { id: D.nextHomeId++, photos: [], ...data };
+    D.homes.push(newHome);
+    navId = newHome.id;
   }
 
-  save(); closeModal();
-  navigate('home-detail', mId || D.homes[D.homes.length-1].id);
+  await persist();
+  closeModal();
+  navigate('home-detail', navId);
 }
 
 function closeModal() {
@@ -1082,32 +1293,35 @@ function closeModal() {
 
 // ── Delete ────────────────────────────────────────────────────────────────────
 
-function deleteChar(id) {
+async function deleteChar(id) {
   const c = byId(D.characters, id);
   if (!c || !confirm(`Delete ${c.name}? This cannot be undone.`)) return;
   D.characters = D.characters.filter(x => x.id !== id);
   D.households.forEach(hh => { hh.memberIds = (hh.memberIds||[]).filter(m => m !== id); });
-  D.characters.forEach(c  => { c.relationships = (c.relationships||[]).filter(r => r.charId !== id); });
-  save(); navigate('all-characters');
+  D.characters.forEach(ch => { ch.relationships = (ch.relationships||[]).filter(r => r.charId !== id); });
+  await persist();
+  navigate('all-characters');
 }
 
-function deleteHH(id) {
+async function deleteHH(id) {
   const hh = byId(D.households, id);
   if (!hh || !confirm(`Delete household "${hh.name}"?`)) return;
   D.households = D.households.filter(x => x.id !== id);
   D.characters.forEach(c => { if (c.householdId === id) c.householdId = null; });
-  save(); navigate('all-households');
+  await persist();
+  navigate('all-households');
 }
 
-function deleteHome(id) {
+async function deleteHome(id) {
   const h = byId(D.homes, id);
   if (!h || !confirm(`Delete "${h.lotName}"?`)) return;
   D.homes = D.homes.filter(x => x.id !== id);
   D.households.forEach(hh => { if (hh.homeId === id) hh.homeId = null; });
-  save(); navigate('all-homes');
+  await persist();
+  navigate('all-homes');
 }
 
-// ── Navigation ────────────────────────────────────────────────────────────────
+// ── Navigation events ─────────────────────────────────────────────────────────
 
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-nav]');
@@ -1115,20 +1329,13 @@ document.addEventListener('click', e => {
 
   const view   = el.dataset.nav;
   const rawId  = el.dataset.id;
-  const filter = el.dataset.filter;   // string or '' or undefined
+  const filter = el.dataset.filter;
 
-  // Numeric ID (characters, households, homes)
-  if (rawId) {
-    navigate(view, parseInt(rawId));
-    return;
-  }
+  if (rawId) { navigate(view, parseInt(rawId)); return; }
 
-  // Neighborhood filter for all-homes (data-filter present, even if empty string)
   if (view === 'all-homes' && filter !== undefined) {
-    curView = 'all-homes';
-    curId   = filter || null;   // empty string → null = show all
-    renderMain();
-    window.scrollTo(0, 0);
+    curView = 'all-homes'; curId = filter || null;
+    renderMain(); window.scrollTo(0, 0);
     return;
   }
 
@@ -1139,9 +1346,26 @@ document.getElementById('modal-backdrop').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
 });
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// ── Auth ──────────────────────────────────────────────────────────────────────
+let appInitialized = false;
 
-renderMain();
+mcAuth.onAuthStateChanged(async user => {
+  if (user) {
+    document.getElementById('signin-overlay').style.display = 'none';
+    if (!appInitialized) {
+      appInitialized = true;
+      await initApp(user);
+    }
+  } else {
+    document.getElementById('signin-overlay').style.display = 'flex';
+    appInitialized = false;
+    D = null;
+  }
+});
+
+document.getElementById('google-signin-btn').addEventListener('click', () => {
+  mcAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+});
 </script>
 </body>
 </html>
