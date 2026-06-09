@@ -1423,6 +1423,7 @@ document.getElementById('try-demo-btn').addEventListener('click', async () => {
   document.getElementById('import-btn').style.display = 'none';
   document.getElementById('export-btn').style.display = 'none';
   document.getElementById('new-month-btn').style.display = 'none';
+  document.querySelector('a[href="../index.html"]').href = '../demo/';
   await initDemo();
 });
 
