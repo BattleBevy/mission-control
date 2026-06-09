@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Living Grimoire — Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Almendra+SC&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      background: #0d1a10 url('../mossy_backdrop.png') center/cover no-repeat scroll;
+      min-height: 100%;
+    }
+
+    :root {
+      --bg:      #ede5d8;
+      --surface: #faf5eb;
+      --border:  #d4b896;
+      --text:    #2a1a08;
+      --muted:   #7a5c3c;
+      --warn:    #c87820;
+      --success: #4e6b35;
+      --danger:  #8b3530;
+    }
+
+    body {
+      font-family: 'IM Fell English SC', serif;
+      background: transparent;
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1.5rem 1.5rem;
+    }
+
+    header {
+      background: url('../leather_desk_blotter.png') no-repeat center / 100% 100%;
+      border-bottom: none;
+      margin-bottom: 1.5rem;
+      padding: 1.5rem 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.25rem;
+      font-weight: 400;
+      font-family: 'Almendra SC', serif;
+      color: #f5e6c0;
+      text-shadow: 0 1px 10px rgba(0,0,0,0.9);
+    }
+
+    header .subtitle {
+      font-size: 1rem;
+      color: rgba(245,230,192,0.7);
+      margin-top: 0.35rem;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+    }
+
+    .domains {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .domain-card {
+      border-style: solid;
+      border-width: 28px;
+      border-image: url('../PlannerApp/src/assets/parchment.png') 25% fill stretch;
+      padding: 0.5rem 1rem 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 1.5rem;
+      transition: filter 0.2s, transform 0.15s;
+    }
+
+    .domain-card:hover {
+      filter: brightness(1.04);
+      transform: translateY(-2px);
+    }
+
+    .domain-card-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .domain-icon {
+      width: 96px;
+      height: 96px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .domain-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .domain-title {
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      font-family: 'Almendra SC', serif;
+    }
+
+    .domain-desc {
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .planner-card .domain-title { color: #4e6b35; }
+    .finance-card .domain-title { color: #c27c28; }
+    .meal-card    .domain-title { color: #c06040; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>The Living Grimoire</h1>
+  <div class="subtitle">Explore a sample — no account required</div>
+</header>
+
+<div class="content">
+<div class="domains">
+
+  <a href="../planner/?demo=true" class="domain-card planner-card">
+    <div class="domain-card-text">
+      <div class="domain-title">The Mossbound Hourglass</div>
+      <div class="domain-desc">Constraint-based daily scheduler &middot; fixed events &middot; flexible tasks &middot; real-time recalculation</div>
+    </div>
+    <div class="domain-icon">
+      <img src="../icons/Scheduler_Icon.png" alt="Scheduler">
+    </div>
+  </a>
+
+  <a href="../finance/?demo=true" class="domain-card finance-card">
+    <div class="domain-card-text">
+      <div class="domain-title">The Lantern&#8209;Scale Ledger</div>
+      <div class="domain-desc">Bill tracker &middot; expense log &middot; receipt breakdown &middot; debt progress</div>
+    </div>
+    <div class="domain-icon">
+      <img src="../icons/Finance_icon.png" alt="Finance">
+    </div>
+  </a>
+
+  <a href="../meal/?demo=true" class="domain-card meal-card">
+    <div class="domain-card-text">
+      <div class="domain-title">The Forager&rsquo;s Pot</div>
+      <div class="domain-desc">Weekly meal plan &middot; nutrition targets &middot; food library &middot; recipes</div>
+    </div>
+    <div class="domain-icon">
+      <img src="../icons/Meal_Icon.png" alt="Meal">
+    </div>
+  </a>
+
+</div>
+</div>
+
+</body>
+</html>

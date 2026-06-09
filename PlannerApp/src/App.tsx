@@ -293,6 +293,12 @@ function App() {
     }
   }, [user?.uid, user?.isAnonymous])
 
+  useEffect(() => {
+    if (user === null && new URLSearchParams(location.search).get('demo') === 'true') {
+      signInAnon()
+    }
+  }, [user])
+
   if (user === undefined) {
     return (
       <div id="app" className="app-centered">

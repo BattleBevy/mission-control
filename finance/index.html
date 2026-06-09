@@ -1426,6 +1426,10 @@ document.getElementById('try-demo-btn').addEventListener('click', async () => {
   await initDemo();
 });
 
+if (new URLSearchParams(location.search).get('demo') === 'true') {
+  document.getElementById('try-demo-btn').click();
+}
+
 // ── Tour ─────────────────────────────────────────────────────────────────────
 const TOUR_STEPS = [
   {

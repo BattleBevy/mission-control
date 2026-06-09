@@ -1647,6 +1647,10 @@ document.getElementById('try-demo-btn').addEventListener('click', async () => {
   await initDemo();
 });
 
+if (new URLSearchParams(location.search).get('demo') === 'true') {
+  document.getElementById('try-demo-btn').click();
+}
+
 // ── Import ────────────────────────────────────────────────────────────────────
 document.getElementById('import-btn').addEventListener('click', () =>
   document.getElementById('file-input').click());
