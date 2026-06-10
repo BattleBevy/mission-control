@@ -52,24 +52,33 @@ function SchedulerView({ user }: { user: User }) {
   const [selectedDay, setSelectedDay] = useState(todayString)
   const [view, setView] = useState<'day' | 'week'>('day')
   const [weekStart, setWeekStart] = useState(() => getMondayOfWeek(todayString()))
-  const { plan, scheduled, conflicts, loading, snapshot, canUndo, undo, suppressedTaskTemplateIds } = useDayPlan(user.uid, selectedDay)
+  const { plan, scheduled, conflicts, loading, recalculate, snapshot, canUndo, undo, suppressedTaskTemplateIds } = useDayPlan(user.uid, selectedDay)
   const templates = useTemplates(user.uid)
   const eventTemplates = useEventTemplates(user.uid)
   const [conflictDismissed, setConflictDismissed] = useState(false)
   const [showTour, setShowTour] = useState(false)
   const [showEventForm, setShowEventForm] = useState(false)
   const [showTaskForm, setShowTaskForm] = useState(false)
-  const generatedDayRef = useRef<string | null>(null)
+  const generatedDaysRef = useRef<Set<string>>(new Set())
+  const recalculateRef = useRef(recalculate)
   const [now, setNow] = useState(nowString)
   const isToday = selectedDay === todayString()
+
+  useEffect(() => { recalculateRef.current = recalculate }, [recalculate])
 
   // Tick every minute so the overdue check re-runs even without a plan change.
   // Also snap forward immediately when the tab becomes visible (Android timers pause
   // while the screen is off, so the interval can drift many minutes behind reality).
+  // Recalculate forces the scheduler to re-run with the correct current time on wake.
   useEffect(() => {
     const tick = () => setNow(nowString())
     const interval = setInterval(tick, 60_000)
-    const onVisible = () => { if (document.visibilityState === 'visible') tick() }
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        tick()
+        recalculateRef.current()
+      }
+    }
     document.addEventListener('visibilitychange', onVisible)
     return () => {
       clearInterval(interval)
@@ -123,8 +132,8 @@ function SchedulerView({ user }: { user: User }) {
   // Auto-generate recurring task instances for the selected day (once per day navigation)
   useEffect(() => {
     if (!plan || templates.length === 0) return
-    if (generatedDayRef.current === selectedDay) return
-    generatedDayRef.current = selectedDay
+    if (generatedDaysRef.current.has(selectedDay)) return
+    generatedDaysRef.current.add(selectedDay)
 
     const existingTemplateIds = new Set(
       plan.flexible_tasks.filter(t => t.template_id).map(t => t.template_id!)

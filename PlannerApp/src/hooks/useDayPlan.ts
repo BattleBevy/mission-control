@@ -53,7 +53,7 @@ export function useDayPlan(userId: string, day: string): DayPlanState {
     undoSuppressionRef.current = null
     setCanUndo(false)
     return subscribeDayPlan(userId, day, (p, confirmed) => {
-      if (confirmed) setServerConfirmed(true)
+      setServerConfirmed(confirmed)
       setPlan(p)
       setLoading(false)
     })

@@ -64,7 +64,7 @@ export function subscribeDayPlan(
     query(collection(db, 'users', userId, 'tasks'), where('day', '==', day)),
     snap => {
       tasks = snap.docs.map(d => d.data() as TaskInstance)
-      if (!snap.metadata.fromCache) serverConfirmed = true
+      serverConfirmed = !snap.metadata.fromCache
       emit()
     },
   )
