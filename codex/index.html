@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer">
   <title>The Rune-Root Codex</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -505,6 +506,8 @@
       <span class="nav-link" data-nav="chronicle">The Fairy's Chronicle</span>
     </nav>
     <div class="header-actions">
+      <button class="btn" onclick="exportData()">Export</button>
+      <label class="btn" style="cursor:pointer">Import<input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)"></label>
       <a href="../index.html" class="btn">← Hub</a>
       <button class="btn" onclick="mcAuth.signOut()">Sign Out</button>
     </div>
@@ -522,7 +525,8 @@
       <input id="photo-url-input" type="url" placeholder="Paste image link here…">
     </div>
     <p style="font-size:0.8rem;color:var(--muted);margin-top:-0.5rem;line-height:1.5">
-      Discord: drag screenshot into any DM → right-click the image → Copy Link
+      Discord CDN links expire within hours — use a permanent host instead.<br>
+      <strong>GitHub (recommended):</strong> Open any GitHub repo → Issues → New Issue → drag image in → copy the URL that appears.
     </p>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closePhotoModal()">Cancel</button>
@@ -555,6 +559,35 @@ function blank() {
 async function persist() {
   if (!uid) return;
   await mcDb.collection('users').doc(uid).collection('data').doc('codex').set(D);
+}
+
+function exportData() {
+  if (!D) return;
+  const blob = new Blob([JSON.stringify(D, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `rune-root-codex-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!confirm('Import will replace all current Codex data. This cannot be undone. Continue?')) {
+    e.target.value = '';
+    return;
+  }
+  try {
+    const text = await file.text();
+    D = { ...blank(), ...JSON.parse(text) };
+    await persist();
+    e.target.value = '';
+    navigate('home');
+  } catch {
+    alert('Import failed — file may be invalid.');
+    e.target.value = '';
+  }
 }
 
 async function initApp(user) {
@@ -595,6 +628,68 @@ const OUTFITS = [
   { key: 'swimwear',    label: 'Swimwear'     },
   { key: 'coldWeather', label: 'Cold Weather' },
 ];
+
+// Relationship dropdown — grouped for the optgroup select; also used for inverse lookup
+const REL_GROUPS = [
+  { label: 'Partner / Spouse',              opts: ['Spouse','Partner'] },
+  { label: 'Parent / Child',                opts: ['Mother','Father','Parent','Daughter','Son','Child'] },
+  { label: 'Grandparent / Grandchild',      opts: ['Grandmother','Grandfather','Grandparent','Granddaughter','Grandson','Grandchild'] },
+  { label: 'Great-grandparent / Great-grandchild', opts: ['Great Grandmother','Great Grandfather','Great Grandparent','Great Granddaughter','Great Grandson','Great Grandchild'] },
+  { label: 'In-Laws',                       opts: ['Mother-In-Law','Father-In-Law','Parent-In-Law','Daughter-In-Law','Son-In-Law','Child-In-Law','Sister-In-Law','Brother-In-Law','Sibling-In-Law'] },
+  { label: 'Extended Family',               opts: ['Aunt','Uncle','Niece','Nephew','Nibling'] },
+  { label: 'Other',                         opts: ['Friend','Housemate','Landlord','Tenant'] },
+];
+
+function relSelectHtml() {
+  return REL_GROUPS.map(g =>
+    `<optgroup label="${g.label}">${g.opts.map(o=>`<option>${o}</option>`).join('')}</optgroup>`
+  ).join('');
+}
+
+function inverseRel(label, pronouns) {
+  const p = pronouns || 'He/Him';
+  const m = (he, she, they) => p === 'She/Her' ? she : p === 'They/Them' ? they : he;
+  switch (label) {
+    case 'Mother': case 'Father': case 'Parent':
+      return m('Son','Daughter','Child');
+    case 'Daughter': case 'Son': case 'Child':
+      return m('Father','Mother','Parent');
+    case 'Grandmother': case 'Grandfather': case 'Grandparent':
+      return m('Grandson','Granddaughter','Grandchild');
+    case 'Granddaughter': case 'Grandson': case 'Grandchild':
+      return m('Grandfather','Grandmother','Grandparent');
+    case 'Great Grandmother': case 'Great Grandfather': case 'Great Grandparent':
+      return m('Great Grandson','Great Granddaughter','Great Grandchild');
+    case 'Great Granddaughter': case 'Great Grandson': case 'Great Grandchild':
+      return m('Great Grandfather','Great Grandmother','Great Grandparent');
+    case 'Mother-In-Law': case 'Father-In-Law': case 'Parent-In-Law':
+      return m('Son-In-Law','Daughter-In-Law','Child-In-Law');
+    case 'Daughter-In-Law': case 'Son-In-Law': case 'Child-In-Law':
+      return m('Father-In-Law','Mother-In-Law','Parent-In-Law');
+    case 'Sister-In-Law': case 'Brother-In-Law': case 'Sibling-In-Law':
+      return m('Brother-In-Law','Sister-In-Law','Sibling-In-Law');
+    case 'Aunt': case 'Uncle':
+      return m('Nephew','Niece','Nibling');
+    case 'Niece': case 'Nephew': case 'Nibling':
+      return m('Uncle','Aunt','Nibling');
+    case 'Spouse':    return 'Spouse';
+    case 'Partner':   return 'Partner';
+    case 'Friend':    return 'Friend';
+    case 'Housemate': return 'Housemate';
+    case 'Landlord':  return 'Tenant';
+    case 'Tenant':    return 'Landlord';
+    default:          return label;
+  }
+}
+
+function handleImgError(img) {
+  img.onerror = null;
+  img.style.display = 'none';
+  const span = document.createElement('span');
+  span.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.2rem;width:100%;height:100%;';
+  span.innerHTML = '<span style="font-size:1.25rem;color:#c8605c">⚠</span><span style="font-size:0.625rem;color:#a89090;text-align:center">Link<br>expired</span>';
+  img.parentNode.insertBefore(span, img);
+}
 
 // ── Photo URL modal ───────────────────────────────────────────────────────────
 let pendingPhotoType   = null;
@@ -765,7 +860,7 @@ function outfitGalleryHtml(c) {
     const url = photos[o.key] || '';
     const inner = url
       ? `<div class="outfit-photo" onclick="openPhotoInput('outfit',${c.id},'${o.key}')">
-           <img src="${esc(url)}" alt="${esc(o.label)}">
+           <img src="${esc(url)}" alt="${esc(o.label)}" onerror="handleImgError(this)">
            <button class="photo-del" onclick="deleteOutfitPhoto(${c.id},'${o.key}',event)">✕</button>
          </div>`
       : `<div class="outfit-photo" onclick="openPhotoInput('outfit',${c.id},'${o.key}')">
@@ -782,7 +877,7 @@ function homeGalleryHtml(h) {
 
   const items = photos.map((url, i) => `
     <div class="gallery-item">
-      <img src="${esc(url)}" alt="Photo ${i+1}">
+      <img src="${esc(url)}" alt="Photo ${i+1}" onerror="handleImgError(this)">
       <button class="photo-del" onclick="deleteHomePhoto(${h.id},${i},event)">✕</button>
     </div>`).join('');
 
@@ -797,7 +892,7 @@ function hhPhotoHtml(hh) {
   const url  = hh.photoUrl || '';
   const slot = url
     ? `<div class="hh-photo-slot" onclick="openPhotoInput('hh-photo',${hh.id},null)">
-         <img src="${esc(url)}" alt="Household photo">
+         <img src="${esc(url)}" alt="Household photo" onerror="handleImgError(this)">
          <button class="photo-del" onclick="deleteHHPhoto(${hh.id},event)">✕</button>
        </div>`
     : `<div class="hh-photo-slot" onclick="openPhotoInput('hh-photo',${hh.id},null)">
@@ -1061,7 +1156,6 @@ function openModal(type, id) {
     pendingRels = c ? JSON.parse(JSON.stringify(c.relationships||[])) : [];
     title.textContent = id ? 'Edit Character' : 'New Character';
     saveBtn.onclick = saveChar;
-    const others = D.characters.filter(x => x.id !== id);
 
     body.innerHTML = `
       <div class="form-row">
@@ -1077,9 +1171,16 @@ function openModal(type, id) {
         <div class="form-group"><label>Occult Type</label>
           <select id="c-occult">${OCCULTS.map(o=>`<option ${(c?.occultType||'Human')===o?'selected':''}>${o}</option>`).join('')}</select>
         </div>
-        <div class="form-group"><label>Career</label><input id="c-career" value="${esc(c?.career||'')}"></div>
+        <div class="form-group"><label>Pronouns</label>
+          <select id="c-pronouns">
+            ${['He/Him','She/Her','They/Them'].map(p=>`<option value="${p}" ${(c?.pronouns||'He/Him')===p?'selected':''}>${p}</option>`).join('')}
+          </select>
+        </div>
       </div>
-      <div class="form-group"><label>Aspiration</label><input id="c-aspiration" value="${esc(c?.aspiration||'')}"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Career</label><input id="c-career" value="${esc(c?.career||'')}"></div>
+        <div class="form-group"><label>Aspiration</label><input id="c-aspiration" value="${esc(c?.aspiration||'')}"></div>
+      </div>
       <div class="form-group"><label>Traits (one per line)</label><textarea id="c-traits" rows="3">${esc((c?.traits||[]).join('\n'))}</textarea></div>
       <div class="form-group"><label>Their Story / Backstory</label><textarea id="c-backstory" rows="5">${esc(c?.backstory||'')}</textarea></div>
       <div class="fairy-check-wrap">
@@ -1089,25 +1190,18 @@ function openModal(type, id) {
       <div class="form-group"><label>Relationships</label>
         <div class="rel-builder">
           <div class="rel-builder-list" id="rel-list"></div>
-          <div class="rel-add-form">
-            ${others.length > 0 ? `
-              <div class="rel-add-row">
-                <select id="rel-who">${others.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select>
-                <input id="rel-label" placeholder="Label (e.g. Spouse, Rival)" style="flex:1">
-              </div>
-              <div class="rel-add-row">
-                <input id="rel-notes" placeholder="Notes (optional)" style="flex:1">
-                <button class="btn btn-primary btn-sm" onclick="addRel()" style="flex-shrink:0">Add</button>
-              </div>` : `<div style="padding:0.4rem;font-size:0.8125rem;color:var(--muted)">Add other characters first.</div>`}
-          </div>
+          <div id="rel-add-form-wrap"></div>
         </div>
       </div>`;
-    renderRelList(others);
+    renderRelList();
 
   } else if (type === 'household') {
     const hh = id ? byId(D.households, id) : null;
     title.textContent = id ? 'Edit Household' : 'New Household';
     saveBtn.onclick = saveHH;
+
+    // Only show characters not already in a DIFFERENT household
+    const eligibleChars = D.characters.filter(c => !c.householdId || c.householdId === id);
 
     body.innerHTML = `
       <div class="form-group"><label>Household Name *</label><input id="hh-name" value="${esc(hh?.name||'')}"></div>
@@ -1119,9 +1213,9 @@ function openModal(type, id) {
         </select>
       </div>
       <div class="form-group"><label>Members</label>
-        ${D.characters.length > 0
-          ? `<div class="checkbox-group">${D.characters.map(c=>`<label><input type="checkbox" value="${c.id}" ${(hh?.memberIds||[]).includes(c.id)?'checked':''}>${esc(c.name)}${c.age?' — '+esc(c.age):''}</label>`).join('')}</div>`
-          : `<p style="color:var(--muted);font-size:0.875rem">No characters yet.</p>`}
+        ${eligibleChars.length > 0
+          ? `<div class="checkbox-group">${eligibleChars.map(c=>`<label><input type="checkbox" value="${c.id}" ${(hh?.memberIds||[]).includes(c.id)?'checked':''}>${esc(c.name)}${c.age?' — '+esc(c.age):''}</label>`).join('')}</div>`
+          : `<p style="color:var(--muted);font-size:0.875rem">${D.characters.length === 0 ? 'No characters yet.' : 'All characters are already in other households.'}</p>`}
       </div>`;
 
   } else if (type === 'home') {
@@ -1156,20 +1250,49 @@ function openModal(type, id) {
   document.getElementById('modal-backdrop').classList.add('open');
 }
 
-function renderRelList(others) {
+function renderRelList() {
   const list = document.getElementById('rel-list');
   if (!list) return;
   if (!pendingRels.length) {
     list.innerHTML = `<div style="padding:0.4rem;font-size:0.8125rem;color:var(--muted);font-style:italic">No relationships yet.</div>`;
+  } else {
+    list.innerHTML = pendingRels.map((r,i) => `
+      <div class="rbi">
+        <span class="rbi-name">${esc(charName(r.charId))}</span>
+        ${r.label?`<span class="rbi-label">${esc(r.label)}</span>`:''}
+        ${r.notes?`<span class="rbi-label">${esc(r.notes)}</span>`:''}
+        <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="removeRel(${i})">✕</button>
+      </div>`).join('');
+  }
+  renderRelAddForm();
+}
+
+function renderRelAddForm() {
+  const wrap = document.getElementById('rel-add-form-wrap');
+  if (!wrap) return;
+  const pendingIds = new Set(pendingRels.map(r => r.charId));
+  const allOthers  = D.characters.filter(c => c.id !== mId);
+  const available  = allOthers.filter(c => !pendingIds.has(c.id));
+
+  if (allOthers.length === 0) {
+    wrap.innerHTML = `<div class="rel-add-form"><div style="padding:0.4rem;font-size:0.8125rem;color:var(--muted)">Add other characters first.</div></div>`;
     return;
   }
-  list.innerHTML = pendingRels.map((r,i) => `
-    <div class="rbi">
-      <span class="rbi-name">${esc(charName(r.charId))}</span>
-      ${r.label?`<span class="rbi-label">${esc(r.label)}</span>`:''}
-      ${r.notes?`<span class="rbi-label">${esc(r.notes)}</span>`:''}
-      <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="removeRel(${i})">✕</button>
-    </div>`).join('');
+  if (available.length === 0) {
+    wrap.innerHTML = `<div class="rel-add-form"><div style="padding:0.4rem;font-size:0.8125rem;color:var(--muted)">All characters are already linked.</div></div>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="rel-add-form">
+      <div class="rel-add-row">
+        <select id="rel-who">${available.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select>
+        <select id="rel-label" style="flex:1">${relSelectHtml()}</select>
+      </div>
+      <div class="rel-add-row">
+        <input id="rel-notes" placeholder="Notes (optional)" style="flex:1">
+        <button class="btn btn-primary btn-sm" onclick="addRel()" style="flex-shrink:0">Add</button>
+      </div>
+    </div>`;
 }
 
 function addRel() {
@@ -1177,27 +1300,31 @@ function addRel() {
   const label = document.getElementById('rel-label');
   const notes = document.getElementById('rel-notes');
   if (!who?.value) return;
-  pendingRels.push({ charId: parseInt(who.value), label: label?.value.trim()||'', notes: notes?.value.trim()||'' });
-  if (label) label.value = '';
+  pendingRels.push({ charId: parseInt(who.value), label: label?.value || 'Friend', notes: notes?.value.trim()||'' });
   if (notes) notes.value = '';
-  renderRelList(D.characters.filter(x => x.id !== mId));
+  renderRelList();
 }
 
 function removeRel(i) {
   pendingRels.splice(i, 1);
-  renderRelList(D.characters.filter(x => x.id !== mId));
+  renderRelList();
 }
 
 async function saveChar() {
   const name = document.getElementById('c-name')?.value.trim();
   if (!name) { alert('Name is required.'); return; }
 
-  const traits  = (document.getElementById('c-traits')?.value||'').split('\n').map(t=>t.trim()).filter(Boolean);
-  const isFairy = document.getElementById('c-fairy')?.checked;
+  const traits   = (document.getElementById('c-traits')?.value||'').split('\n').map(t=>t.trim()).filter(Boolean);
+  const isFairy  = document.getElementById('c-fairy')?.checked;
+  const pronouns = document.getElementById('c-pronouns')?.value || 'He/Him';
   if (isFairy) D.characters.forEach(c => { if (c.id !== mId) c.isTheFairy = false; });
+
+  // Snapshot old relationships before overwriting, so we can sync inverses
+  const oldRels = mId ? JSON.parse(JSON.stringify(byId(D.characters, mId)?.relationships || [])) : [];
 
   const data = {
     name,
+    pronouns,
     age:           document.getElementById('c-age')?.value || '',
     occultType:    document.getElementById('c-occult')?.value || 'Human',
     career:        document.getElementById('c-career')?.value.trim() || '',
@@ -1208,19 +1335,48 @@ async function saveChar() {
     relationships: pendingRels,
   };
 
-  let navId;
+  let savedId;
   if (mId) {
     Object.assign(byId(D.characters, mId), data);
-    navId = mId;
+    savedId = mId;
   } else {
     const newChar = { id: D.nextCharId++, householdId: null, outfitPhotos: {}, ...data };
     D.characters.push(newChar);
-    navId = newChar.id;
+    savedId = newChar.id;
   }
+
+  const savedChar = byId(D.characters, savedId);
+
+  // Remove inverse from targets whose relationship was deleted
+  oldRels.filter(old => !pendingRels.find(r => r.charId === old.charId)).forEach(old => {
+    const target = byId(D.characters, old.charId);
+    if (target?.relationships) target.relationships = target.relationships.filter(r => r.charId !== savedId);
+  });
+
+  // Update inverse label when label was changed (only if the target's label still matches the old auto-inverse)
+  pendingRels.forEach(rel => {
+    const old = oldRels.find(r => r.charId === rel.charId);
+    if (!old || old.label === rel.label) return;
+    const target = byId(D.characters, rel.charId);
+    const tRel   = target?.relationships?.find(r => r.charId === savedId);
+    if (tRel && tRel.label === inverseRel(old.label, savedChar.pronouns)) {
+      tRel.label = inverseRel(rel.label, savedChar.pronouns);
+    }
+  });
+
+  // Auto-add inverse for newly added relationships
+  pendingRels.filter(rel => !oldRels.find(r => r.charId === rel.charId)).forEach(rel => {
+    const target = byId(D.characters, rel.charId);
+    if (!target) return;
+    if (!target.relationships) target.relationships = [];
+    if (!target.relationships.find(r => r.charId === savedId)) {
+      target.relationships.push({ charId: savedId, label: inverseRel(rel.label, savedChar.pronouns), notes: '' });
+    }
+  });
 
   await persist();
   closeModal();
-  navigate('character', navId);
+  navigate('character', savedId);
 }
 
 async function saveHH() {

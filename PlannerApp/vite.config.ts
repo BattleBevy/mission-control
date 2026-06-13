@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/mission-control/planner/',
+  base: '/planner/',
   plugins: [
     react(),
     VitePWA({
@@ -16,7 +16,7 @@ export default defineConfig({
         theme_color: '#ede5d8',
         background_color: '#ede5d8',
         display: 'standalone',
-        start_url: '/mission-control/planner/',
+        start_url: '/planner/',
         icons: [
           {
             src: 'favicon.svg',
