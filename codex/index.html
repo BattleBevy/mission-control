@@ -728,18 +728,21 @@ function closePhotoModal() {
 }
 
 async function confirmPhotoUrl() {
-  const url = document.getElementById('photo-url-input').value.trim();
+  const url    = document.getElementById('photo-url-input').value.trim();
+  const type   = pendingPhotoType;
+  const entity = pendingPhotoEntity;
+  const slot   = pendingPhotoSlot;
   closePhotoModal();
   if (!url) return;
 
-  if (pendingPhotoType === 'outfit') {
-    const c = byId(D.characters, pendingPhotoEntity);
-    if (c) { if (!c.outfitPhotos) c.outfitPhotos = {}; c.outfitPhotos[pendingPhotoSlot] = url; }
-  } else if (pendingPhotoType === 'home-photo') {
-    const h = byId(D.homes, pendingPhotoEntity);
+  if (type === 'outfit') {
+    const c = byId(D.characters, entity);
+    if (c) { if (!c.outfitPhotos) c.outfitPhotos = {}; c.outfitPhotos[slot] = url; }
+  } else if (type === 'home-photo') {
+    const h = byId(D.homes, entity);
     if (h) { if (!h.photos) h.photos = []; h.photos.push(url); }
-  } else if (pendingPhotoType === 'hh-photo') {
-    const hh = byId(D.households, pendingPhotoEntity);
+  } else if (type === 'hh-photo') {
+    const hh = byId(D.households, entity);
     if (hh) hh.photoUrl = url;
   }
 
