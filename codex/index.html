@@ -558,7 +558,12 @@ function blank() {
 
 async function persist() {
   if (!uid) return;
-  await mcDb.collection('users').doc(uid).collection('data').doc('codex').set(D);
+  try {
+    await mcDb.collection('users').doc(uid).collection('data').doc('codex').set(D);
+  } catch (err) {
+    console.error('[Codex] Firestore write failed:', err.code, err.message);
+    throw err;
+  }
 }
 
 function exportData() {
@@ -738,7 +743,7 @@ async function confirmPhotoUrl() {
     if (hh) hh.photoUrl = url;
   }
 
-  await persist();
+  try { await persist(); } catch { /* error already logged in persist() */ }
   renderMain();
 }
 
