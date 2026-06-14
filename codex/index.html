@@ -501,6 +501,7 @@
     <div class="site-title" data-nav="home">✦ The Rune-Root Codex</div>
     <nav class="nav-links">
       <span class="nav-link" data-nav="all-characters">Characters</span>
+      <span class="nav-link" data-nav="all-pets">Pets</span>
       <span class="nav-link" data-nav="all-households">Households</span>
       <span class="nav-link" data-nav="all-homes">Homes &amp; Lots</span>
       <span class="nav-link" data-nav="chronicle">The Fairy's Chronicle</span>
@@ -553,7 +554,7 @@ let D   = null;
 let uid = null;
 
 function blank() {
-  return { characters: [], households: [], homes: [], nextCharId: 1, nextHouseholdId: 1, nextHomeId: 1 };
+  return { characters: [], households: [], homes: [], pets: [], nextCharId: 1, nextHouseholdId: 1, nextHomeId: 1, nextPetId: 1 };
 }
 
 async function persist() {
@@ -623,6 +624,10 @@ function neighborhoods() {
 const AGES     = ['Infant','Toddler','Child','Teen','Young Adult','Adult','Elder'];
 const OCCULTS  = ['Human','Spellcaster','Vampire','Mermaid','Werewolf','Alien','Servo','Ghost','Other'];
 const STATUSES = ['original','in-progress','renovated','rebuilt'];
+const SPECIES  = ['Cat','Dog','Horse'];
+const PET_AGES = ['Baby','Adult','Elder'];
+
+function petName(id) { const p = byId(D.pets, id); return p ? p.name : '(unknown)'; }
 
 const OUTFITS = [
   { key: 'everyday',    label: 'Everyday'     },
@@ -745,6 +750,9 @@ async function confirmPhotoUrl() {
   } else if (type === 'hh-photo') {
     const hh = byId(D.households, entity);
     if (hh) hh.photoUrl = url;
+  } else if (type === 'pet-photo') {
+    const p = byId(D.pets, entity);
+    if (p) p.photoUrl = url;
   }
 
   try { await persist(); } catch { /* error already logged in persist() */ }
@@ -784,6 +792,14 @@ async function deleteHHPhoto(hhId, e) {
   renderMain();
 }
 
+async function deletePetPhoto(petId, e) {
+  e.stopPropagation();
+  const p = byId(D.pets, petId);
+  if (p) p.photoUrl = '';
+  try { await persist(); } catch { /* logged in persist */ }
+  renderMain();
+}
+
 // ── Router ────────────────────────────────────────────────────────────────────
 let curView = 'home', curId = null;
 
@@ -797,6 +813,8 @@ function renderMain() {
     case 'home':           el.innerHTML = vHome();            break;
     case 'all-characters': el.innerHTML = vAllChars();        break;
     case 'character':      el.innerHTML = vChar(curId);       break;
+    case 'all-pets':       el.innerHTML = vAllPets();         break;
+    case 'pet':            el.innerHTML = vPet(curId);        break;
     case 'all-households': el.innerHTML = vAllHH();           break;
     case 'household':      el.innerHTML = vHH(curId);         break;
     case 'all-homes':      el.innerHTML = vAllHomes();        break;
@@ -826,6 +844,7 @@ function vHome() {
     <div style="padding-top:0.25rem">
       <div class="stats-bar">
         <div class="stat"><div class="num">${D.characters.length}</div><div class="lbl">Characters</div></div>
+        ${D.pets.length ? `<div class="stat"><div class="num">${D.pets.length}</div><div class="lbl">Pets</div></div>` : ''}
         <div class="stat"><div class="num">${D.households.length}</div><div class="lbl">Households</div></div>
         <div class="stat"><div class="num">${D.homes.length}</div><div class="lbl">Homes</div></div>
         ${f ? `<div class="stat"><div class="num">✦</div><div class="lbl">${esc(f.name)}</div></div>` : ''}
@@ -837,6 +856,7 @@ function vHome() {
       <div class="card-grid">${nbCards}</div>
       <div class="quick-actions">
         <button class="btn btn-ghost" onclick="openModal('character',null)">+ New Character</button>
+        <button class="btn btn-ghost" onclick="openModal('pet',null)">+ New Pet</button>
         <button class="btn btn-ghost" onclick="openModal('household',null)">+ New Household</button>
       </div>
     </div>`;
@@ -849,7 +869,7 @@ function vAllChars() {
     : sorted.map(c => {
         const meta = [c.age, c.occultType || 'Human', c.career || '—'].filter(Boolean).join(' · ');
         return `<div class="entity-row" data-nav="character" data-id="${c.id}">
-          <div class="row-name">${esc(c.name)}${c.isTheFairy ? ' ✦' : ''}</div>
+          <div class="row-name">${esc(c.name)}${c.isTheFairy?' ✦':''}${c.isDeceased?' <span style="color:#a89090;font-size:0.85em">☠</span>':''}</div>
           <div class="row-meta">${esc(meta)}</div>
           <div class="row-actions" onclick="event.stopPropagation()">
             <button class="btn btn-ghost btn-sm" onclick="openModal('character',${c.id})">Edit</button>
@@ -913,6 +933,22 @@ function hhPhotoHtml(hh) {
   </div>`;
 }
 
+function petPhotoHtml(pet) {
+  const url  = pet.photoUrl || '';
+  const slot = url
+    ? `<div class="hh-photo-slot" onclick="openPhotoInput('pet-photo',${pet.id},null)">
+         <img src="${esc(url)}" alt="${esc(pet.name)}" onerror="handleImgError(this)">
+         <button class="photo-del" onclick="deletePetPhoto(${pet.id},event)">✕</button>
+       </div>`
+    : `<div class="hh-photo-slot" onclick="openPhotoInput('pet-photo',${pet.id},null)">
+         <span class="hh-photo-slot-empty">+</span>
+       </div>`;
+  return `<div style="margin-bottom:1rem">
+    <div style="font-size:0.6875rem;text-transform:uppercase;letter-spacing:0.06em;color:#a89090;margin-bottom:0.5rem">Photo</div>
+    ${slot}
+  </div>`;
+}
+
 function vChar(id) {
   const c = byId(D.characters, id);
   if (!c) return `<p class="empty">Character not found.</p>`;
@@ -967,6 +1003,7 @@ function vChar(id) {
         <div class="info-item"><label>Aspiration</label><div class="val">${esc(c.aspiration || '—')}</div></div>
         <div class="info-item"><label>Household</label><div class="val">${hh ? `<span class="wiki-link" data-nav="household" data-id="${hh.id}">${esc(hh.name)}</span>` : '—'}</div></div>
         ${hhHome ? `<div class="info-item"><label>Home</label><div class="val"><span class="wiki-link" data-nav="home-detail" data-id="${hhHome.id}">${esc(hhHome.lotName)}</span></div></div>` : ''}
+        ${c.isDeceased ? `<div class="info-item" style="grid-column:1/-1"><label>Status</label><div class="val" style="color:#a89090">☠ Deceased${c.causeOfDeath?' — '+esc(c.causeOfDeath):''}</div></div>` : ''}
       </div>
       ${traitHtml}
     </div>
@@ -975,6 +1012,58 @@ function vChar(id) {
     ${c.backstory ? `<div class="card"><h3>Their Story</h3><div class="long-text">${esc(c.backstory)}</div></div>` : ''}
     ${relHtml     ? `<div class="card"><h3>Relationships</h3><div class="rel-list">${relHtml}</div></div>` : ''}
     ${chronicleHtml}`;
+}
+
+function vAllPets() {
+  const sorted = [...(D.pets||[])].sort((a,b) => a.name.localeCompare(b.name));
+  const rows = sorted.length === 0
+    ? `<div class="empty">No pets yet.</div>`
+    : sorted.map(p => {
+        const hh   = p.householdId ? byId(D.households, p.householdId) : null;
+        const meta = [p.species, p.age, p.breed||''].filter(Boolean).join(' · ');
+        return `<div class="entity-row" data-nav="pet" data-id="${p.id}">
+          <div class="row-name">${esc(p.name)}</div>
+          <div class="row-meta">${esc(meta)}${hh?' · '+esc(hh.name):''}</div>
+          <div class="row-actions" onclick="event.stopPropagation()">
+            <button class="btn btn-ghost btn-sm" onclick="openModal('pet',${p.id})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deletePet(${p.id})">Del</button>
+          </div>
+        </div>`;
+      }).join('');
+  return `
+    <div class="section-header"><h2>All Pets</h2><button class="btn btn-primary btn-sm" onclick="openModal('pet',null)">+ Add</button></div>
+    <div class="entity-list">${rows}</div>`;
+}
+
+function vPet(id) {
+  const p = byId(D.pets||[], id);
+  if (!p) return `<p class="empty">Pet not found.</p>`;
+  const hh = p.householdId ? byId(D.households, p.householdId) : null;
+  const traitHtml = (p.traits||[]).length
+    ? `<div style="margin-top:0.875rem">
+         <div style="font-size:0.6875rem;text-transform:uppercase;letter-spacing:0.06em;color:#a89090;margin-bottom:0.4rem">Traits</div>
+         <div class="trait-list">${(p.traits||[]).map(t=>`<span class="trait-tag">${esc(t)}</span>`).join('')}</div>
+       </div>` : '';
+  return `
+    <div class="breadcrumb"><span class="crumb" data-nav="all-pets">Pets</span> › ${esc(p.name)}</div>
+    <div class="page-title">
+      ${esc(p.name)} <span style="font-size:0.9rem;color:#a89090;font-family:'IM Fell English SC',Georgia,serif;font-weight:normal">${esc(p.species||'')}</span>
+      <div class="actions">
+        <button class="btn btn-ghost btn-sm" onclick="openModal('pet',${p.id})">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deletePet(${p.id})">Delete</button>
+      </div>
+    </div>
+    <div class="card"><h3>Profile</h3>
+      ${petPhotoHtml(p)}
+      <div class="info-grid">
+        <div class="info-item"><label>Species</label><div class="val">${esc(p.species||'—')}</div></div>
+        <div class="info-item"><label>Age</label><div class="val">${esc(p.age||'—')}</div></div>
+        <div class="info-item"><label>Breed</label><div class="val">${esc(p.breed||'—')}</div></div>
+        <div class="info-item"><label>Household</label><div class="val">${hh?`<span class="wiki-link" data-nav="household" data-id="${hh.id}">${esc(hh.name)}</span>`:'—'}</div></div>
+      </div>
+      ${traitHtml}
+    </div>
+    ${p.notes?`<div class="card"><h3>Notes</h3><div class="long-text">${esc(p.notes)}</div></div>`:''}`;
 }
 
 function vAllHH() {
@@ -1040,7 +1129,21 @@ function vHH(id) {
     ${memberRows ? `<div class="card" style="padding:0;overflow:hidden">
       <h3 style="padding:1rem 1.25rem 0.75rem;margin:0">Members</h3>
       <div class="entity-list" style="margin:0;border:none;border-radius:0">${memberRows}</div>
-    </div>` : ''}`;
+    </div>` : ''}
+    ${(() => {
+      const petRows = (hh.petIds||[]).map(pid => {
+        const p = byId(D.pets||[], pid);
+        if (!p) return '';
+        return `<div class="entity-row" data-nav="pet" data-id="${p.id}">
+          <div class="row-name">${esc(p.name)}</div>
+          <div class="row-meta">${esc(p.species||'')}${p.age?' · '+esc(p.age):''}${p.breed?' · '+esc(p.breed):''}</div>
+        </div>`;
+      }).filter(Boolean).join('');
+      return petRows ? `<div class="card" style="padding:0;overflow:hidden">
+        <h3 style="padding:1rem 1.25rem 0.75rem;margin:0">Pets</h3>
+        <div class="entity-list" style="margin:0;border:none;border-radius:0">${petRows}</div>
+      </div>` : '';
+    })()}`;
 }
 
 function vAllHomes() {
@@ -1196,6 +1299,13 @@ function openModal(type, id) {
         <input type="checkbox" id="c-fairy" ${c?.isTheFairy?'checked':''}>
         <label for="c-fairy">✦ This character is The Fairy</label>
       </div>
+      <div class="fairy-check-wrap">
+        <input type="checkbox" id="c-deceased" ${c?.isDeceased?'checked':''} onchange="document.getElementById('c-cod-wrap').style.display=this.checked?'block':'none'">
+        <label for="c-deceased" style="color:#a89090">☠ This character has passed</label>
+      </div>
+      <div id="c-cod-wrap" style="${c?.isDeceased?'':'display:none'}">
+        <div class="form-group"><label>Cause of Death</label><input id="c-cod" value="${esc(c?.causeOfDeath||'')}"></div>
+      </div>
       <div class="form-group"><label>Relationships</label>
         <div class="rel-builder">
           <div class="rel-builder-list" id="rel-list"></div>
@@ -1225,6 +1335,37 @@ function openModal(type, id) {
         ${eligibleChars.length > 0
           ? `<div class="checkbox-group">${eligibleChars.map(c=>`<label><input type="checkbox" value="${c.id}" ${(hh?.memberIds||[]).includes(c.id)?'checked':''}>${esc(c.name)}${c.age?' — '+esc(c.age):''}</label>`).join('')}</div>`
           : `<p style="color:var(--muted);font-size:0.875rem">${D.characters.length === 0 ? 'No characters yet.' : 'All characters are already in other households.'}</p>`}
+      </div>`;
+
+  } else if (type === 'pet') {
+    const pet = id ? byId(D.pets||[], id) : null;
+    title.textContent = id ? 'Edit Pet' : 'New Pet';
+    saveBtn.onclick = savePet;
+
+    body.innerHTML = `
+      <div class="form-row">
+        <div class="form-group"><label>Name *</label><input id="p-name" value="${esc(pet?.name||'')}"></div>
+        <div class="form-group"><label>Species</label>
+          <select id="p-species">
+            ${SPECIES.map(s=>`<option ${(pet?.species||'Cat')===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Age</label>
+          <select id="p-age">
+            ${PET_AGES.map(a=>`<option ${(pet?.age||'Adult')===a?'selected':''}>${a}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group"><label>Breed</label><input id="p-breed" value="${esc(pet?.breed||'')}"></div>
+      </div>
+      <div class="form-group"><label>Traits (one per line)</label><textarea id="p-traits" rows="3">${esc((pet?.traits||[]).join('\n'))}</textarea></div>
+      <div class="form-group"><label>Notes</label><textarea id="p-notes" rows="3">${esc(pet?.notes||'')}</textarea></div>
+      <div class="form-group"><label>Household</label>
+        <select id="p-hh">
+          <option value="">— None —</option>
+          ${D.households.map(hh=>`<option value="${hh.id}" ${pet?.householdId===hh.id?'selected':''}>${esc(hh.name)}</option>`).join('')}
+        </select>
       </div>`;
 
   } else if (type === 'home') {
@@ -1341,6 +1482,8 @@ async function saveChar() {
     traits,
     backstory:     document.getElementById('c-backstory')?.value.trim() || '',
     isTheFairy:    isFairy || false,
+    isDeceased:    document.getElementById('c-deceased')?.checked || false,
+    causeOfDeath:  document.getElementById('c-cod')?.value.trim() || '',
     relationships: pendingRels,
   };
 
@@ -1386,6 +1529,46 @@ async function saveChar() {
   await persist();
   closeModal();
   navigate('character', savedId);
+}
+
+async function savePet() {
+  const name = document.getElementById('p-name')?.value.trim();
+  if (!name) { alert('Name is required.'); return; }
+
+  const traits = (document.getElementById('p-traits')?.value||'').split('\n').map(t=>t.trim()).filter(Boolean);
+  const hhId   = parseInt(document.getElementById('p-hh')?.value)||null;
+
+  const data = {
+    name,
+    species:     document.getElementById('p-species')?.value || 'Cat',
+    age:         document.getElementById('p-age')?.value || 'Adult',
+    breed:       document.getElementById('p-breed')?.value.trim() || '',
+    traits,
+    notes:       document.getElementById('p-notes')?.value.trim() || '',
+    householdId: hhId,
+  };
+
+  let savedId;
+  if (mId) {
+    Object.assign(byId(D.pets, mId), data);
+    savedId = mId;
+  } else {
+    if (!D.pets) D.pets = [];
+    const newPet = { id: D.nextPetId++, photoUrl: '', ...data };
+    D.pets.push(newPet);
+    savedId = newPet.id;
+  }
+
+  // Sync household petIds
+  D.households.forEach(hh => {
+    if (!hh.petIds) hh.petIds = [];
+    hh.petIds = hh.petIds.filter(pid => pid !== savedId);
+    if (hhId === hh.id) hh.petIds.push(savedId);
+  });
+
+  try { await persist(); } catch { /* logged */ }
+  closeModal();
+  navigate('pet', savedId);
 }
 
 async function saveHH() {
@@ -1457,6 +1640,15 @@ function closeModal() {
 }
 
 // ── Delete ────────────────────────────────────────────────────────────────────
+
+async function deletePet(id) {
+  const p = byId(D.pets||[], id);
+  if (!p || !confirm(`Delete ${p.name}? This cannot be undone.`)) return;
+  D.pets = D.pets.filter(x => x.id !== id);
+  D.households.forEach(hh => { if (hh.petIds) hh.petIds = hh.petIds.filter(pid => pid !== id); });
+  try { await persist(); } catch { /* logged */ }
+  navigate('all-pets');
+}
 
 async function deleteChar(id) {
   const c = byId(D.characters, id);
