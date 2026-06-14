@@ -665,6 +665,7 @@ const REL_GROUPS = [
   { label: 'Parent / Child',                opts: ['Mother','Father','Parent','Daughter','Son','Child'] },
   { label: 'Grandparent / Grandchild',      opts: ['Grandmother','Grandfather','Grandparent','Granddaughter','Grandson','Grandchild'] },
   { label: 'Great-grandparent / Great-grandchild', opts: ['Great Grandmother','Great Grandfather','Great Grandparent','Great Granddaughter','Great Grandson','Great Grandchild'] },
+  { label: 'Sibling',                        opts: ['Sister','Brother','Sibling'] },
   { label: 'In-Laws',                       opts: ['Mother-In-Law','Father-In-Law','Parent-In-Law','Daughter-In-Law','Son-In-Law','Child-In-Law','Sister-In-Law','Brother-In-Law','Sibling-In-Law'] },
   { label: 'Extended Family',               opts: ['Aunt','Uncle','Niece','Nephew','Nibling'] },
   { label: 'Other',                         opts: ['Friend','Housemate','Landlord','Tenant'] },
@@ -674,6 +675,21 @@ function relSelectHtml() {
   return REL_GROUPS.map(g =>
     `<optgroup label="${g.label}">${g.opts.map(o=>`<option>${o}</option>`).join('')}</optgroup>`
   ).join('');
+}
+
+const PET_CHAR_RELS = ['Owner','Caretaker','Trainer','Best Friend','Friend'];
+const PET_PET_RELS  = ['Sibling','Parent','Offspring','Bonded With','Rivals','Best Friend','Friend'];
+
+function petRelTargetName(r) {
+  if (r.targetType === 'character') return charName(r.targetId);
+  const p = byId(D.pets||[], r.targetId);
+  return p ? p.name : `Pet #${r.targetId}`;
+}
+
+function inversePetPetRel(label) {
+  if (label === 'Parent')   return 'Offspring';
+  if (label === 'Offspring') return 'Parent';
+  return label;
 }
 
 function inverseRel(label, pronouns) {
@@ -696,6 +712,8 @@ function inverseRel(label, pronouns) {
       return m('Son-In-Law','Daughter-In-Law','Child-In-Law');
     case 'Daughter-In-Law': case 'Son-In-Law': case 'Child-In-Law':
       return m('Father-In-Law','Mother-In-Law','Parent-In-Law');
+    case 'Sister': case 'Brother': case 'Sibling':
+      return m('Brother','Sister','Sibling');
     case 'Sister-In-Law': case 'Brother-In-Law': case 'Sibling-In-Law':
       return m('Brother-In-Law','Sister-In-Law','Sibling-In-Law');
     case 'Aunt': case 'Uncle':
@@ -1093,7 +1111,23 @@ function vPet(id) {
       </div>
       ${traitHtml}
     </div>
-    ${p.notes?`<div class="card"><h3>Notes</h3><div class="long-text">${esc(p.notes)}</div></div>`:''}`;
+    ${p.notes?`<div class="card"><h3>Notes</h3><div class="long-text">${esc(p.notes)}</div></div>`:''}
+    ${(()=>{
+      const rels = p.relationships||[];
+      if (!rels.length) return '';
+      const rows = rels.map(r => {
+        const nm  = esc(petRelTargetName(r));
+        const nav = r.targetType==='character'
+          ? `data-nav="character" data-id="${r.targetId}"`
+          : `data-nav="pet" data-id="${r.targetId}"`;
+        return `<div class="rel-item">
+          <span class="wiki-link" ${nav}>${nm}</span>
+          <span class="rbi-label">${esc(r.label)}</span>
+          ${r.notes?`<span class="rbi-label">${esc(r.notes)}</span>`:''}
+        </div>`;
+      }).join('');
+      return `<div class="card"><h3>Relationships</h3><div class="rel-list">${rows}</div></div>`;
+    })()}`;
 }
 
 function vAllHH() {
@@ -1285,7 +1319,7 @@ function vChronicle() {
 }
 
 // ── Modals ────────────────────────────────────────────────────────────────────
-let mType=null, mId=null, pendingRels=[];
+let mType=null, mId=null, pendingRels=[], pendingPetRels=[];
 
 function openModal(type, id) {
   mType = type; mId = id;
@@ -1375,6 +1409,7 @@ function openModal(type, id) {
 
   } else if (type === 'pet') {
     const pet = id ? byId(D.pets||[], id) : null;
+    pendingPetRels = pet ? JSON.parse(JSON.stringify(pet.relationships||[])) : [];
     title.textContent = id ? 'Edit Pet' : 'New Pet';
     saveBtn.onclick = savePet;
 
@@ -1402,7 +1437,14 @@ function openModal(type, id) {
           <option value="">— None —</option>
           ${D.households.map(hh=>`<option value="${hh.id}" ${pet?.householdId===hh.id?'selected':''}>${esc(hh.name)}</option>`).join('')}
         </select>
+      </div>
+      <div class="form-group"><label>Relationships</label>
+        <div class="rel-builder">
+          <div class="rel-builder-list" id="pet-rel-list"></div>
+          <div id="pet-rel-add-form-wrap"></div>
+        </div>
       </div>`;
+    renderPetRelList();
 
   } else if (type === 'home') {
     const h = id ? byId(D.homes, id) : null;
@@ -1496,6 +1538,79 @@ function removeRel(i) {
   renderRelList();
 }
 
+function renderPetRelList() {
+  const list = document.getElementById('pet-rel-list');
+  if (!list) return;
+  if (!pendingPetRels.length) {
+    list.innerHTML = `<div style="padding:0.4rem;font-size:0.8125rem;color:var(--muted);font-style:italic">No relationships yet.</div>`;
+  } else {
+    list.innerHTML = pendingPetRels.map((r,i) => `
+      <div class="rbi">
+        <span class="rbi-name">${esc(petRelTargetName(r))}</span>
+        <span class="rbi-label">${esc(r.label)}</span>
+        ${r.notes?`<span class="rbi-label">${esc(r.notes)}</span>`:''}
+        <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="removePetRel(${i})">✕</button>
+      </div>`).join('');
+  }
+  renderPetRelAddForm();
+}
+
+function renderPetRelAddForm() {
+  const wrap = document.getElementById('pet-rel-add-form-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = `
+    <div class="rel-add-form">
+      <div class="rel-add-row">
+        <select id="prel-type" onchange="updatePetRelPickers()" style="flex-shrink:0;width:auto">
+          <option value="character">Sim</option>
+          <option value="pet">Pet</option>
+        </select>
+        <select id="prel-who" style="flex:1"></select>
+        <select id="prel-label" style="flex:1"></select>
+      </div>
+      <div class="rel-add-row">
+        <input id="prel-notes" placeholder="Notes (optional)" style="flex:1">
+        <button class="btn btn-primary btn-sm" onclick="addPetRel()" style="flex-shrink:0">Add</button>
+      </div>
+    </div>`;
+  updatePetRelPickers();
+}
+
+function updatePetRelPickers() {
+  const typeEl  = document.getElementById('prel-type');
+  const whoEl   = document.getElementById('prel-who');
+  const labelEl = document.getElementById('prel-label');
+  if (!typeEl || !whoEl || !labelEl) return;
+  const type = typeEl.value;
+  const pendingCharIds = new Set(pendingPetRels.filter(r=>r.targetType==='character').map(r=>r.targetId));
+  const pendingPetIds  = new Set(pendingPetRels.filter(r=>r.targetType==='pet').map(r=>r.targetId));
+  if (type === 'character') {
+    const avail = D.characters.filter(c => !pendingCharIds.has(c.id));
+    whoEl.innerHTML   = avail.length ? avail.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('') : `<option value="">— None —</option>`;
+    labelEl.innerHTML = PET_CHAR_RELS.map(l=>`<option>${l}</option>`).join('');
+  } else {
+    const avail = (D.pets||[]).filter(p => p.id !== mId && !pendingPetIds.has(p.id));
+    whoEl.innerHTML   = avail.length ? avail.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('') : `<option value="">— None —</option>`;
+    labelEl.innerHTML = PET_PET_RELS.map(l=>`<option>${l}</option>`).join('');
+  }
+}
+
+function addPetRel() {
+  const typeEl  = document.getElementById('prel-type');
+  const whoEl   = document.getElementById('prel-who');
+  const labelEl = document.getElementById('prel-label');
+  const notesEl = document.getElementById('prel-notes');
+  if (!whoEl?.value) return;
+  pendingPetRels.push({ targetType: typeEl.value, targetId: parseInt(whoEl.value), label: labelEl?.value||'Friend', notes: notesEl?.value.trim()||'' });
+  if (notesEl) notesEl.value = '';
+  renderPetRelList();
+}
+
+function removePetRel(i) {
+  pendingPetRels.splice(i, 1);
+  renderPetRelList();
+}
+
 async function saveChar() {
   const name = document.getElementById('c-name')?.value.trim();
   if (!name) { alert('Name is required.'); return; }
@@ -1574,14 +1689,18 @@ async function savePet() {
   const traits = (document.getElementById('p-traits')?.value||'').split('\n').map(t=>t.trim()).filter(Boolean);
   const hhId   = parseInt(document.getElementById('p-hh')?.value)||null;
 
+  // Snapshot old rels before overwriting for bidirectional sync
+  const oldRels = mId ? JSON.parse(JSON.stringify(byId(D.pets||[], mId)?.relationships||[])) : [];
+
   const data = {
     name,
-    species:     document.getElementById('p-species')?.value || 'Cat',
-    age:         document.getElementById('p-age')?.value || 'Adult',
-    breed:       document.getElementById('p-breed')?.value.trim() || '',
+    species:       document.getElementById('p-species')?.value || 'Cat',
+    age:           document.getElementById('p-age')?.value || 'Adult',
+    breed:         document.getElementById('p-breed')?.value.trim() || '',
     traits,
-    notes:       document.getElementById('p-notes')?.value.trim() || '',
-    householdId: hhId,
+    notes:         document.getElementById('p-notes')?.value.trim() || '',
+    householdId:   hhId,
+    relationships: pendingPetRels,
   };
 
   let savedId;
@@ -1600,6 +1719,31 @@ async function savePet() {
     if (!hh.petIds) hh.petIds = [];
     hh.petIds = hh.petIds.filter(pid => pid !== savedId);
     if (hhId === hh.id) hh.petIds.push(savedId);
+  });
+
+  // Remove inverse from pet↔pet relationships that were deleted
+  oldRels.filter(r => r.targetType==='pet' && !pendingPetRels.find(nr => nr.targetType==='pet' && nr.targetId===r.targetId)).forEach(old => {
+    const target = byId(D.pets||[], old.targetId);
+    if (target?.relationships) target.relationships = target.relationships.filter(r => !(r.targetType==='pet' && r.targetId===savedId));
+  });
+
+  // Update inverse label when it changed (only if target's label still matches the old auto-inverse)
+  pendingPetRels.filter(r => r.targetType==='pet').forEach(rel => {
+    const old = oldRels.find(r => r.targetType==='pet' && r.targetId===rel.targetId);
+    if (!old || old.label===rel.label) return;
+    const target = byId(D.pets||[], rel.targetId);
+    const tRel   = target?.relationships?.find(r => r.targetType==='pet' && r.targetId===savedId);
+    if (tRel && tRel.label===inversePetPetRel(old.label)) tRel.label = inversePetPetRel(rel.label);
+  });
+
+  // Auto-add inverse for newly added pet↔pet relationships
+  pendingPetRels.filter(r => r.targetType==='pet' && !oldRels.find(or => or.targetType==='pet' && or.targetId===r.targetId)).forEach(rel => {
+    const target = byId(D.pets||[], rel.targetId);
+    if (!target) return;
+    if (!target.relationships) target.relationships = [];
+    if (!target.relationships.find(r => r.targetType==='pet' && r.targetId===savedId)) {
+      target.relationships.push({ targetType: 'pet', targetId: savedId, label: inversePetPetRel(rel.label), notes: '' });
+    }
   });
 
   try { await persist(); } catch { /* logged */ }
@@ -1678,7 +1822,7 @@ async function saveHome() {
 
 function closeModal() {
   document.getElementById('modal-backdrop').classList.remove('open');
-  mType = mId = null; pendingRels = [];
+  mType = mId = null; pendingRels = []; pendingPetRels = [];
 }
 
 // ── Delete ────────────────────────────────────────────────────────────────────
